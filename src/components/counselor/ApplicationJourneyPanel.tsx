@@ -79,7 +79,7 @@ export function ApplicationJourneyPanel({ signedIn, refreshKey, onStatus }: { si
           <div className="flex items-center gap-2">
             <Link href="/applications" className="rounded-full border border-hair bg-white px-3 py-1.5 text-[10px] font-semibold text-ink hover:border-navy">{applications.length} application{applications.length === 1 ? "" : "s"}</Link>
             <Link href="/documents" className="rounded-full border border-hair bg-white px-3 py-1.5 text-[10px] font-semibold text-ink hover:border-navy">{status.documents} document{status.documents === 1 ? "" : "s"}</Link>
-            <button onClick={() => setExpanded((value) => !value)} className="inline-flex items-center gap-1 rounded-full bg-paper px-3 py-1.5 text-[10px] font-semibold text-navy hover:bg-[#EAF0F5]">{expanded ? "Hide details" : "View details"}{expanded ? <ChevronUp size={11}/> : <ChevronDown size={11}/>}</button>
+            <button onClick={() => setExpanded((value) => !value)} className="inline-flex items-center gap-1 rounded-full bg-paper px-3 py-1.5 text-[10px] font-semibold text-navy hover:bg-[#EAF0F5]">{expanded ? "Hide details" : "View status"}{expanded ? <ChevronUp size={11}/> : <ChevronDown size={11}/>}</button>
           </div>
         </div>
 
