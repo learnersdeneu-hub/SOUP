@@ -1,0 +1,92 @@
+name: CI
+
+# Runs on every push and pull request. This is the automated version of what
+# was previously only a local script (`npm run verify:deploy`) — see
+# docs/security/CI_PIPELINE.md for what each job does and how to configure
+# the required repository secrets.
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Build-time placeholders. Prisma schema validation and `tsc`/`next build`
+  # do not need a live database, but Next.js reads NEXT_PUBLIC_* at build
+  # time, so real values must exist even if they are never contacted.
+  DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://ci:ci@localhost:5432/ci' }}
+  DIRECT_URL: ${{ secrets.DIRECT_URL || 'postgresql://ci:ci@localhost:5432/ci' }}
+  NEXT_PUBLIC_SITE_URL: "http://localhost:3001"
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_ci_placeholder' }}
+  SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || '' }}
+  AI_PROVIDER: "gemini"
+  AI_MODEL: "gemini-3.8-flash"
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'ci-placeholder-key' }}
+  SOUP_RATE_LIMIT_SALT: ${{ secrets.SOUP_RATE_LIMIT_SALT || 'ci-placeholder-salt' }}
+  SOUP_SUPER_ADMIN_EMAILS: ""
+  SOUP_ADMIN_EMAILS: ""
+
+jobs:
+  verify:
+    name: Lint, test, and build gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          # No package-lock.json exists in this repo yet, so npm's cache
+          # can't key off it. Once a lockfile is committed, switch this back
+          # to `cache: "npm"` and the install step below to `npm ci` for a
+          # faster, fully reproducible install. See README note this
+          # workflow links to.
+
+      - name: Install dependencies
+        # TEMPORARY: using `npm install` because no package-lock.json is
+        # committed yet. `npm ci` would fail immediately without one. Run
+        # `npm install` locally once, commit the generated package-lock.json,
+        # then change this back to `npm ci` for reproducible, faster builds.
+        run: npm install
+
+      - name: Unit + security tests
+        run: npm run test
+
+      - name: Auth route audit
+        run: npm run check:auth
+
+      - name: Validation coverage audit
+        run: npm run check:validation
+
+      - name: RLS static coverage audit
+        run: npm run check:rls
+
+      - name: Type-safety (any) budget
+        run: npm run check:any
+
+      - name: Prisma schema validation
+        run: npm run prisma:validate:local
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+  dependency-audit:
+    name: Dependency vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install
+      - name: npm audit (fail on high/critical)
+        run: npm audit --audit-level=high

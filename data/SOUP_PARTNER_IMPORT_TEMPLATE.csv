@@ -1,0 +1,6 @@
+partner_type,name,country,city,status,website_url,transaction_url,priority,university_public,program_title,program_level,program_field,study_mode,language,duration,tuition_amount,tuition_currency,intake,application_deadline,application_url,source_url
+UNIVERSITY,Example Partner University,Germany,Berlin,ACTIVE,https://example.edu,,50,false,BSc Business Management,Bachelors,Business,On campus,English,3 years,12000,EUR,September,2027-05-31,https://example.edu/apply,https://example.edu/program
+ACCOMMODATION,Example Housing Partner,Germany,Berlin,ACTIVE,https://housing.example,https://housing.example/book,50,,,,,,,,,,,,,
+INSURANCE,Example Insurance Broker,Pakistan,Lahore,ACTIVE,https://insurance.example,https://insurance.example/buy,50,,,,,,,,,,,,,
+STUDENT_FINANCE,Example Student Finance Partner,United Kingdom,London,ACTIVE,https://finance.example,https://finance.example/apply,50,,,,,,,,,,,,,
+SCHOLARSHIP,Example Scholarship Partner,France,Paris,ACTIVE,https://scholarship.example,https://scholarship.example/apply,50,,,,,,,,,,,,,

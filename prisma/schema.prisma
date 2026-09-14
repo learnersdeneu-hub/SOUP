@@ -1,0 +1,1834 @@
+// ============================================================================
+// SOUP — Production Prisma Schema (forked from the proven GCI production foundation)
+// PostgreSQL. Implements the Final Domain Model (see GCI_Domain_Model_Final.md)
+//
+// Design notes:
+// - Lookup tables (not enums) are used wherever the CTO review required
+//   extensibility without a migration: OrganizationType, CredentialType,
+//   CaseType, ScoreCategory, AttestationStandard, ScoreBand.
+// - True fixed lifecycle states (status fields) remain Prisma enums —
+//   these represent business logic branches, not admin-configurable data.
+// - AccessAuditLog is defined here as a normal table. Postgres native
+//   partitioning (by month, by org_id) is applied via a raw SQL migration
+//   layered on top of this schema — Prisma's schema language does not
+//   declaratively express PARTITION BY. See migrations/002_partition_audit_log.sql.
+// - All personal-data-bearing tables carry `dataRegion` for future
+//   regional-routing compatibility (Decision 5) without requiring physical
+//   sharding at MVP.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Shared enums (fixed lifecycle states — not admin-configurable, so plain enums)
+// ----------------------------------------------------------------------------
+
+enum DataRegion {
+  US
+  EU
+  APAC
+  GLOBAL_DEFAULT
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum AppRole {
+  CUSTOMER
+  COUNSELOR
+  ADMISSIONS
+  FINANCE
+  ACCOMMODATION
+  SUPPORT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  ACCOUNT
+  DOCUMENT
+  VERIFICATION
+  REPORT
+  SUPPORT
+  PAYMENT
+  SYSTEM
+}
+
+enum PaymentType {
+  PREMIUM_COUNSELING
+  UNIVERSITY_APPLICATION_FEE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum DocumentReviewStatus {
+  UPLOADED
+  PENDING_REVIEW
+  MORE_INFO_REQUIRED
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum DocumentReviewAction {
+  SUBMITTED
+  REQUESTED_MORE_INFO
+  APPROVED
+  REJECTED
+  REPLACED
+  EXPIRED
+}
+
+enum EvidenceProcessingStatus {
+  QUEUED
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+enum ResumeTemplate {
+  STUDENT
+  GRADUATE
+  PROFESSIONAL
+  INTERNATIONAL_STUDENT
+  JOB_SEEKER
+}
+
+enum ResumeStatus {
+  DRAFT
+  READY
+  ARCHIVED
+}
+
+enum ReportProductKind {
+  FULL_GCI_PACKAGE
+  FINANCIAL_STANDALONE
+  FINANCIAL_INTEGRATED
+}
+
+enum CareerGoalType {
+  INTERNSHIP
+  JOB
+  UNIVERSITY
+  SCHOLARSHIP
+  COMPETITION
+  CAREER_GROWTH
+}
+
+enum CredentialStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+  INSUFFICIENT_EVIDENCE
+  EXPIRED
+  DISPUTED
+}
+
+enum VerificationRequestStatus {
+  SUBMITTED
+  ROUTED_AUTOMATED
+  ROUTED_MANUAL
+  AUTO_RESOLVED
+  ESCALATED_TO_MANUAL
+  RESOLVED
+  EXPIRED
+}
+
+enum SourceType {
+  SELF_REPORTED
+  DOCUMENT_UPLOADED
+  INSTITUTION_ATTESTED
+  VENDOR_VERIFIED
+}
+
+enum AttestationResult {
+  CONFIRMED
+  REJECTED
+  PARTIALLY_CONFIRMED
+  PENDING_APPROVAL
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+}
+
+enum OrgVerificationStatus {
+  ORG_PENDING
+  ORG_VERIFIED
+  ORG_SUSPENDED
+}
+
+enum OrgMembershipRole {
+  ORG_ADMIN
+  REVIEWER
+  READ_ONLY
+}
+
+enum OrgMembershipStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum CaseStatus {
+  OPEN
+  CONSENT_PENDING
+  CONSENT_GRANTED
+  CONSENT_DENIED
+  UNDER_REVIEW
+  DECISION_RECORDED
+  CLOSED
+}
+
+enum ConsentRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+}
+
+enum ConsentGrantStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum IdentityFlagStatus {
+  OPEN
+  DISMISSED
+  CONFIRMED
+}
+
+enum MergeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DataSubjectRequestType {
+  ACCESS
+  ERASURE
+  PORTABILITY
+}
+
+enum DataSubjectRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum CaseBatchStatus {
+  OPEN
+  PROCESSING
+  CLOSED
+}
+
+// ----------------------------------------------------------------------------
+// Identity Resolution (Decision 2)
+// ----------------------------------------------------------------------------
+
+model IdentityAnchor {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  profiles       Profile[]
+  duplicateFlagsAsA IdentityDuplicateFlag[] @relation("AnchorA")
+  duplicateFlagsAsB IdentityDuplicateFlag[] @relation("AnchorB")
+  mergeRequestsAsPrimary IdentityMergeRequest[] @relation("PrimaryAnchor")
+  mergeRequestsAsMerged  IdentityMergeRequest[] @relation("MergedAnchor")
+  disputes       IdentityDisputeCase[]
+
+  @@map("identity_anchors")
+}
+
+model IdentityDuplicateFlag {
+  id               String             @id @default(uuid())
+  candidateAnchorA String
+  candidateAnchorB String
+  anchorA          IdentityAnchor     @relation("AnchorA", fields: [candidateAnchorA], references: [id])
+  anchorB          IdentityAnchor     @relation("AnchorB", fields: [candidateAnchorB], references: [id])
+  confidenceScore  Decimal            @db.Decimal(5, 4)
+  detectionMethod  String
+  status           IdentityFlagStatus @default(OPEN)
+  createdAt        DateTime           @default(now())
+  resolvedAt       DateTime?
+
+  @@index([status])
+  @@map("identity_duplicate_flags")
+}
+
+model IdentityMergeRequest {
+  id              String             @id @default(uuid())
+  primaryAnchorId String
+  mergedAnchorId  String
+  primaryAnchor   IdentityAnchor     @relation("PrimaryAnchor", fields: [primaryAnchorId], references: [id])
+  mergedAnchor    IdentityAnchor     @relation("MergedAnchor", fields: [mergedAnchorId], references: [id])
+  initiatedBy     String // User.id of the requester (admin or user)
+  status          MergeRequestStatus @default(PENDING)
+  createdAt       DateTime           @default(now())
+  resolvedAt      DateTime?
+  resolutionNotes String?
+
+  @@map("identity_merge_requests")
+}
+
+model IdentityDisputeCase {
+  id            String   @id @default(uuid())
+  anchorId      String
+  anchor        IdentityAnchor @relation(fields: [anchorId], references: [id])
+  raisedByUserId String
+  reason        String
+  status        String   @default("OPEN")
+  createdAt     DateTime @default(now())
+  resolvedAt    DateTime?
+
+  @@map("identity_dispute_cases")
+}
+
+// ----------------------------------------------------------------------------
+// User / Profile
+// ----------------------------------------------------------------------------
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  authProvider String        @default("supabase")
+  fullName     String
+  dateOfBirth  DateTime?
+  nationality  String?
+  currentCountry String?
+  accountStatus AccountStatus @default(ACTIVE)
+  role         AppRole       @default(CUSTOMER)
+  createdAt    DateTime      @default(now())
+  lastLoginAt  DateTime?
+
+  profile         Profile?
+  orgMemberships  OrgMembership[]
+  referenceResponsesAsUser ReferenceResponse[] @relation("RespondingUser")
+  supportTicketsCreated SupportTicket[] @relation("SupportTicketCustomer")
+  supportTicketsAssigned SupportTicket[] @relation("SupportTicketAssignee")
+  supportMessages SupportTicketMessage[]
+  internalNotesAuthored InternalUserNote[]
+  documentReviewsAuthored DocumentReviewEvent[]
+  counselorSessionsAsCounselor CounselorSession[] @relation("CounselorSessionCounselor")
+  counselorSessionsRequested CounselorSession[] @relation("CounselorSessionRequester")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Profile {
+  id                 String      @id @default(uuid())
+  userId             String      @unique
+  user               User        @relation(fields: [userId], references: [id])
+  identityAnchorId   String?
+  identityAnchor     IdentityAnchor? @relation(fields: [identityAnchorId], references: [id])
+  dataRegion         DataRegion  @default(GLOBAL_DEFAULT)
+  headlineSummary    String?
+  profileCompletenessPct Int     @default(0)
+  communicationPreferences Json?
+  lastScoredAt       DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  credentials        Credential[]
+  documents          Document[]
+  consentGrants      ConsentGrant[]
+  chatSessions       ChatSession[]
+  consentRequests    ConsentRequest[]
+  scores             Score[]
+  referenceRequests  ReferenceRequest[]
+  timelineEvents     TimelineEvent[]
+  dataSubjectRequests DataSubjectRequest[]
+  accessAuditLogs    AccessAuditLog[]
+  notifications      Notification[]
+  supportTickets     SupportTicket[]
+  internalNotes      InternalUserNote[]
+  resumes            Resume[]
+  careerGoals        CareerGoal[]
+  documentReviewEvents DocumentReviewEvent[]
+  reportSnapshots      ReportSnapshot[]
+  propertyEvidence     PropertyEvidence[]
+  customerContext      CustomerContext?
+  studentCase          StudentCase?
+  universityShortlists UniversityShortlist[]
+  studentApplications  StudentApplication[]
+  serviceReferrals     ServiceReferral[]
+  journeyChecklists    JourneyChecklist[]
+  payments             Payment[]
+  counselorSessions    CounselorSession[]
+
+  @@index([identityAnchorId])
+  @@map("profiles")
+}
+
+// ----------------------------------------------------------------------------
+// Credential Structure (Decision 3)
+// ----------------------------------------------------------------------------
+
+model CredentialType {
+  id                    String   @id @default(uuid())
+  code                  String   @unique // e.g. "EDUCATION", "EMPLOYMENT", "IDENTITY", "FINANCIAL", "LANGUAGE", "PORTFOLIO", "IMMIGRATION"
+  label                 String
+  isStructured          Boolean  @default(false) // true = has a dedicated detail table
+  requiresMakerChecker  Boolean  @default(false)
+  defaultSlaDays        Int      @default(14)
+  createdAt             DateTime @default(now())
+
+  credentials           Credential[]
+  slaConfigs            VerificationSlaConfig[]
+
+  @@map("credential_types")
+}
+
+model Credential {
+  id               String            @id @default(uuid())
+  profileId        String
+  profile          Profile           @relation(fields: [profileId], references: [id])
+  credentialTypeId String
+  credentialType   CredentialType    @relation(fields: [credentialTypeId], references: [id])
+  sourceType       SourceType
+  verificationStatus CredentialStatus @default(DRAFT)
+  issuingEntityName String?
+  issuingOrgId     String?
+  issuingOrg       Organization?     @relation(fields: [issuingOrgId], references: [id])
+  effectiveDate    DateTime?
+  expiryDate       DateTime?
+  dataRegion       DataRegion        @default(GLOBAL_DEFAULT)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  educationDetail  EducationCredentialDetail?
+  employmentDetail EmploymentCredentialDetail?
+  identityDetail   IdentityCredentialDetail?
+  financialDetail  FinancialCredentialDetail?
+  flexibleData     CredentialFlexibleData?
+
+  documents        Document[]
+  verificationRequests VerificationRequest[]
+  attestations     Attestation[]
+  scoreFactors     ScoreExplanationFactor[]
+  timelineEvents   TimelineEvent[]
+
+  @@index([profileId, credentialTypeId])
+  @@index([verificationStatus])
+  @@map("credentials")
+}
+
+// Dedicated relational detail tables for the four MVP structured types.
+
+model EducationCredentialDetail {
+  credentialId    String   @id
+  credential      Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  institutionName String
+  institutionCountry String?
+  degreeType      String
+  fieldOfStudy    String?
+  graduationDate  DateTime?
+  gpaOrGrade      String?
+
+  @@map("education_credential_details")
+}
+
+model EmploymentCredentialDetail {
+  credentialId  String   @id
+  credential    Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  employerName  String
+  jobTitle      String
+  startDate     DateTime
+  endDate       DateTime?
+  employmentType String? // FULL_TIME / PART_TIME / CONTRACT
+  country       String?
+
+  @@map("employment_credential_details")
+}
+
+model IdentityCredentialDetail {
+  credentialId      String   @id
+  credential        Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  documentType      String   // PASSPORT / NATIONAL_ID / DRIVERS_LICENSE
+  documentCountry    String
+  kycVendorRef      String?
+  kycConfidenceScore Decimal? @db.Decimal(5, 4)
+  livenessCheckPassed Boolean?
+
+  @@map("identity_credential_details")
+}
+
+model FinancialCredentialDetail {
+  credentialId       String   @id
+  credential         Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  attestingInstitutionName String
+  attestationCategory String  // e.g. "INCOME_BAND_CONFIRMED", "GOOD_STANDING_CONFIRMED"
+  // Deliberately no raw statements/balances — GCI never stores raw financial data (Decision from Section 3 of CTO review).
+
+  @@map("financial_credential_details")
+}
+
+// Escape hatch for not-yet-promoted credential types (e.g. future IMMIGRATION, LICENSING).
+model CredentialFlexibleData {
+  credentialId  String   @id
+  credential    Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  data          Json
+  schemaVersion Int      @default(1)
+
+  @@map("credential_flexible_data")
+}
+
+model Document {
+  id            String     @id @default(uuid())
+  profileId     String
+  profile       Profile    @relation(fields: [profileId], references: [id])
+  credentialId  String?
+  credential    Credential? @relation(fields: [credentialId], references: [id])
+  storageRef    String
+  documentType  String
+  originalFileName String?
+  dataRegion    DataRegion @default(GLOBAL_DEFAULT)
+  uploadedAt    DateTime   @default(now())
+  uploadedBy    String
+  retentionExpiry DateTime?
+  documentIssuedAt DateTime?
+  validUntil      DateTime?
+  reviewStatus  DocumentReviewStatus @default(UPLOADED)
+  reviewReason  String?
+  reviewedAt    DateTime?
+  replacementForId String?
+  processingStatus EvidenceProcessingStatus @default(QUEUED)
+  aiAnalysis       Json?
+  aiProcessedAt    DateTime?
+  processingError  String?
+  sourceWorkflow   ChatWorkflow?
+
+  reviewEvents  DocumentReviewEvent[]
+  propertyEvidence PropertyEvidence?
+  applicationLinks StudentApplicationDocument[]
+  checklistItems   JourneyChecklistItem[]
+  offerForApplication StudentApplication? @relation("ApplicationOfferDocument")
+
+  @@index([profileId])
+  @@index([reviewStatus, uploadedAt])
+  @@index([profileId, processingStatus])
+  @@map("documents")
+}
+
+model DocumentReviewEvent {
+  id           String               @id @default(uuid())
+  documentId   String
+  document     Document             @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  profileId    String
+  profile      Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  actorUserId  String
+  actor        User                 @relation(fields: [actorUserId], references: [id])
+  action       DocumentReviewAction
+  reason       String?
+  createdAt    DateTime             @default(now())
+
+  @@index([documentId, createdAt])
+  @@index([profileId, createdAt])
+  @@map("document_review_events")
+}
+
+// ----------------------------------------------------------------------------
+// Verification & SLA (Decisions 4, 9)
+// ----------------------------------------------------------------------------
+
+model VerificationSlaConfig {
+  id               String   @id @default(uuid())
+  credentialTypeId String
+  credentialType   CredentialType @relation(fields: [credentialTypeId], references: [id])
+  orgTypeId        String? // nullable = applies globally; set = org-type-specific override
+  orgType          OrganizationType? @relation(fields: [orgTypeId], references: [id])
+  slaDays          Int
+
+  @@unique([credentialTypeId, orgTypeId])
+  @@map("verification_sla_configs")
+}
+
+model VerificationRequest {
+  id               String   @id @default(uuid())
+  credentialId     String
+  credential       Credential @relation(fields: [credentialId], references: [id])
+  requestedMethod  SourceType
+  vendorRef        String?
+  targetOrgId      String?
+  targetOrg        Organization? @relation(fields: [targetOrgId], references: [id])
+  status           VerificationRequestStatus @default(SUBMITTED)
+  submittedAt      DateTime @default(now())
+  resolvedAt       DateTime?
+  expiresAt        DateTime // computed at creation from VerificationSlaConfig, never hardcoded
+  resolutionNotes  String?
+  retryCount       Int      @default(0)
+
+  attestations     Attestation[]
+
+  @@index([status])
+  @@index([credentialId])
+  @@map("verification_requests")
+}
+
+model AttestationStandard {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  description String
+
+  attestations Attestation[]
+
+  @@map("attestation_standards")
+}
+
+model Attestation {
+  id                     String   @id @default(uuid())
+  credentialId           String
+  credential             Credential @relation(fields: [credentialId], references: [id])
+  verificationRequestId  String?
+  verificationRequest    VerificationRequest? @relation(fields: [verificationRequestId], references: [id])
+  attestingOrgId         String
+  attestingOrg           Organization @relation(fields: [attestingOrgId], references: [id])
+  attestingOrgMembershipId String
+  attestingOrgMembership OrgMembership @relation(fields: [attestingOrgMembershipId], references: [id])
+  method                 String // PORTAL_LOGIN_CONFIRMATION / VENDOR_API / MANUAL_DOCUMENT_REVIEW
+  result                 AttestationResult @default(PENDING_APPROVAL)
+  attestationStandardId  String?
+  attestationStandard    AttestationStandard? @relation(fields: [attestationStandardId], references: [id])
+  confirmationScope      String?
+  evidenceChecksum       String?
+  evidenceDocumentId     String?
+  attestedAt             DateTime @default(now())
+
+  approvals              AttestationApproval[]
+
+  @@index([credentialId])
+  @@index([attestingOrgId])
+  @@map("attestations")
+}
+
+// Maker-checker: one row per required approver (Decision 4)
+model AttestationApproval {
+  id                       String   @id @default(uuid())
+  attestationId            String
+  attestation              Attestation @relation(fields: [attestationId], references: [id])
+  approverOrgMembershipId  String
+  approverOrgMembership    OrgMembership @relation(fields: [approverOrgMembershipId], references: [id])
+  decision                 ApprovalDecision
+  decidedAt                DateTime @default(now())
+  notes                    String?
+
+  @@unique([attestationId, approverOrgMembershipId])
+  @@map("attestation_approvals")
+}
+
+model AttestationRevocationEvent {
+  id                    String   @id @default(uuid())
+  orgId                 String
+  org                   Organization @relation(fields: [orgId], references: [id])
+  reason                String
+  triggeredByUserId     String
+  affectedAttestationIds String[] // denormalized snapshot for audit; source of truth remains Attestation rows
+  executedAt            DateTime @default(now())
+
+  @@map("attestation_revocation_events")
+}
+
+// ----------------------------------------------------------------------------
+// Organizations (Decision 6, 10)
+// ----------------------------------------------------------------------------
+
+model OrganizationType {
+  id    String @id @default(uuid())
+  code  String @unique // "UNIVERSITY" | "BANK" | "INSURER" | future: "EMPLOYER", "RECRUITER", "LICENSING_BODY"
+  label String
+
+  organizations Organization[]
+  slaConfigs    VerificationSlaConfig[]
+
+  @@map("organization_types")
+}
+
+model Organization {
+  id                 String   @id @default(uuid())
+  organizationTypeId String
+  organizationType   OrganizationType @relation(fields: [organizationTypeId], references: [id])
+  legalName          String
+  country            String
+  verificationStatus OrgVerificationStatus @default(ORG_PENDING)
+  ssoConfig          Json?
+  dataRegion         DataRegion @default(GLOBAL_DEFAULT)
+  createdAt          DateTime @default(now())
+
+  memberships        OrgMembership[]
+  cases              Case[]
+  caseBatches        CaseBatch[]
+  issuedCredentials   Credential[]
+  verificationRequestsReceived VerificationRequest[]
+  attestations        Attestation[]
+  revocationEvents    AttestationRevocationEvent[]
+  dataResidencyPolicy OrgDataResidencyPolicy?
+  accessAuditLogs     AccessAuditLog[]
+
+  @@index([organizationTypeId])
+  @@map("organizations")
+}
+
+model OrgDataResidencyPolicy {
+  orgId          String   @id
+  organization   Organization @relation(fields: [orgId], references: [id])
+  requiredRegion DataRegion
+
+  @@map("org_data_residency_policies")
+}
+
+model OrgMembership {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  orgId    String
+  org      Organization @relation(fields: [orgId], references: [id])
+  role     OrgMembershipRole
+  status   OrgMembershipStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+
+  attestations        Attestation[]
+  attestationApprovals AttestationApproval[]
+  accessAuditLogs      AccessAuditLog[]
+
+  @@unique([userId, orgId])
+  @@map("org_memberships")
+}
+
+// ----------------------------------------------------------------------------
+// Cases & Consent (Decisions 1, 6, 10)
+// ----------------------------------------------------------------------------
+
+model CaseType {
+  id    String @id @default(uuid())
+  code  String @unique // ADMISSIONS | EMPLOYMENT | RECRUITMENT | INSURANCE | LOAN | HOUSING |
+                        // SCHOLARSHIP | PROFESSIONAL_LICENSING | VISA | BACKGROUND_VERIFICATION | OTHER
+  label String
+
+  cases Case[]
+  caseBatches CaseBatch[]
+
+  @@map("case_types")
+}
+
+model CaseBatch {
+  id         String   @id @default(uuid())
+  orgId      String
+  org        Organization @relation(fields: [orgId], references: [id])
+  caseTypeId String
+  caseType   CaseType @relation(fields: [caseTypeId], references: [id])
+  name       String
+  status     CaseBatchStatus @default(OPEN)
+  createdAt  DateTime @default(now())
+
+  cases      Case[]
+
+  @@map("case_batches")
+}
+
+model ConsentPolicyVersion {
+  id            String   @id @default(uuid())
+  versionLabel  String   @unique
+  policyText    String
+  effectiveFrom DateTime @default(now())
+
+  consentGrants   ConsentGrant[]
+  consentRequests ConsentRequest[]
+  casesUsingAsDisclaimer Case[]
+
+  @@map("consent_policy_versions")
+}
+
+model Case {
+  id              String   @id @default(uuid())
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+  caseTypeId      String
+  caseType        CaseType @relation(fields: [caseTypeId], references: [id])
+  batchId         String?
+  batch           CaseBatch? @relation(fields: [batchId], references: [id])
+  initiatedBy     String // "ORG" | "INDIVIDUAL"
+  status          CaseStatus @default(OPEN)
+  externalReference String?
+  decisionDisclaimerVersionId String?
+  decisionDisclaimerVersion   ConsentPolicyVersion? @relation(fields: [decisionDisclaimerVersionId], references: [id])
+  disclaimerAcknowledgedAt    DateTime?
+  createdAt       DateTime @default(now())
+  closedAt        DateTime?
+
+  consentRequest  ConsentRequest?
+  consentGrants   ConsentGrant[]
+  accessAuditLogs AccessAuditLog[]
+
+  @@index([orgId, status])
+  @@map("cases")
+}
+
+model ConsentRequest {
+  id             String   @id @default(uuid())
+  caseId         String   @unique
+  case           Case     @relation(fields: [caseId], references: [id])
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id])
+  requestedScope String[] // credential type codes
+  status         ConsentRequestStatus @default(PENDING)
+  policyVersionId String
+  policyVersion  ConsentPolicyVersion @relation(fields: [policyVersionId], references: [id])
+  requestedAt    DateTime @default(now())
+  respondedAt    DateTime?
+
+  @@index([profileId, status])
+  @@map("consent_requests")
+}
+
+model ConsentGrant {
+  id             String   @id @default(uuid())
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id])
+  caseId         String
+  case           Case     @relation(fields: [caseId], references: [id])
+  scope          String[] // credential type codes or specific credential IDs
+  policyVersionId String
+  policyVersion  ConsentPolicyVersion @relation(fields: [policyVersionId], references: [id])
+  status         ConsentGrantStatus @default(ACTIVE)
+  grantedAt      DateTime @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  accessAuditLogs AccessAuditLog[]
+
+  @@index([profileId, status])
+  @@index([caseId])
+  @@map("consent_grants")
+}
+
+// ----------------------------------------------------------------------------
+// Access Audit Log — logical table here; physical partitioning applied via
+// raw SQL migration (partition by month, sub-partition by org_id range).
+// ----------------------------------------------------------------------------
+
+model AccessAuditLog {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         Profile  @relation(fields: [profileId], references: [id])
+  orgId           String
+  org             Organization @relation(fields: [orgId], references: [id])
+  orgMembershipId String
+  orgMembership   OrgMembership @relation(fields: [orgMembershipId], references: [id])
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id])
+  consentGrantId  String
+  consentGrant    ConsentGrant @relation(fields: [consentGrantId], references: [id])
+  accessedFields  String[]
+  dataRegion      DataRegion @default(GLOBAL_DEFAULT)
+  accessedAt      DateTime @default(now())
+
+  @@index([profileId, accessedAt])
+  @@index([orgId, accessedAt])
+  @@map("access_audit_logs")
+}
+
+// ----------------------------------------------------------------------------
+// Scoring (Decisions 7, 12)
+// ----------------------------------------------------------------------------
+
+model ScoreCategory {
+  id    String @id @default(uuid())
+  code  String @unique // IDENTITY_CONFIDENCE | EDUCATION_CREDIBILITY | EMPLOYMENT_CREDIBILITY |
+                        // FINANCIAL_CREDIBILITY | REFERENCE_CREDIBILITY | (future) IMMIGRATION_CREDIBILITY
+  label String
+
+  ruleVersions ScoringRuleVersion[]
+  scoreInstances Score[]
+
+  @@map("score_categories")
+}
+
+model ScoringRuleVersion {
+  id              String   @id @default(uuid())
+  categoryId      String
+  category        ScoreCategory @relation(fields: [categoryId], references: [id])
+  versionNumber   Int
+  weightsConfig   Json
+  effectiveFrom   DateTime @default(now())
+
+  scores          Score[]
+
+  @@unique([categoryId, versionNumber])
+  @@map("scoring_rule_versions")
+}
+
+model ScoreBand {
+  id        String  @id @default(uuid())
+  minValue  Decimal @db.Decimal(2, 1) // e.g. 6.0
+  maxValue  Decimal @db.Decimal(2, 1) // e.g. 6.4 (band upper bound before next label)
+  label     String  // "Outstanding", "Excellent", "Very Strong", "Strong", "Good", "Developing", "Emerging"
+
+  @@map("score_bands")
+}
+
+model Score {
+  id              String   @id @default(uuid())
+  profileId       String
+  profile         Profile  @relation(fields: [profileId], references: [id])
+  categoryId      String
+  category        ScoreCategory @relation(fields: [categoryId], references: [id])
+  internalValue   Decimal  @db.Decimal(7, 4) // full internal precision
+  publicScore     Decimal  @db.Decimal(2, 1) // 0.0–9.0, 0.5 increments, derived from internalValue
+  rulesVersionId  String
+  rulesVersion    ScoringRuleVersion @relation(fields: [rulesVersionId], references: [id])
+  computedAt      DateTime @default(now())
+
+  explanationFactors ScoreExplanationFactor[]
+  narratives         ScoreNarrative[]
+  overrides          ScoreOverride[]
+
+  @@index([profileId, categoryId, computedAt])
+  @@map("scores")
+}
+
+// Normalized (not raw JSONB) explanation factors — queryable at scale.
+model ScoreExplanationFactor {
+  id                       String   @id @default(uuid())
+  scoreId                  String
+  score                    Score    @relation(fields: [scoreId], references: [id])
+  credentialId             String
+  credential               Credential @relation(fields: [credentialId], references: [id])
+  contributionWeight       Decimal  @db.Decimal(6, 4)
+  verificationStatusAtTime CredentialStatus
+
+  @@index([scoreId])
+  @@index([credentialId])
+  @@map("score_explanation_factors")
+}
+
+model ScoreNarrative {
+  id            String   @id @default(uuid())
+  scoreId       String
+  score         Score    @relation(fields: [scoreId], references: [id])
+  modelVersion  String
+  promptVersion String
+  narrativeText String
+  generatedAt   DateTime @default(now())
+
+  @@index([scoreId])
+  @@map("score_narratives")
+}
+
+model ScoreOverride {
+  id               String   @id @default(uuid())
+  scoreId          String
+  score            Score    @relation(fields: [scoreId], references: [id])
+  overriddenByUserId String
+  reason           String
+  previousPublicScore Decimal @db.Decimal(2, 1)
+  newPublicScore      Decimal @db.Decimal(2, 1)
+  createdAt        DateTime @default(now())
+
+  @@map("score_overrides")
+}
+
+// ----------------------------------------------------------------------------
+// References (Decision 8)
+// ----------------------------------------------------------------------------
+
+model ReferenceRequest {
+  id             String   @id @default(uuid())
+  profileId      String
+  profile        Profile  @relation(fields: [profileId], references: [id])
+  refereeName    String
+  refereeContact String
+  relationshipType String // e.g. "FORMER_MANAGER", "PROFESSOR", "COLLEAGUE"
+  status         String   @default("PENDING") // PENDING / SENT / RESPONDED / EXPIRED
+  createdAt      DateTime @default(now())
+
+  invitation     ReferenceInvitation?
+  response       ReferenceResponse?
+
+  @@index([profileId])
+  @@map("reference_requests")
+}
+
+model ReferenceInvitation {
+  id                 String   @id @default(uuid())
+  referenceRequestId String   @unique
+  referenceRequest   ReferenceRequest @relation(fields: [referenceRequestId], references: [id])
+  tokenHash          String   @unique
+  sentAt             DateTime @default(now())
+  expiresAt          DateTime
+
+  @@map("reference_invitations")
+}
+
+model ReferenceResponse {
+  id                 String   @id @default(uuid())
+  referenceRequestId String   @unique
+  referenceRequest   ReferenceRequest @relation(fields: [referenceRequestId], references: [id])
+  respondingUserId   String?  // nullable — referee may not be a GCI user
+  respondingUser     User?    @relation("RespondingUser", fields: [respondingUserId], references: [id])
+  contentStructured  Json     // structured Q&A, not free-form narrative — keeps AI narrative generation grounded
+  submittedAt        DateTime @default(now())
+  expiresAt          DateTime // ages out of scoring contribution after this
+
+  verification       ReferenceVerification?
+
+  @@map("reference_responses")
+}
+
+model ReferenceVerification {
+  id                              String   @id @default(uuid())
+  referenceResponseId             String   @unique
+  referenceResponse                ReferenceResponse @relation(fields: [referenceResponseId], references: [id])
+  refereeIdentityAnchorId          String?
+  refereeVerifiedEmploymentCredentialId String?
+  verifiedAt                       DateTime @default(now())
+
+  @@map("reference_verifications")
+}
+
+// ----------------------------------------------------------------------------
+// Timeline (Decision 11)
+// ----------------------------------------------------------------------------
+
+model TimelineEvent {
+  id                String   @id @default(uuid())
+  profileId         String
+  profile           Profile  @relation(fields: [profileId], references: [id])
+  eventType         String   // CREDENTIAL_VERIFIED / SCORE_CHANGED / CASE_CLOSED / CREDENTIAL_ADDED
+  eventDate         DateTime
+  sourceCredentialId String?
+  sourceCredential   Credential? @relation(fields: [sourceCredentialId], references: [id])
+  sourceCaseId       String?
+  title              String
+  description         String?
+  visibilityScope     String  @default("OWNER_ONLY") // controls who can see this timeline entry when profile is shared
+
+  @@index([profileId, eventDate])
+  @@map("timeline_events")
+}
+
+// ----------------------------------------------------------------------------
+// Compliance / Data Subject Requests
+// ----------------------------------------------------------------------------
+
+model DataSubjectRequest {
+  id          String   @id @default(uuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  requestType DataSubjectRequestType
+  status      DataSubjectRequestStatus @default(RECEIVED)
+  requestedAt DateTime @default(now())
+  resolvedAt  DateTime?
+  notes       String?
+
+  @@index([profileId, status])
+  @@map("data_subject_requests")
+}
+
+// ----------------------------------------------------------------------------
+// GCI Passport resume workspace
+// ----------------------------------------------------------------------------
+
+model Resume {
+  id             String         @id @default(uuid())
+  profileId      String
+  profile        Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title          String         @default("My Resume")
+  template       ResumeTemplate
+  status         ResumeStatus   @default(DRAFT)
+  content        Json
+  coverLetter    String?
+  previewTips    Json?
+  sourceFileName String?
+  sourceMimeType String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  versions       ResumeVersion[]
+
+  @@index([profileId, updatedAt])
+  @@map("resumes")
+}
+
+
+model ResumeVersion {
+  id          String   @id @default(uuid())
+  resumeId    String
+  resume      Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  version     Int
+  title       String
+  template    ResumeTemplate
+  content     Json
+  coverLetter String?
+  createdAt   DateTime @default(now())
+
+  @@unique([resumeId, version])
+  @@index([resumeId, createdAt])
+  @@map("resume_versions")
+}
+
+model CareerGoal {
+  id                 String         @id @default(uuid())
+  profileId          String
+  profile            Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  goalType           CareerGoalType
+  targetTitle        String
+  targetOrganization String?
+  targetCountry      String?
+  notes              String?
+  isPrimary          Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([profileId, isPrimary])
+  @@map("career_goals")
+}
+
+
+
+
+
+
+
+model CustomerContext {
+  id          String   @id @default(uuid())
+  profileId   String   @unique
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  facts       Json
+  financialMode String?
+  refreshedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("customer_contexts")
+}
+
+model PropertyEvidence {
+  id                  String   @id @default(uuid())
+  profileId           String
+  profile             Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  documentId          String   @unique
+  document            Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  propertyLabel       String?
+  country             String?
+  addressText         String?
+  documentStatedValue String?
+  currency            String?
+  ownershipNames      Json?
+  extractedFacts      Json
+  valuationStatus     String   @default("EVIDENCE_ONLY")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([profileId, updatedAt])
+  @@map("property_evidence")
+}
+
+model ReportSnapshot {
+  id                String            @id @default(uuid())
+  profileId         String
+  profile           Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  kind              ReportProductKind
+  version           Int               @default(1)
+  content           Json
+  sourceDocumentIds Json
+  sourceResumeId    String?
+  generatedAt       DateTime           @default(now())
+
+  @@index([profileId, kind, generatedAt])
+  @@map("report_snapshots")
+}
+
+// ----------------------------------------------------------------------------
+// Passport customer support / notifications / internal operations
+// ----------------------------------------------------------------------------
+
+model SupportTicket {
+  id               String                @id @default(uuid())
+  profileId        String
+  profile          Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  customerUserId   String
+  customer         User                  @relation("SupportTicketCustomer", fields: [customerUserId], references: [id])
+  assignedToUserId String?
+  assignedTo       User?                 @relation("SupportTicketAssignee", fields: [assignedToUserId], references: [id])
+  subject          String
+  category         String
+  status           SupportTicketStatus   @default(OPEN)
+  priority         SupportTicketPriority @default(NORMAL)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  closedAt         DateTime?
+
+  messages         SupportTicketMessage[]
+
+  @@index([profileId, status])
+  @@index([assignedToUserId, status])
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id         String        @id @default(uuid())
+  ticketId   String
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User          @relation(fields: [authorId], references: [id])
+  body       String
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_messages")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  profileId String
+  profile   Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([profileId, readAt, createdAt])
+  @@map("notifications")
+}
+
+model InternalUserNote {
+  id           String   @id @default(uuid())
+  profileId    String
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  authoredById String
+  authoredBy   User     @relation(fields: [authoredById], references: [id])
+  body         String
+  createdAt    DateTime @default(now())
+
+  @@index([profileId, createdAt])
+  @@map("internal_user_notes")
+}
+
+// ----------------------------------------------------------------------------
+// Chat / Workflow Session Persistence (Save, Save & Exit, History)
+// Additive — added during production integration, does not modify any
+// existing model.
+// ----------------------------------------------------------------------------
+
+enum ChatWorkflow {
+  RESUME
+  COUNSELOR
+  REPORT
+  FINANCIAL
+  LEARN
+}
+
+enum ChatSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model ChatSession {
+  id          String            @id @default(uuid())
+  profileId   String
+  profile     Profile           @relation(fields: [profileId], references: [id])
+  workflow    ChatWorkflow
+  status      ChatSessionStatus @default(IN_PROGRESS)
+  currentStep Int               @default(1)
+  totalSteps  Int               @default(10)
+  title       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  lastSavedAt         DateTime?
+  // SOUP human handoff is scoped to this exact conversation thread, not the whole student case.
+  humanHandoffActive  Boolean   @default(false)
+  assignedStaffUserId String?
+  handoffReason        String?
+  handoffStartedAt     DateTime?
+
+  messages    ChatMessage[]
+
+  @@index([profileId, workflow])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id])
+  role      ChatRole
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  @@index([sessionId, createdAt])
+  @@map("chat_messages")
+}
+
+
+// ----------------------------------------------------------------------------
+// SOUP student journey, partner inventory and transaction orchestration
+// Additive to the proven GCI foundation so the fork can be migrated safely.
+// ----------------------------------------------------------------------------
+
+enum StudentJourneyStage {
+  EXPLORING
+  SHORTLISTING
+  APPLYING
+  AWAITING_DECISIONS
+  OFFER_RECEIVED
+  VISA_PREPARATION
+  PRE_DEPARTURE
+  ARRIVED
+}
+
+enum PartnerType {
+  UNIVERSITY
+  ACCOMMODATION
+  INSURANCE
+  STUDENT_FINANCE
+  SCHOLARSHIP
+  TRAVEL
+  OTHER
+}
+
+enum PartnershipStatus {
+  ACTIVE
+  PAUSED
+  INACTIVE
+}
+
+enum ApplicationOwnership {
+  SOUP_MANAGED
+  STUDENT_MANAGED_EXTERNAL
+  ASSISTED_EXTERNAL
+}
+
+enum StudentApplicationStatus {
+  SHORTLISTED
+  DOCUMENTS_REQUIRED
+  READY_TO_SUBMIT
+  SUBMITTED
+  UNDER_REVIEW
+  OFFER_RECEIVED
+  CONDITIONAL_OFFER
+  REJECTED
+  WITHDRAWN
+  ENROLLED
+}
+
+enum ChecklistKind {
+  ADMISSION
+  VISA
+  PRE_DEPARTURE
+  ARRIVAL
+  GENERAL
+}
+
+enum ChecklistItemStatus {
+  NOT_STARTED
+  ACTION_REQUIRED
+  WAITING_FOR_DOCUMENT
+  DOCUMENT_UPLOADED
+  COMPLETE
+  NOT_APPLICABLE
+  BLOCKED
+}
+
+enum ApplicationFeeStatus {
+  UNKNOWN
+  NOT_REQUIRED
+  REQUIRED
+  STUDENT_PAYING
+  SOUP_PAYING
+  PENDING
+  PAID
+  WAIVED
+  REFUNDED
+}
+
+enum ApplicationEligibilityStatus {
+  NOT_CHECKED
+  LIKELY_ELIGIBLE
+  NEEDS_REVIEW
+  NOT_ELIGIBLE
+}
+
+enum ServiceReferralType {
+  ACCOMMODATION
+  INSURANCE
+  STUDENT_FINANCE
+  SCHOLARSHIP
+  TRAVEL
+  ATTESTATION
+  OTHER
+}
+
+enum ServiceReferralStatus {
+  RECOMMENDED
+  OPENED
+  STARTED
+  COMPLETED
+  DECLINED
+  EXTERNAL_ONLY
+}
+
+model StudentCase {
+  id                  String              @id @default(uuid())
+  profileId           String              @unique
+  profile             Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  stage               StudentJourneyStage @default(EXPLORING)
+  targetDegreeLevel   String?
+  targetSubject       String?
+  preferredIntake    String?
+  preferredRegions    Json?
+  preferredCountries  Json?
+  searchScope         String?
+  academicBackgroundSummary String?
+  englishProficiencySummary String?
+  fundingSummary       String?
+  budgetMin           Decimal?            @db.Decimal(12, 2)
+  budgetMax           Decimal?            @db.Decimal(12, 2)
+  budgetCurrency      String?
+  studyLanguage       String?
+  goals               Json?
+  constraints         Json?
+  nextAction          String?
+  humanHandoffActive  Boolean             @default(false)
+  assignedStaffUserId String?
+  handoffReason       String?
+  handoffStartedAt    DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  shortlists          UniversityShortlist[]
+  applications        StudentApplication[]
+  checklists          JourneyChecklist[]
+  referrals           ServiceReferral[]
+
+  @@index([stage, updatedAt])
+  @@map("student_cases")
+}
+
+model Partner {
+  id                  String            @id @default(uuid())
+  type                PartnerType
+  name                String
+  slug                String            @unique
+  status              PartnershipStatus @default(ACTIVE)
+  country             String?
+  city                String?
+  websiteUrl          String?
+  transactionUrl      String?
+  internalPriority    Int               @default(100)
+  commercialMetadata  Json?
+  publicMetadata      Json?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  universities        University[]
+  referrals           ServiceReferral[]
+
+  @@index([type, status, internalPriority])
+  @@map("partners")
+}
+
+model University {
+  id                  String    @id @default(uuid())
+  partnerId           String?
+  partner             Partner?  @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  name                String
+  country             String
+  city                String?
+  websiteUrl          String?
+  isPublic            Boolean?
+  sourceUrl           String?
+  sourceCheckedAt     DateTime?
+  publicMetadata      Json?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  programs            UniversityProgram[]
+  shortlistItems      UniversityShortlistItem[]
+  applications        StudentApplication[]
+
+  @@unique([name, country])
+  @@index([country, name])
+  @@index([partnerId])
+  @@map("universities")
+}
+
+model UniversityProgram {
+  id                  String    @id @default(uuid())
+  universityId        String
+  university          University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  title               String
+  level               String
+  field               String?
+  studyMode           String?
+  language            String?
+  duration            String?
+  tuitionAmount       Decimal?  @db.Decimal(12, 2)
+  tuitionCurrency     String?
+  intake              String?
+  applicationDeadline String?
+  applicationUrl      String?
+  sourceUrl           String?
+  sourceCheckedAt     DateTime?
+  requirements        Json?
+  active              Boolean   @default(true)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  shortlistItems      UniversityShortlistItem[]
+  applications        StudentApplication[]
+
+  @@index([universityId, level, active])
+  @@index([field])
+  @@map("university_programs")
+}
+
+model UniversityShortlist {
+  id                  String      @id @default(uuid())
+  profileId           String
+  profile             Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  studentCaseId       String
+  studentCase         StudentCase @relation(fields: [studentCaseId], references: [id], onDelete: Cascade)
+  title               String      @default("University Application Plan")
+  regionScope         String?
+  version             Int         @default(1)
+  generatedBy         String      @default("SOUP_COUNSELOR")
+  researchSummary     Json?
+  generatedAt         DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  items               UniversityShortlistItem[]
+
+  @@index([profileId, generatedAt])
+  @@index([studentCaseId, generatedAt])
+  @@map("university_shortlists")
+}
+
+model UniversityShortlistItem {
+  id                  String              @id @default(uuid())
+  shortlistId         String
+  shortlist           UniversityShortlist @relation(fields: [shortlistId], references: [id], onDelete: Cascade)
+  universityId        String
+  university          University          @relation(fields: [universityId], references: [id])
+  programId           String?
+  program             UniversityProgram?  @relation(fields: [programId], references: [id], onDelete: SetNull)
+  position            Int
+  isPartnerAtGeneration Boolean           @default(false)
+  eligibilityStatus   String?
+  rationale           String?
+  cautions             Json?
+  sourceUrls          Json?
+  studentDecision     String?
+  studentDecisionAt   DateTime?
+  createdAt           DateTime            @default(now())
+
+  @@index([shortlistId, position])
+  @@index([universityId])
+  @@index([studentDecision])
+  @@map("university_shortlist_items")
+}
+
+model StudentApplication {
+  id                  String                   @id @default(uuid())
+  profileId           String
+  profile             Profile                  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  studentCaseId       String
+  studentCase         StudentCase              @relation(fields: [studentCaseId], references: [id], onDelete: Cascade)
+  universityId        String?
+  university          University?              @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  programId           String?
+  program             UniversityProgram?       @relation(fields: [programId], references: [id], onDelete: SetNull)
+  ownership           ApplicationOwnership
+  status              StudentApplicationStatus @default(SHORTLISTED)
+  externalApplicationUrl String?
+  externalReference   String?
+  submittedAt         DateTime?
+  decisionAt          DateTime?
+  offerDocumentId     String?                  @unique
+  offerDocument       Document?                @relation("ApplicationOfferDocument", fields: [offerDocumentId], references: [id], onDelete: SetNull)
+  notes               String?
+  applicationKey      String?                   @unique
+  intake              String?
+  startDate           DateTime?
+  deadlineAt          DateTime?
+  deadlineSourceUrl   String?
+  deadlineCheckedAt   DateTime?
+  eligibilityStatus   ApplicationEligibilityStatus @default(NOT_CHECKED)
+  eligibilityCheckedAt DateTime?
+  eligibilitySourceUrl String?
+  eligibilityNotes    Json?
+  applicationFeeAmount Decimal?                 @db.Decimal(12, 2)
+  applicationFeeCurrency String?
+  applicationFeeStatus ApplicationFeeStatus     @default(UNKNOWN)
+  assignedStaffUserId String?
+  studentDeclarationAt DateTime?
+  studentApprovedAt   DateTime?
+  lastStudentActionAt DateTime?
+  lastSoupActionAt    DateTime?
+  withdrawnAt         DateTime?
+  withdrawalReason    String?
+  submissionEvidence  Json?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+
+  documents           StudentApplicationDocument[]
+  checklists          JourneyChecklist[]
+  events              StudentApplicationEvent[]
+  payments            Payment[]
+  offerConditions     OfferCondition[]
+
+  @@index([profileId, status, updatedAt])
+  @@index([studentCaseId, status])
+  @@index([universityId])
+  @@map("student_applications")
+}
+
+model StudentApplicationEvent {
+  id                  String             @id @default(uuid())
+  applicationId       String
+  application         StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  actorUserId         String?
+  eventType           String
+  fromStatus          String?
+  toStatus            String?
+  message             String
+  metadata            Json?
+  createdAt           DateTime           @default(now())
+
+  @@index([applicationId, createdAt])
+  @@map("student_application_events")
+}
+
+
+enum OfferConditionStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETE
+  WAIVED
+}
+
+model OfferCondition {
+  id            String               @id @default(uuid())
+  applicationId String
+  application   StudentApplication   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  status        OfferConditionStatus @default(OPEN)
+  dueAt         DateTime?
+  sourceUrl     String?
+  sourceCheckedAt DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([applicationId, status, dueAt])
+  @@map("offer_conditions")
+}
+
+enum CounselorSessionStatus {
+  REQUESTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model CounselorSession {
+  id                String                 @id @default(uuid())
+  profileId         String
+  profile           Profile                @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  counselorUserId   String?
+  counselor         User?                  @relation("CounselorSessionCounselor", fields: [counselorUserId], references: [id], onDelete: SetNull)
+  requestedByUserId String
+  requestedBy       User                   @relation("CounselorSessionRequester", fields: [requestedByUserId], references: [id])
+  status            CounselorSessionStatus @default(REQUESTED)
+  requestedDate     DateTime?
+  requestedTimeNote String?
+  scheduledFor      DateTime?
+  durationMinutes   Int                    @default(30)
+  meetingUrl        String?
+  studentNote       String?
+  staffNote         String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@index([profileId, status, scheduledFor])
+  @@index([counselorUserId, status, scheduledFor])
+  @@map("counselor_sessions")
+}
+
+model AiRateLimitCounter {
+  subject             String   @id
+  windowStart         DateTime
+  count               Int      @default(0)
+  updatedAt           DateTime @updatedAt
+
+  @@map("ai_rate_limit_counters")
+}
+
+model StudentApplicationDocument {
+  id                  String             @id @default(uuid())
+  applicationId       String
+  application         StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  documentId          String
+  document            Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentRole        String
+  required            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+
+  @@unique([applicationId, documentId])
+  @@index([documentId])
+  @@map("student_application_documents")
+}
+
+model JourneyChecklist {
+  id                  String        @id @default(uuid())
+  profileId           String
+  profile             Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  studentCaseId       String
+  studentCase         StudentCase   @relation(fields: [studentCaseId], references: [id], onDelete: Cascade)
+  applicationId       String?
+  application         StudentApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  kind                ChecklistKind
+  title               String
+  destinationCountry  String?
+  authorityName       String?
+  sourceUrl           String?
+  sourceCheckedAt     DateTime?
+  sourceSnapshot      Json?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  items               JourneyChecklistItem[]
+
+  @@index([profileId, kind, updatedAt])
+  @@index([applicationId, updatedAt])
+  @@map("journey_checklists")
+}
+
+model JourneyChecklistItem {
+  id                  String              @id @default(uuid())
+  checklistId         String
+  checklist           JourneyChecklist    @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  title               String
+  description         String?
+  position            Int
+  status              ChecklistItemStatus @default(NOT_STARTED)
+  required            Boolean             @default(true)
+  externalActionUrl   String?
+  externalActionLabel String?
+  documentId          String?
+  document            Document?           @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  completedAt         DateTime?
+  dueAt               DateTime?
+  metadata            Json?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([checklistId, position])
+  @@index([status, dueAt])
+  @@map("journey_checklist_items")
+}
+
+model ServiceReferral {
+  id                  String                @id @default(uuid())
+  profileId           String
+  profile             Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  studentCaseId       String
+  studentCase         StudentCase           @relation(fields: [studentCaseId], references: [id], onDelete: Cascade)
+  type                ServiceReferralType
+  partnerId           String?
+  partner             Partner?              @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  status              ServiceReferralStatus @default(RECOMMENDED)
+  title               String
+  externalUrl         String?
+  counselorRationale  String?
+  sourceSessionId     String?
+  sourceMessageId     String?
+  partnerReference    String?
+  convertedAt         DateTime?
+  revenueAmount       Decimal?              @db.Decimal(12, 2)
+  revenueCurrency     String?
+  commissionAmount    Decimal?              @db.Decimal(12, 2)
+  commissionCurrency  String?
+  metadata            Json?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@index([profileId, type, updatedAt])
+  @@index([partnerId, status])
+  @@index([sourceSessionId])
+  @@map("service_referrals")
+}
+
+
+model Payment {
+  id                String        @id @default(uuid())
+  profileId         String
+  profile           Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  applicationId     String?
+  application       StudentApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  type              PaymentType
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(12, 2)
+  currency          String        @default("USD")
+  title             String
+  description       String?
+  provider          String?
+  providerSessionId String?       @unique
+  providerPaymentId String?
+  metadata          Json?
+  dueAt             DateTime?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([profileId, status, createdAt])
+  @@index([applicationId, status])
+  @@map("payments")
+}

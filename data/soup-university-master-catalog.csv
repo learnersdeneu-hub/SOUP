@@ -1,0 +1,297 @@
+name,country,networks,relationship,source_type,source_urls,program_families,application_management,status,student_visible_label
+Bond University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+CQUniversity,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Charles Darwin University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Curtin University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Deakin University,Australia,ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Edith Cowan University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Federation University Australia,Australia,ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Flinders University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Griffith University,Australia,ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+La Trobe College Australia,Australia,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/australia,,true,ACTIVE,SOUP Application Network
+La Trobe University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Macquarie University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Monash University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Murdoch University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+UTS College,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Newcastle Australia,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Southern Queensland,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Tasmania,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Western Sydney University,Australia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+International Business School Vienna,Austria,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Gomel State Medical University,Belarus,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+International University MITSO,Belarus,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Yanka Kupala State University of Grodno,Belarus,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Brock University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Canadian College of Technology and Business,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Cape Breton University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Conestoga College,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Fleming College Toronto,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Fraser International College,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+International College of Manitoba,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Lakehead University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Laurentian University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+NAIT,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Niagara College - Toronto,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Thompson Rivers University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Toronto Metropolitan University International College,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Toronto School of Management,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Trebas Institute,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University Canada West,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Manitoba,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Niagara Falls Canada,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Western University,Canada,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Wilfrid Laurier International College,Canada,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Medical University of the Americas,Caribbean,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Saba University School of Medicine,Caribbean,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+St. Matthew’s University School of Medicine,Caribbean,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Algebra University College,Croatia,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Cyprus International University,Cyprus,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Nicosia,Cyprus,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+ESDES Business School,France,USER_CONFIRMED_PARTNER,USER_CONFIRMED_PARTNER,USER_OR_LEGACY,conversation:user-confirmed,,true,ACTIVE,SOUP Application Network
+KEDGE Business School,France,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Paris School of Business,France,LEGACY_CATALOG,LEGACY_NEEDS_CONFIRMATION,USER_OR_LEGACY,internal:replit-partnered-university-programs.csv,,false,PAUSED,Catalog - verification required
+Arden University Berlin,Germany,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Berlin School of Business and Innovation,Germany,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+GISMA University of Applied Sciences,Germany,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Hochschule Fresenius,Germany,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+IU International University of Applied Sciences,Germany,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Mediadesign Hochschule,Germany,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+New European College,Germany,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+SRH University Berlin,Germany,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Steinbeis School of Management and Innovation,Germany,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Europe for Applied Sciences,Germany,GUS|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+htk academy,Germany,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+International Business School Budapest,Hungary,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Debrecen,Hungary,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Wekerle Business School,Hungary,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Pearl Academy,India,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+UPES,India,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Atlantic Technological University,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+CCT College Dublin,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+City Education Group,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Dorset College,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Dublin Business School,Ireland,IEO|GUS|ABN_GLOBAL|APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Dublin City University,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Dublin International Foundation College,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Dundalk Institute of Technology,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Galway Business School,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Griffith College Ireland,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Holmes Institute Dublin,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+IBAT College Dublin,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+ICD Business School,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Independent College,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Maynooth University,Ireland,IEO|GUS|ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Munster Technological University,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+National College of Ireland,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+RCSI University of Medicine and Health Sciences,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Shannon College of Hotel Management,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+South East Technological University,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Technological University Dublin,Ireland,IEO|GUS|ABN_GLOBAL,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Technological University of the Shannon,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Trinity College Dublin,Ireland,IEO|GUS|ABN_GLOBAL|APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://events.educationireland.net/|file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University College Cork,Ireland,IEO|GUS|ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University College Dublin,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Galway,Ireland,IEO|GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Limerick,Ireland,IEO|GUS|ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Asia Pacific University of Technology & Innovation,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Curtin University Malaysia,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Heriot-Watt University Malaysia,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Monash University Malaysia,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Sunway University,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Swinburne University of Technology Sarawak Campus,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Taylor’s University,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Nottingham Malaysia,Malaysia,ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+GBS Malta,Malta,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Global College Malta,Malta,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Saint Martin's Institute of Higher Education,Malta,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Applied Sciences Europe Amsterdam,Netherlands,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Collegium Da Vinci,Poland,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+International European University Poland,Poland,DIRECT_SOUP,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+WSEI University,Poland,LEGACY_CATALOG,LEGACY_NEEDS_CONFIRMATION,USER_OR_LEGACY,internal:replit-partnered-university-programs.csv,,false,PAUSED,Catalog - verification required
+I.M. Sechenov First Moscow State Medical University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Kazan State Medical University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Lomonosov Moscow State University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Moscow Aviation Institute,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Moscow Power Engineering Institute,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+National University of Science and Technology MISIS,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Peoples’ Friendship University of Russia (RUDN),Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Pirogov Russian National Research Medical University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Saint Petersburg State Pediatric Medical University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Saint Petersburg State University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Siberian Federal University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Tomsk Polytechnic University,Russia,EEUA,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Singidunum University,Serbia,LEGACY_CATALOG,LEGACY_NEEDS_CONFIRMATION,USER_OR_LEGACY,internal:replit-partnered-university-programs.csv,,false,PAUSED,Catalog - verification required
+London School of Business and Finance Singapore,Singapore,GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+DOBA Business School,Slovenia,LEGACY_CATALOG,LEGACY_NEEDS_CONFIRMATION,USER_OR_LEGACY,internal:replit-partnered-university-programs.csv,,false,PAUSED,Catalog - verification required
+C3S Business School,Spain,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+LCI Barcelona,Spain,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+"UDIT, University of Design, Innovation and Technology",Spain,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Ajman University,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Canadian University Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Curtin University Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+De Montfort University Dubai,United Arab Emirates,GUS|ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Heriot-Watt University Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Murdoch University Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+TETR College of Business,United Arab Emirates,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Birmingham Dubai,United Arab Emirates,GUS|ABN_GLOBAL|APPLYBOARD,USER_CONFIRMED_NETWORK_ACCESS,MIXED,file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Europe for Applied Sciences Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Wollongong in Dubai,United Arab Emirates,GUS|ABN_GLOBAL,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Abertay University,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Aberystwyth University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Amity University London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Anglia Ruskin University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Arden University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Arts University Bournemouth,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Aston University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+BPP University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Bangor University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+"Birkbeck, University of London",United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Birmingham City University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Bloomsbury Institute,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Bournemouth University,United Kingdom,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Brunel University London,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Buckinghamshire New University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Canterbury Christ Church University,United Kingdom,AHZ|GUS_INUNI|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|https://www.globaluniversitysystems.com/network/partners|file-library:Masterlist Universities.docx,Education|Health|Business|Sciences,true,ACTIVE,SOUP Application Network
+Cardiff Metropolitan University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Coventry University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Cranfield University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+De Montfort University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Edge Hill University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Edinburgh Napier University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Falmouth University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Glasgow Caledonian University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Harper Adams University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Hartpury University,United Kingdom,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,Agriculture|Animal|Equine|Sport|Business|Veterinary Nursing,true,ACTIVE,SOUP Application Network
+Heriot-Watt University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Hult International Business School,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Keele University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Kingston University,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Kingston University London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Lancaster University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Leeds Trinity University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Liverpool John Moores University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+London College of Contemporary Arts,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+London Metropolitan University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+London School of Business and Finance,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+London South Bank University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Loughborough University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Manchester Metropolitan University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Middlesex University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Middlesex University London,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Newcastle College (HE),United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Newcastle University,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Northeastern University,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Northeastern University London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Northumbria University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Norwich University of the Arts,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Nottingham Trent University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Oxford International Education Group,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Queen Mary University of London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Queen’s University Belfast,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Ravensbourne University London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Regent College London,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Regent's University London,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Richmond American University London,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Robert Gordon University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Sheffield Hallam University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Solent University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+"Solent University, Southampton",United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+"St George’s, University of London",United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+"St Mary’s University, Twickenham",United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Staffordshire University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Swansea University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Teesside University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+The University of Buckingham,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+The University of Law,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+UWE Bristol,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Ulster University,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University Academy 92,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University College Birmingham,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University for the Creative Arts,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Aberdeen,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Bedfordshire,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Birmingham,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Bolton,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Bradford,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Brighton,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Bristol,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Buckingham,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Central Lancashire,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Chester,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Derby,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Dundee,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of East Anglia,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of East London,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Edinburgh,United Kingdom,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Essex,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Gloucestershire,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Greenwich,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE|APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx|https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Hertfordshire,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Huddersfield,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Hull,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Kent,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Leicester,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Lincoln,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Liverpool,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+University of Northampton,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Plymouth,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Portsmouth,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Reading,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Roehampton,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Salford,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of South Wales,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Southampton,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+University of Stirling,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Strathclyde,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Suffolk,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Sunderland,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Sunderland London,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+University of Surrey,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Sussex,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Wales Trinity Saint David,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+University of Westminster,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Winchester,United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+University of Wolverhampton,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Worcester,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of York,United Kingdom,AHZ|GUS|ABN_GLOBAL|CONNECTEDHE,INDIRECT_RECRUITMENT_PARTNER,MIXED,https://www.ahzassociates.com/blogs/september-intake-in-the-uk|file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of the West of England (UWE Bristol),United Kingdom,AHZ,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.ahzassociates.com/blogs/september-intake-in-the-uk,,true,ACTIVE,SOUP Application Network
+Wrexham University,United Kingdom,GUS|ABN_GLOBAL|AHZ|CONNECTEDHE,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+American University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Arizona State University,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Auburn University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Avila University,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,Undergraduate|Graduate|Liberal Arts|Professional Studies,true,ACTIVE,SOUP Application Network
+Baylor University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+"California State University, Northridge",United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Colorado State University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Concordia University Chicago,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,,true,ACTIVE,SOUP Application Network
+Florida International University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+George Mason University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Gonzaga University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Herzing University,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,Business|Technology|Healthcare|Public Safety,true,ACTIVE,SOUP Application Network
+Hofstra University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Illinois State University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Johns Hopkins University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+LIM College,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,Fashion Business|Lifestyle Business,true,ACTIVE,SOUP Application Network
+Louisiana State University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Northeastern University,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Oral Roberts University,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+Oregon State University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Penn State Dickinson Law,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,JD|LLM|Law,true,ACTIVE,SOUP Application Network
+Pepperdine University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Rensselaer Polytechnic Institute,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/news/group/inuni-global-partners-with-rensselaer-polytechnic-institute-rpi-to-lead-exclusive-international-recruitment,,true,ACTIVE,SOUP Application Network
+Rutgers University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+Saint Louis University,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+San Diego State University,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/news/institutions/inuni-global-welcomes-san-diego-state-university-to-its-network,,true,ACTIVE,SOUP Application Network
+Southern New Hampshire University,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University at Buffalo,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of Akron,United States,GUS_INUNI,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.globaluniversitysystems.com/network/partners,STEM|Polymer Science|Engineering,true,ACTIVE,SOUP Application Network
+University of Arizona,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Central Florida,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Illinois Chicago,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Kansas,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Massachusetts Boston,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of North Florida,United States,APPLYBOARD,INDIRECT_RECRUITMENT_PARTNER,PUBLIC_WEB,https://www.applyboard.com/institution,,true,ACTIVE,SOUP Application Network
+University of South Carolina,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Utah,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network
+University of Wisconsin,United States,ABN_GLOBAL|GUS,USER_CONFIRMED_NETWORK_ACCESS,USER_MASTERLIST,file-library:Masterlist Universities.docx,,true,ACTIVE,SOUP Application Network

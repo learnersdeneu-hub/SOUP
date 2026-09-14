@@ -1,0 +1,300 @@
+university,country,title,level,field,duration,tuition_amount,tuition_currency,intake,deadline,source_url,source_checked_at,data_status,active
+University of Debrecen,Hungary,Agricultural Engineering,Bachelors,Agriculture,3.5,6687,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Agribusiness and Rural Development Engineering,Bachelors,Agriculture,3.5,6678,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Environmental Engineering,Bachelors,Engineering,3.5,7166,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Food Engineering,Bachelors,Agriculture,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Precision Agricultural Engineering,Bachelors,Agriculture,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Rural Development Engineering,Bachelors,Agriculture,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Business Administration and Management,Bachelors,Business and management,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Commerce and Marketing,Bachelors,Business and management,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Biochemical Engineering,Bachelors,Engineering,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Chemical Engineering,Bachelors,Engineering,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Civil Engineering,Bachelors,Engineering,4,7166,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Electrical Engineering,Bachelors,Engineering,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Mechanical Engineering,Bachelors,Engineering,3.5,7166,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Communication and Media Studies,Bachelors,Arts and media,3,5735,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Mechatronics Engineering,Bachelors,Engineering,3.5,7166,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Contemporary Music,Bachelors,Performance arts,3,9557,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Vehicle Engineering,Bachelors,Engineering,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Nursing and Patient Care - Dietetics,Bachelors,Health sciences,4,5735,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Nursing and Patient Care - Physiotherapy,Bachelors,Health sciences,4,5735,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Nursing and Patient Care - Nurse,Bachelors,Health sciences,4,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Health Care and Disease Prevention - Public Health,Bachelors,Health sciences,4,5735,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,English and american studies,Bachelors,Humanities and education,3,5735,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Romance philology and culture - french studies,Bachelors,Humanities and education,3,5735,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Kindergarden education,Bachelors,Humanities and education,3,5735,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Psychology,Bachelors,Humanities and education,3,5735,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Business Informatics,Bachelors,Computer science,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Computer Science,Bachelors,Computer science,3,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Computer Science Engineering,Bachelors,Computer science,3.5,6678,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Musical Creative Art and Musicology,Bachelors,Performance arts,3,9557,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Classical Performing Arts - Music,Bachelors,Performance arts,3,9557,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Biology,Bachelors,Natural science and mathematics,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Chemistry,Bachelors,Natural science and mathematics,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Earth Sciences,Bachelors,Environmental science,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Biotechnology,Bachelors,Natural science and mathematics,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Mathematics,Bachelors,Natural science and mathematics,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Physics,Bachelors,Natural science and mathematics,3,6212,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Animal Husbandry Engineering,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Agricultural Environmental Management Engineering,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Agricultural Water Management Engineering,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Crop Production Engineering,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Food Safety and Quality Engineering,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Plant Protection,Masters,Agriculture and forestry,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Rural Development Engineering,Masters,Agriculture and forestry,4,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,International Economy and Business,Masters,Business and management,4,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Chemical Engineering,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Engineering Management,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Electrical Engineering,Masters,engineering,4,7660,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Environmental Engineering,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Mechatronical Engineering,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Mechanical Engineering,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Sports Engineering,Masters,Engineering,4,7660,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Vehicle Engineering,Masters,Engineering,4,7660,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Urban Systems Engineering,Masters,Engineering,4,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Postgraduate Diploma in Lean Engineer,Masters,Engineering,1,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Postgraduate Diploma in Lean Manager,Masters,Engineering,1,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Postgraduate Diploma in Strategic Engineering and Sustainability Leadership,Masters,Engineering,1,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Complex Rehabilitation,Masters,Health sciences,2,7660,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Public Health,Masters,Health sciences,1.5,7660,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Social Work in Health Care,Masters,Health sciences,2,5267,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Social Work and Social Economy,Masters,Health sciences,2,5267,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,English Studies,Masters,Humanties,4,6521,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,American Studies,Masters,Humanties,4,6521,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Business Informatics,Masters,Computer science,2,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Computer Science,Masters,Computer science,4,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Computer Science Engineering,Masters,Computer science,4,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Postgraduate Diploma in Artificial Intelligence,Masters,Computer science,2,7660,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,European and International Business Law- LL.M.,Masters,Law,2,7181,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Classical Musical Performance,Masters,Performance arts,4,9557,EUR,,15/6/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Applied Mathematics,Masters,Applied Mathematics,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Biology,Masters,Natural science and mathematics,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Chemistry,Masters,Natural science and mathematics,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Environmental Sciences,Masters,Environmental studies,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Geography,Masters,Environmental studies,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Geoinformatics,Masters,sciences,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,​Hydrobiology - Water Quality Management,Masters,Environmental studies,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Molecular Biology,Masters,Natural science and mathematics,2,8141,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+University of Debrecen,Hungary,Physics,Masters,Natural science and mathematics,4,7181,EUR,,31/5/23,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Corporate Finance,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with AI and Data Analytics,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with Arts,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with Diplomacy and International Relations,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with HRM and Business Psychology,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with Markketing,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Management with Tourism,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Business Administration and Management,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,International Business and Economics,Bachelors,Business and management,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Marketing- Digital Media,Bachelors,Business and management,3.5,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Psychology,Bachelors,Social Sciences,3,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management with Human Resource Management,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management with Marketing,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management with Finance,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management with specialization in AI and cybersecurity,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,IT for Business Data and Analytics,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International Business School Budapest,Hungary,Strategic International Management with specialization in Hospitality,Masters,Business and management,1.5,6400,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,Commerce and Marketing,Bachelors,Business and management,3.5,5600,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,Business Administration and Management,Bachelors,Business and management,3.5,5600,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,Business Informatics,Bachelors,Business and management,3.5,6200,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,Marketing Strategy and Innovation,Masters,Business and management,1,8000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,MBA,Masters,Business and management,2,7000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,Human Resource Management,Bachelors,Business and management,3.5,5600,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Wekerle Business School,Hungary,International Economics,BAchelors,Business and management,4,6000,EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,Business Administration Financial Services Managament,Bachelors,Business and management,3,13500,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,Business Administration Marketing and Communication,Bachelors,Business and management,3,13500,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,Business Administration Economics and Management,Bachelors,Business and management,3,13500,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,Business Management Entreprenuership and Innovation,Masters,Business and management,1.5,14600,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,Business Management Digital Marketing and Communication,Masters,Business and management,1.5,14600,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,MBA International Management,Masters,Business and management,1.5,15890,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,MBA Finance,Masters,Business and management,1.5,15890,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+New European College,Germany,MBA Entrepreneurship and Innovation,Masters,Business and management,1.5,15890,EUR,,3-Apr,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BSc (Hons) International Business & Management,Bachelors,Business and management,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BA (Hons) Tourism and Hospitality Management,Bachelors,Business and management,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BSc (Hons) Computer Sciences and Digitisation,Bachelors,Computer science and IT,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BSc in Psychology - Psychosocial Disciplines,Bachelors,Social sciences,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,Global MBA,Masters,Business and management,1.5,"€ 14,150",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc Digital Marketing,Masters,Business and management,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc Finance and Investment,Masters,Business and management,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,"MA Tourism, Hospitality and Event Management",Masters,Business and management,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc Data Analytics,Masters,Computer science and IT,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc Information Technology Management,Masters,Computer science and IT,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc in International Health Management,Masters,Business and management,1.5,"€ 12,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA in Energy Management,Masters,Business and management,1.5,"€ 12,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc in Engineering Management,Masters,Business and management,1.5,"€ 12,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA in Logistics,Masters,Business and management,1.5,"€ 12,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MBA,Masters,Business and management,2,"€ 18,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA in Innovation and Entrepreneurship (MAIE),Masters,Business and management,2,"€ 15,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MSc in Psychology - Cognitive Processes and Technologies,Masters,Social sciences,2,"€ 15,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,DBA,,Business and management,4,"€ 15,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BSc (Hons) International Business & Management,Bachelors,Business and management,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,"MA Tourism, Hospitality and Event Management",Masters,Business and management,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,Global MBA,Masters,Business and management,1.5,"€ 14,150",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA in Innovation and Entrepreneurship,Masters,Business and management,1.5,"€ 15,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BA in Economics and Business Administration,Bachelors,Business and management,3,"€ 21,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,"MA in International Tourism, Hospitality and Event Management",Masters,Business and management,1.5,"€ 8,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,Global MBA,Masters,Business and management,1.5,"€ 9,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BSc (Hons) International Business & Management,Bachelors,Business and management,3,"€ 28,350",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,"MA Tourism, Hospitality and Event Management",Masters,Business and management,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,Global MBA,Masters,Business and management,1.5,"€ 14,150",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA in Innovation and Entrepreneurship,Masters,Business and management,2,"€ 15,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BA (Hons) Graphic Design,Bachelors,Arts,3,"€ 36,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BA (Hons) Illustration,Bachelors,Arts,3,"€ 36,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,BA (Hons) Animation,Bachelors,Arts,3,"€ 36,000",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Berlin School of Business and Innovation,Germany,MA Visual Communication,Masters,Arts,1.5,"€ 12,600",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BA (Hons) Business Management Marketing,Bachelors,Business and management,3,10500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,Business Management Human Resource,Bachelors,Business and management,3,10500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BSc (Hons) Health and Care Management,Bachelors,Business and management,3,10500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BSc (Hons) Computing,Bachelors,Computer science and IT,3,10500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BA (Hons) Business Management Tourism,Bachelors,Business and management,3,10500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BSc (Hons) Accounting with Finance with Foundation Year,Bachelors,Business and management,4,"€10,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BSc (Hons) Health and Care Management with Foundation Year,Bachelors,Business and management,4,"€10,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,BSc (Hons) Computing with Foundation,Bachelors,Computer science and IT,4,"€10,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,Executive MBA,Masters,Business and management,1,"€16,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MBA,Masters,Business and management,1,"€16,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Data Analytics and Information Systems Management,Masters,Computer science and IT,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Engineering Management,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Project Management,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc IT Security Management,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Supply Chain Management and Logistics,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Strategic Digital Marketing,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,MSc Strategic Human Resource Management,Masters,Business and management,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Arden University,United Kingdom,Master of Public Health,Masters,Medicine and health,1,"€15,500",EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,BSc Computer Science,Bachelors,Computer science and IT,3,"€39,375",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,B Eng Software Engineering,Bachelors,Computer science and IT,3,"€39,375",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,BSc Business Management,Bachelors,Business and management,3,"€39,375",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,BSc International Business Management,Bachelors,Business and management,3,"€39,375",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,"BSc Data Science, AI & Digital Business",Bachelors,Computer science and IT,3,"€39,375",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,Foundation Program,Bachelors,Business and management,0.5,"€6,563",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,Master of Engineering Computer Science,Masters,Engineering,2,"€23,150",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,MSc Business Management,Masters,Business and management,2,"€23,150",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,MSc International Business Management,Masters,Business and management,2,"€23,150",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,MSc International Business Management (Kingston Accredited Course),Masters,Business and management,1,"€16,500",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,"MSc Data Science, AI & Digital Business",Masters,Computer science and IT,2,"€23,150",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,MSc Leadership for Digital Transformation,Masters,Business and management,2,"€23,150",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,PreMasters,Masters,Business and management,0.5,"€5,500",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+GISMA University for Applied Sciences,Germany,Global MBA,Masters,Business and management,1,"€18,000",EUR,,,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,International BBA,Bachelors,Business and Management,4,11200,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Business Transformation for Sustainability,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Data Analytics for Business,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Banking and Finance,Masters,Business and Management,1,18500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Busines Law,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Ecological and Impact Finance,Masters,Business and Management,1,20400,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Digital Marketing and Sales,Masters,Business and Management,1,20400,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,International Business,Masters,Business and Management,1,18500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Marketing,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Sport International Sport and Event Management,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,International Trade and Maritime Logistics,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Global Supply Chain Management,Masters,Business and Management,1,20400,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,International Purchasing and Innovation Management,Masters,Business and Management,1,20400,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Arts and Creative industry Management,Masters,Business and Management,1,22500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Creativity and Design Management,Masters,Business and Management,1,17500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Wine and Spirits Management,Masters,Business and Management,1,21500,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+KEDGE Business School,France,Wine and Hospitality Management,Masters,Business and Management,1,24000,EUR,,11-May,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,International Business,Bachelors,Business and Management,3,9000,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,International Business Administration,Masters,Business and Management,2,13000,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,Supply Chain Management and Purchasing,Masters,Business and Management,2,13000,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,Marketing and Digital Business,Masters,Business and Management,2,13000,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,Circular Economy and Sustainable Innovation,Masters,Business and Management,1,13900,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,Impat Finance and Fintech Management,Masters,Business and Management,1,13900,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+ESDES University,France,Sustainable Tourism and Event Management,Masters,Business and Management,1,14800,EUR,,6-Jun,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Cybersecurity,Bachelors,Tech & Management,1,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Data Analytics & A.I,Bachelors,Tech & Management,1,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Tech for Management,Bachelors,Tech & Management,3,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Luxury Marketing,Bachelors,Business and Management,1,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Management,Bachelors,Business and Management,3,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,International Business,Bachelors,Business and Management,1,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Banking And Finance,Bachelors,Business and Management,1,9690,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Int. Management & Business Development,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Luxury & Fashion Management,Masters,Business and Management,1.25,22000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Hospitality Management,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Data Management,Masters,Business and Management,1.5,14450,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Supply Chain Management,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Marketing Analytics & Data Intelligence,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Sustainability & Business Development,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,International Finance,Masters,Business and Management,1.25,16000,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Arts & Cultural Management,Masters,Business and Management,1.25,21500,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Paris Business School,France,Business Adminstration,Masters,Business and Management,1,18870,EUR,,Rolling,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Computer Science ( Different specializations)),,Yes,15-Aug,3700,EUR,,3700,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Management,,Yes,15-Aug,3700,EUR,,3700,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Nursing,,Yes,15-Aug,3700,EUR,,3700,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Psychology,,Yes,15-Aug,3700,EUR,,3700,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Economics,,Yes,15-Aug,2400,EUR,,2400,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Management,,Yes,15-Aug,2400,EUR,,2400,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Higher Institute of Economics & Innovation WSEI Poland,Poland,Computer Science ( Different specializations)),,Yes,15-Aug,2400,EUR,,2400,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Creative Management,,Yes,15-Jul,3800,EUR,,3800,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Information Technology,,Yes,15-Jul,3800,EUR,,3800,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Business And Management,,Yes,7/15/2025,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Arts and Design,,Yes,7/15/2025,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Technology and IT,,Yes,7/15/2025,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Education,,Yes,7/15/2025,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Collegium Da Vinci Poland,Poland,Creative Media,,Yes,7/15/2025,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,General Medicine,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,Dentistry,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,Pharmacy,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,Pediatrics,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,Nursing,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Surgery Facility Courses,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Pediatrics Department,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Therapy Department,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All General Practice,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Pharmaceutical Department,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Medical-Preventive Department,,Yes,July-August,Depends,EUR,,Depends,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Business Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Business Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Architecture and Engineering Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Architecture and Engineering Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Language Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Language Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All IT Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All IT Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Law Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Law Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Humanity Courses,,Yes,July-August,4000,EUR,,4000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+International European University Poland,Poland,All Humanity Courses,,Yes,July-August,5000,EUR,,5000,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Business Economics,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Tourism,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Hospitality,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Food Economics,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Computer Science,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,IT,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Data Engineering,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,English Studies,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Apllied Artificial Intelligence,,No,June and July,4609,EUR,,4609,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Business Economics,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Business Systems,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Data Science,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Applied English,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Communication Studies,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Psychology,,No,June and July,4500,EUR,,4500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Contemporary Business Decision Making,,No,June and July,4900,EUR,,4900,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Singidunum University Serbia,Serbia,Tourism Management,,No,June and July,4900,EUR,,4900,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Software Engineering,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Cyber Securit,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Game Development,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Data Science and Ai,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Economics of Digital Business,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Digital Marketing,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Multimedia Production,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Visual Communications,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Design and 3D Design,,No,June 20,6780,EUR,,6780,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Applied Computer Engineering,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Software Engineering,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,System Engineering,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Data Science,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Creative Marketing,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Digital Marketing,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Economics of Digital Business,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Algebra University College Croatia,Croatia,Leadership MBA,,No,June 20,6500,EUR,,6500,internal:replit-partnered-university-programs.csv,,HISTORICAL_REFRESH_REQUIRED,false
+Northeastern University,United States,Master of Professional Studies - Analytics,Masters,Analytics,,,,,,https://www.applyboard.com/usa,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+University at Buffalo,United States,Master of Science - Engineering Science - Artificial Intelligence,Masters,Artificial Intelligence,,,,,,https://www.applyboard.com/usa,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+Arizona State University,United States,Master of Science - Environmental Engineering,Masters,Environmental Engineering,,,,,,https://www.applyboard.com/usa,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+University of Arizona,United States,Master of Science - Agricultural and Resource Economics,Masters,Agricultural and Resource Economics,,,,,,https://www.applyboard.com/usa,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+University of Edinburgh,United Kingdom,Master of Laws - Corporate Law,Masters,Law,,,,,,https://www.applyboard.com/uk,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+University of Greenwich,United Kingdom,Master of Science - Global Public Health,Masters,Public Health,,,,,,https://www.applyboard.com/uk,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+Bournemouth University,United Kingdom,Bachelor of Science (Honours) - Forensic Science,Bachelors,Forensic Science,,,,,,https://www.applyboard.com/uk,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+Griffith University,Australia,Bachelor of Engineering (Honours),Bachelors,Engineering,,,,,,https://www.applyboard.com/australia,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+La Trobe College,Australia,Bachelor of Health Science,Bachelors,Health Science,,,,,,https://www.applyboard.com/australia,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+Deakin University,Australia,Bachelor of Social Work,Bachelors,Social Work,,,,,,https://www.applyboard.com/australia,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
+La Trobe University,Australia,Bachelor of Health Sciences,Bachelors,Health Sciences,,,,,,https://www.applyboard.com/australia,2026-09-12,CURRENT_PUBLIC_VERIFIED,true
