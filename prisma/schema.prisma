@@ -394,6 +394,9 @@ model Profile {
   journeyChecklists    JourneyChecklist[]
   payments             Payment[]
   counselorSessions    CounselorSession[]
+  companionPairingCodes CompanionPairingCode[]
+  companionDevices      CompanionDevice[]
+  companionFillEvents   CompanionFillEvent[]
 
   @@index([identityAnchorId])
   @@map("profiles")
@@ -1831,4 +1834,67 @@ model Payment {
   @@index([profileId, status, createdAt])
   @@index([applicationId, status])
   @@map("payments")
+}
+
+// ----------------------------------------------------------------------------
+// SOUP Companion — external-site browser extension pairing, devices and audit
+// trail. Additive only. The extension never receives a Supabase session
+// cookie or long-lived secret directly: a student generates a short-lived
+// pairing code from the signed-in web app, the extension redeems it once for
+// a device-scoped bearer token, and only that token's hash is ever stored.
+// ----------------------------------------------------------------------------
+
+model CompanionPairingCode {
+  id         String    @id @default(uuid())
+  profileId  String
+  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  codeHash   String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([profileId, createdAt])
+  @@map("companion_pairing_codes")
+}
+
+model CompanionDevice {
+  id         String    @id @default(uuid())
+  profileId  String
+  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  label      String?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  fillEvents CompanionFillEvent[]
+
+  @@index([profileId, revokedAt])
+  @@map("companion_devices")
+}
+
+enum CompanionFillOutcome {
+  COMPLETED
+  PARTIAL
+  NEEDS_INPUT
+  ERROR
+}
+
+model CompanionFillEvent {
+  id              String                @id @default(uuid())
+  profileId       String
+  profile         Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  deviceId        String
+  device          CompanionDevice       @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  portalHost      String
+  pageUrl         String
+  fieldsDetected  Int                   @default(0)
+  fieldsFilled    Int                   @default(0)
+  fieldsNeedInput Int                   @default(0)
+  outcome         CompanionFillOutcome  @default(COMPLETED)
+  createdAt       DateTime              @default(now())
+
+  @@index([profileId, createdAt])
+  @@index([deviceId, createdAt])
+  @@map("companion_fill_events")
 }

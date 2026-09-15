@@ -13,6 +13,9 @@ const publicAllowlist = new Set([
   "report/finalize/route.ts",
   "resume/generate/route.ts",
   "payments/stripe/webhook/route.ts",
+  // Guarded by a short-lived, single-use pairing code instead of a session —
+  // analogous to the webhook above being guarded by a signature instead.
+  "companion/pair/route.ts",
 ]);
 
 const authMarkers = [
@@ -22,6 +25,7 @@ const authMarkers = [
   "getApiStaff",
   "requireCurrentUser",
   "requireProfile",
+  "requireCompanionAuth",
 ];
 
 function walk(dir) {

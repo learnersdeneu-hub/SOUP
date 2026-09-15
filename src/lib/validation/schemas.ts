@@ -299,6 +299,20 @@ export const resumeImportFormSchema = z.object({
   targetRole: z.string().transform((value) => value.trim().slice(0, 160)).refine((value) => value.length > 0),
 }).strict();
 
+export const companionPairSchema = z.object({
+  code: z.string().trim().min(4).max(32),
+  deviceLabel: optionalShortTextSchema(120),
+}).strict();
+
+export const companionFillEventSchema = z.object({
+  portalHost: z.string().trim().min(1).max(255),
+  pageUrl: z.string().trim().min(1).max(2000),
+  fieldsDetected: z.number().int().min(0).max(5000),
+  fieldsFilled: z.number().int().min(0).max(5000),
+  fieldsNeedInput: z.number().int().min(0).max(5000),
+  outcome: z.enum(["COMPLETED", "PARTIAL", "NEEDS_INPUT", "ERROR"]).optional().default("COMPLETED"),
+}).strict();
+
 export const stripeSignatureSchema = z.string().trim().min(1).max(4096);
 
 export const stripeWebhookEventSchema = z.object({

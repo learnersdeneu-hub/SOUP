@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BriefcaseBusiness, CreditCard, FileUp, GraduationCap, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Search, X } from "lucide-react";
+import { Bell, BriefcaseBusiness, CreditCard, FileUp, GraduationCap, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Puzzle, Search, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const LINKS: Array<[string, string, LucideIcon]> = [
@@ -14,6 +14,7 @@ const LINKS: Array<[string, string, LucideIcon]> = [
   ["/documents", "Documents", FileUp],
   ["/visa", "Visa centre", PlaneTakeoff],
   ["/payments", "Payments", CreditCard],
+  ["/companion/connect", "SOUP Companion", Puzzle],
   ["/notifications", "Updates", Bell],
   ["/support", "Help & support", LifeBuoy],
 ];
