@@ -28,7 +28,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // /downloads/* is excluded entirely (not just added to PUBLIC_PATHS):
+  // static installer files there must be fetchable by signed-out visitors
+  // and don't need the Supabase session-refresh work middleware otherwise
+  // does on every request. .exe wasn't previously in the static-extension
+  // exclusion list either — public/downloads/*.exe was being silently
+  // redirected to /sign-in (a 200 HTML response, not the file) until this
+  // was added.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|downloads/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|exe)$).*)",
   ],
 };
