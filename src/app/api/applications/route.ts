@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   if (!profile) return Response.json({ error: "Your SOUP profile is not ready yet." }, { status: 409 });
   const parsed = await parseJsonBody(request, startApplicationSchema);
   if (!parsed.ok) return parsed.response;
-  const { shortlistItemId, universityId, programId, intake: requestedIntake } = parsed.data;
+  const { shortlistItemId, universityId, programId, intake: requestedIntake, intendedSubjectNote } = parsed.data;
 
   // Two entry paths create the exact same StudentApplication record: from an
   // AI-generated shortlist recommendation (shortlistItemId present), or directly
@@ -83,6 +83,13 @@ export async function POST(request: Request) {
     eligibilityStatus = "NOT_CHECKED";
     startedNote = "Added by the student as a self-managed application. SOUP does not submit this application.";
     eventSource = "STUDENT_DIRECT_APPLY_EXTERNAL";
+  }
+
+  // A student-typed subject only ever applies when no real program was
+  // resolved — it is recorded as a plain, clearly-unverified statement of
+  // interest, never as a program the university is confirmed to offer.
+  if (!programId && intendedSubjectNote) {
+    startedNote = `${startedNote} Student's stated subject of interest: ${intendedSubjectNote} (not a verified program listing for this university).`;
   }
 
   const key = applicationKey(profile.id, universityId, programId, intake);

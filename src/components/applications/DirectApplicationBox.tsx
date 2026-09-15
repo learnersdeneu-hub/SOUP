@@ -1,42 +1,68 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export type DirectApplyProgram = { id: string; title: string; level: string; intake: string | null };
 export type DirectApplyUniversity = { id: string; name: string; country: string; city: string | null; isPartner: boolean; programs: DirectApplyProgram[] };
+
+// Common degree subjects most students search for, offered as typeable
+// suggestions only when the selected university has no verified program rows
+// on file. This is never sent as a programId or stored as if it were a real,
+// university-confirmed program — see the "intendedSubjectNote" handling below
+// and in POST /api/applications, which records it as a plain, clearly
+// unverified statement of the student's own interest.
+const COMMON_SUBJECTS = [
+  "Computer Science", "Business Administration", "Mechanical Engineering", "Electrical Engineering",
+  "Civil Engineering", "Software Engineering", "Data Science", "Economics", "Finance", "Marketing",
+  "Psychology", "Law", "Medicine", "Nursing", "Architecture", "International Relations",
+  "Artificial Intelligence", "Biotechnology",
+];
+
+function universityLabel(u: DirectApplyUniversity) {
+  return `${u.name} — ${[u.city, u.country].filter(Boolean).join(", ")}`;
+}
+function programLabel(p: DirectApplyProgram) {
+  return `${p.title} — ${p.level}${p.intake ? ` · ${p.intake}` : ""}`;
+}
 
 // A student-facing fallback that works even when Noodles/Gemini is unavailable.
 // It calls the same /api/applications endpoint Noodles uses, so a Direct
 // Application and an AI-started one produce the identical StudentApplication
 // record — there is no separate "manual" application architecture.
 export function DirectApplicationBox({ universities }: { universities: DirectApplyUniversity[] }) {
-  const [query, setQuery] = useState("");
-  const [universityId, setUniversityId] = useState("");
-  const [programId, setProgramId] = useState("");
+  const [universityText, setUniversityText] = useState("");
+  const [programText, setProgramText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [started, setStarted] = useState<{ id: string; ownership: string } | null>(null);
 
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const matches = needle
-      ? universities.filter((u) => u.name.toLowerCase().includes(needle) || u.country.toLowerCase().includes(needle) || (u.city || "").toLowerCase().includes(needle))
-      : universities;
-    return matches.slice(0, 60);
-  }, [universities, query]);
+  // Always the full catalogue, alphabetical — no artificial cap, so a student
+  // can type-to-find any university, not just the first page of results.
+  const sortedUniversities = useMemo(() => [...universities].sort((a, b) => a.name.localeCompare(b.name)), [universities]);
+  const universityByLabel = useMemo(() => new Map(sortedUniversities.map((u) => [universityLabel(u), u])), [sortedUniversities]);
+  const selectedUniversity = universityByLabel.get(universityText.trim()) || null;
 
-  const selectedUniversity = universities.find((u) => u.id === universityId) || null;
+  const programByLabel = useMemo(() => new Map((selectedUniversity?.programs || []).map((p) => [programLabel(p), p])), [selectedUniversity]);
+  const selectedProgram = programByLabel.get(programText.trim()) || null;
+  const hasVerifiedPrograms = Boolean(selectedUniversity && selectedUniversity.programs.length > 0);
+  // Only meaningful once a real university is chosen and there is no verified
+  // program to match against — otherwise this is never sent to the server.
+  const intendedSubjectNote = selectedUniversity && !hasVerifiedPrograms ? programText.trim().slice(0, 160) : "";
 
   async function start() {
-    if (!universityId) { setError("Choose a university first."); return; }
+    if (!selectedUniversity) { setError("Choose a university from the list first."); return; }
     setLoading(true);
     setError(null);
     try {
       const response = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ universityId, programId: programId || undefined }),
+        body: JSON.stringify({
+          universityId: selectedUniversity.id,
+          programId: selectedProgram?.id || undefined,
+          intendedSubjectNote: intendedSubjectNote || undefined,
+        }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "Could not start the application.");
@@ -71,45 +97,44 @@ export function DirectApplicationBox({ universities }: { universities: DirectApp
     <div className="rounded-2xl border border-hair bg-white p-5">
       <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Direct Application</div>
       <h2 className="mt-2 text-sm font-semibold text-ink">Start an application without Noodles</h2>
-      <p className="mt-1 text-xs leading-5 text-mute">Search a university, pick a program if you know it, and start tracking your application here. This works even if AI guidance is unavailable, and creates the same application record Noodles would.</p>
+      <p className="mt-1 text-xs leading-5 text-mute">Type a university and, if known, a program — this works even if AI guidance is unavailable, and creates the same application record Noodles would.</p>
 
-      <div className="relative mt-3">
-        <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-mute" />
-        <input
-          value={query}
-          onChange={(event) => { setQuery(event.target.value); setUniversityId(""); setProgramId(""); }}
-          placeholder="Search university, city or country..."
-          className="w-full rounded-full border border-hair bg-white py-2 pl-8 pr-3 text-xs text-ink outline-none focus:border-navy/40"
-        />
-      </div>
+      <label className="mt-3 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">University ({sortedUniversities.length} in the SOUP catalogue)</label>
+      <input
+        list="direct-apply-universities"
+        value={universityText}
+        onChange={(event) => { setUniversityText(event.target.value); setProgramText(""); setError(null); }}
+        placeholder="Start typing a university, city or country..."
+        className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+      />
+      <datalist id="direct-apply-universities">
+        {sortedUniversities.map((u) => <option key={u.id} value={universityLabel(u)} />)}
+      </datalist>
 
-      <select
-        value={universityId}
-        onChange={(event) => { setUniversityId(event.target.value); setProgramId(""); setError(null); }}
-        className="mt-2 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
-        aria-label="Choose a university"
-      >
-        <option value="">{filtered.length ? "Choose a university" : "No matches — refine your search"}</option>
-        {filtered.map((u) => <option key={u.id} value={u.id}>{u.name} · {[u.city, u.country].filter(Boolean).join(", ")}{u.isPartner ? "" : " (external)"}</option>)}
-      </select>
-
-      {selectedUniversity && selectedUniversity.programs.length > 0 && (
-        <select
-          value={programId}
-          onChange={(event) => setProgramId(event.target.value)}
-          className="mt-2 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
-          aria-label="Choose a program"
-        >
-          <option value="">Program not decided yet</option>
-          {selectedUniversity.programs.map((p) => <option key={p.id} value={p.id}>{p.title} · {p.level}{p.intake ? ` · ${p.intake}` : ""}</option>)}
-        </select>
+      {selectedUniversity && (
+        <>
+          <label className="mt-3 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">{hasVerifiedPrograms ? "Program" : "Intended subject (not yet on file for this university)"}</label>
+          <input
+            list="direct-apply-programs"
+            value={programText}
+            onChange={(event) => setProgramText(event.target.value)}
+            placeholder={hasVerifiedPrograms ? "Start typing a program..." : "e.g. Computer Science, Business..."}
+            className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+          />
+          <datalist id="direct-apply-programs">
+            {hasVerifiedPrograms
+              ? selectedUniversity.programs.map((p) => <option key={p.id} value={programLabel(p)} />)
+              : COMMON_SUBJECTS.map((subject) => <option key={subject} value={subject} />)}
+          </datalist>
+          {!hasVerifiedPrograms && <p className="mt-1 text-[10px] leading-4 text-mute">SOUP has no verified program list for this university yet, so this is recorded as your own stated interest, not a confirmed program.</p>}
+        </>
       )}
 
       {selectedUniversity && !selectedUniversity.isPartner && (
         <p className="mt-2 text-[10px] leading-4 text-mute">This university is not currently a SOUP partner. SOUP will track it as a self-managed application; you submit it directly with the university.</p>
       )}
 
-      <button onClick={start} disabled={loading || !universityId} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-60">
+      <button onClick={start} disabled={loading || !selectedUniversity} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-60">
         {loading && <Loader2 size={12} className="animate-spin" />}
         {loading ? "Starting…" : "Start application"}
       </button>

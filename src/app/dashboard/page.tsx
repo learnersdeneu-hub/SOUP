@@ -27,13 +27,16 @@ export default async function DashboardPage() {
   await syncStudentAlerts(profile.id);
   const [data, directApplyCatalog] = await Promise.all([
     getCustomerDashboardData(user.id),
+    // No `take` cap: Direct Application must be able to reach the full SOUP
+    // catalogue, not a partner-biased subset — alphabetical by name so a
+    // student can find their university without needing to know which
+    // partner channel it is (or isn't) on.
     prisma.university.findMany({
-      orderBy: [{ partnerId: "desc" }, { country: "asc" }, { name: "asc" }],
-      take: 400,
+      orderBy: { name: "asc" },
       select: {
         id: true, name: true, country: true, city: true,
         partner: { select: { status: true, type: true } },
-        programs: { where: { active: true }, take: 8, select: { id: true, title: true, level: true, intake: true } },
+        programs: { where: { active: true }, take: 20, select: { id: true, title: true, level: true, intake: true } },
       },
     }).catch(() => []),
   ]);

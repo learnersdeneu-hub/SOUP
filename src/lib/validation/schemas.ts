@@ -9,6 +9,11 @@ export const startApplicationSchema = z.object({
   universityId: idSchema,
   programId: optionalIdSchema,
   intake: optionalShortTextSchema(160),
+  // Direct Application only: a student-typed subject (e.g. "Computer Science")
+  // used when the university has no verified program rows on file. Recorded
+  // honestly as an unverified student-stated interest — never treated as a
+  // real UniversityProgram or as verified program data.
+  intendedSubjectNote: optionalShortTextSchema(160),
 }).strict();
 
 export const applicationApproveSchema = z.object({
