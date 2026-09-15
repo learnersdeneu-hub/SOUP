@@ -12,4 +12,9 @@ contextBridge.exposeInMainWorld("soupShell", {
     ipcRenderer.on("portal-url-changed", listener);
     return () => ipcRenderer.removeListener("portal-url-changed", listener);
   },
+  onFocusAddressBar: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on("focus-address-bar", listener);
+    return () => ipcRenderer.removeListener("focus-address-bar", listener);
+  },
 });

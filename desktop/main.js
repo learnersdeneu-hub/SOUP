@@ -70,15 +70,39 @@ function createWindow() {
   portalView.webContents.on("did-navigate-in-page", (_e, url) => {
     mainWindow?.webContents.send("portal-url-changed", url);
   });
+  // BrowserView bounds set before the window has actually finished its
+  // first paint can end up wrong on Windows (a DWM/compositor timing quirk,
+  // not an app bug per se) — the symptom is the portal view rendering at
+  // y=0 and fully covering the toolbar instead of stopping at
+  // TOOLBAR_HEIGHT. Re-running layout() on every plausible "now it's really
+  // ready" signal, not just once, is the robust fix rather than trying to
+  // guess the one correct moment.
+  portalView.webContents.once("did-finish-load", layout);
   portalView.webContents.loadURL(START_URL);
 
   panelView = new BrowserView({ webPreferences: { contextIsolation: true, preload: path.join(__dirname, "preload-panel.js") } });
   mainWindow.addBrowserView(panelView);
   panelView.webContents.loadFile(path.join(__dirname, "panel", "index.html"));
 
+  // Standard browser convention as a fallback way to reach the address bar
+  // (Ctrl+L / Cmd+L), independent of the BrowserView layout above — useful
+  // while confirming that layout fix actually lands for every user.
+  const focusAddressBar = (input) => {
+    if (input.type !== "keyDown") return;
+    const isAccelerator = (input.control || input.meta) && input.key.toLowerCase() === "l";
+    if (!isAccelerator) return;
+    mainWindow?.webContents.focus();
+    mainWindow?.webContents.send("focus-address-bar");
+  };
+  portalView.webContents.on("before-input-event", (_e, input) => focusAddressBar(input));
+  panelView.webContents.on("before-input-event", (_e, input) => focusAddressBar(input));
+
   mainWindow.on("resize", layout);
   mainWindow.once("ready-to-show", layout);
+  mainWindow.webContents.once("did-finish-load", layout);
   layout();
+  setTimeout(layout, 150);
+  setTimeout(layout, 600);
 }
 
 app.whenReady().then(createWindow);
