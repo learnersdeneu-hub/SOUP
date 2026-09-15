@@ -6,10 +6,10 @@ import { prisma } from "@/lib/prisma";
 import { CompanionConnect } from "@/components/companion/CompanionConnect";
 import { revokeCompanionDevice } from "@/app/actions/companion";
 
-// Unset until the installer is actually hosted somewhere real and pricing/
-// rollout is decided — the download button below stays visible but disabled
-// until this is set. Set COMPANION_DOWNLOAD_URL to enable it.
-const DOWNLOAD_URL = process.env.COMPANION_DOWNLOAD_URL?.trim() || null;
+// Served as a static file from public/downloads/ — see desktop/README.md
+// for how to rebuild and replace it. Set back to null to hide/disable the
+// download button again (e.g. while preparing a new release).
+const DOWNLOAD_URL = "/downloads/soup-companion-setup.exe";
 
 export default async function CompanionConnectPage() {
   const { profile } = await requireProfile();
