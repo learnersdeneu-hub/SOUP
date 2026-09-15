@@ -14,3 +14,7 @@ tsconfig.tsbuildinfo
 
 .vercel
 .env*
+
+# Packaged extension build artifact — regenerate with the command in
+# extension/STORE_LISTING.md, don't commit the binary.
+soup-companion.zip

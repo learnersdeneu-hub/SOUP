@@ -5,7 +5,10 @@ import { updateSession } from "@/lib/supabase/middleware";
 // separately below (all of /api is left to each route's own auth check —
 // this preview-access gate must never block server-to-server calls like the
 // Stripe webhook or the uptime health check with an HTML redirect).
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback"];
+// /companion/privacy must be readable without a session: Chrome Web Store
+// reviewers and prospective testers need to open it before they have (or
+// without ever creating) a SOUP account.
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/companion/privacy"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
