@@ -45,9 +45,34 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 #app { display: flex; flex-direction: column; min-height: 100vh; }
 
-.sc-header {
+/* ---------- Nav bar (controls the portal view alongside this panel) ---------- */
+.sc-navbar {
   position: sticky;
   top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--navy);
+}
+.sc-nav-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+  border: none; background: rgba(255,255,255,.12); color: #fff; font-size: 13px;
+}
+.sc-nav-btn:hover { background: rgba(255,255,255,.22); }
+.sc-navbar-form { flex: 1; min-width: 0; }
+.sc-nav-input {
+  width: 100%; height: 26px; border-radius: 8px; border: none;
+  padding: 0 10px; font-size: 11.5px; outline: none;
+  background: rgba(255,255,255,.92); color: var(--ink);
+}
+.sc-nav-input:focus { background: #fff; }
+
+.sc-header {
+  position: sticky;
+  top: 42px; /* exact rendered height of .sc-navbar: 8px+8px padding + 26px controls */
   z-index: 5;
   display: flex;
   align-items: center;

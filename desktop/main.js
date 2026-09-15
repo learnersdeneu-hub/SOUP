@@ -3,19 +3,27 @@
 // Architecture: one window with two BrowserViews side by side — a "portal"
 // view (a real, minimal built-in browser the student navigates to the
 // actual university/visa/accommodation site) and a "panel" view (the SOUP
-// assistant UI, ported from the browser-extension side panel). The main
-// process injects inject/field-dictionary.js + inject/portal-bridge.js into
-// the portal view on every page load, then calls the functions those
-// scripts define via executeJavaScript when the panel asks it to scan or
-// fill — this is the desktop equivalent of a browser extension's content
-// script, using Electron's own first-party page access instead of the
-// extension APIs a Chrome extension would need.
+// assistant UI, ported from the browser-extension side panel). The panel
+// also renders the navigation controls (address bar, back/forward/reload)
+// for the portal view — an earlier version tried to render those in a
+// separate toolbar area of the main window's own content, but that space
+// was unreliably covered by the portal BrowserView on real hardware (a
+// timing/DWM quirk that resisted fixing blind, without the ability to
+// actually run the app here). Folding navigation into the panel — which
+// was already confirmed working end-to-end — removes that failure mode
+// entirely rather than patching around it again.
+//
+// The main process injects inject/field-dictionary.js + inject/portal-
+// bridge.js into the portal view on every page load, then calls the
+// functions those scripts define via executeJavaScript when the panel asks
+// it to scan or fill — this is the desktop equivalent of a browser
+// extension's content script, using Electron's own first-party page access
+// instead of the extension APIs a Chrome extension would need.
 const { app, BrowserWindow, BrowserView, ipcMain, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
 const PANEL_WIDTH = 380;
-const TOOLBAR_HEIGHT = 46;
 const START_URL = "https://www.soupassist.com/universities";
 
 function storePath() {
@@ -36,8 +44,8 @@ function layout() {
   if (!mainWindow || !portalView || !panelView) return;
   const bounds = mainWindow.getContentBounds();
   const portalWidth = Math.max(320, bounds.width - PANEL_WIDTH);
-  portalView.setBounds({ x: 0, y: TOOLBAR_HEIGHT, width: portalWidth, height: Math.max(0, bounds.height - TOOLBAR_HEIGHT) });
-  panelView.setBounds({ x: portalWidth, y: TOOLBAR_HEIGHT, width: bounds.width - portalWidth, height: Math.max(0, bounds.height - TOOLBAR_HEIGHT) });
+  portalView.setBounds({ x: 0, y: 0, width: portalWidth, height: bounds.height });
+  panelView.setBounds({ x: portalWidth, y: 0, width: bounds.width - portalWidth, height: bounds.height });
 }
 
 function injectBridge() {
@@ -55,61 +63,31 @@ function createWindow() {
     minHeight: 600,
     title: "SOUP Companion",
     icon: path.join(__dirname, "icons", "icon.png"),
-    webPreferences: { contextIsolation: true, preload: path.join(__dirname, "preload-shell.js") },
+    backgroundColor: "#FAFAFA",
   });
-  mainWindow.loadFile(path.join(__dirname, "shell.html"));
   mainWindow.setMenuBarVisibility(false);
 
   portalView = new BrowserView({ webPreferences: { contextIsolation: true, sandbox: true } });
   mainWindow.addBrowserView(portalView);
   portalView.webContents.on("dom-ready", injectBridge);
-  portalView.webContents.on("did-navigate", (_e, url) => {
-    mainWindow?.webContents.send("portal-url-changed", url);
-    panelView?.webContents.send("tab-changed");
-  });
-  portalView.webContents.on("did-navigate-in-page", (_e, url) => {
-    mainWindow?.webContents.send("portal-url-changed", url);
-  });
-  // BrowserView bounds set before the window has actually finished its
-  // first paint can end up wrong on Windows (a DWM/compositor timing quirk,
-  // not an app bug per se) — the symptom is the portal view rendering at
-  // y=0 and fully covering the toolbar instead of stopping at
-  // TOOLBAR_HEIGHT. Re-running layout() on every plausible "now it's really
-  // ready" signal, not just once, is the robust fix rather than trying to
-  // guess the one correct moment.
-  portalView.webContents.once("did-finish-load", layout);
+  portalView.webContents.on("did-navigate", (_e, url) => panelView?.webContents.send("portal-url-changed", url));
+  portalView.webContents.on("did-navigate-in-page", (_e, url) => panelView?.webContents.send("portal-url-changed", url));
   portalView.webContents.loadURL(START_URL);
 
   panelView = new BrowserView({ webPreferences: { contextIsolation: true, preload: path.join(__dirname, "preload-panel.js") } });
   mainWindow.addBrowserView(panelView);
   panelView.webContents.loadFile(path.join(__dirname, "panel", "index.html"));
 
-  // Standard browser convention as a fallback way to reach the address bar
-  // (Ctrl+L / Cmd+L), independent of the BrowserView layout above — useful
-  // while confirming that layout fix actually lands for every user.
-  const focusAddressBar = (input) => {
-    if (input.type !== "keyDown") return;
-    const isAccelerator = (input.control || input.meta) && input.key.toLowerCase() === "l";
-    if (!isAccelerator) return;
-    mainWindow?.webContents.focus();
-    mainWindow?.webContents.send("focus-address-bar");
-  };
-  portalView.webContents.on("before-input-event", (_e, input) => focusAddressBar(input));
-  panelView.webContents.on("before-input-event", (_e, input) => focusAddressBar(input));
-
   mainWindow.on("resize", layout);
   mainWindow.once("ready-to-show", layout);
-  mainWindow.webContents.once("did-finish-load", layout);
   layout();
-  setTimeout(layout, 150);
-  setTimeout(layout, 600);
 }
 
 app.whenReady().then(createWindow);
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 
-// ---------- Toolbar (portal navigation) ----------
+// ---------- Portal navigation (triggered from the panel's own nav bar) ----------
 ipcMain.on("nav-go", (_e, rawUrl) => {
   let target = String(rawUrl || "").trim();
   if (!target) return;

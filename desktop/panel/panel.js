@@ -27,6 +27,7 @@ const state = {
   reviewOpenField: null,
   error: null,
   documentsOpen: false,
+  currentPortalUrl: "",
 };
 
 // ---------- transport (desktop bridge, see preload-panel.js) ----------
@@ -106,14 +107,46 @@ function classifiedOnly(resolved) { return resolved.filter((r) => r.field.matche
 // ---------- rendering ----------
 const app = document.getElementById("app");
 
+// The panel re-renders wholesale on most state changes (simple, correct,
+// fast enough at this size — see the file header). That would normally
+// steal focus/cursor position out of the address bar mid-type, so its
+// value and selection are explicitly preserved across a render() call
+// rather than trying to avoid full re-renders altogether.
 function render() {
+  const navInput = document.getElementById("nav-url");
+  const hadFocus = document.activeElement === navInput;
+  const draft = navInput ? navInput.value : state.currentPortalUrl;
+  const selectionStart = navInput ? navInput.selectionStart : null;
+  const selectionEnd = navInput ? navInput.selectionEnd : null;
+
   app.innerHTML = "";
+  app.appendChild(renderNavBar(draft));
   app.appendChild(renderHeader());
   const body = document.createElement("div");
   body.className = "sc-body";
   body.appendChild(renderScreen());
   app.appendChild(body);
   bindEvents();
+
+  if (hadFocus) {
+    const restored = document.getElementById("nav-url");
+    restored?.focus();
+    if (selectionStart !== null) restored?.setSelectionRange(selectionStart, selectionEnd);
+  }
+}
+
+function renderNavBar(draftUrl) {
+  return el(`
+    <div class="sc-navbar">
+      <button class="sc-nav-btn" data-action="nav-back" title="Back" aria-label="Back">&#8592;</button>
+      <button class="sc-nav-btn" data-action="nav-forward" title="Forward" aria-label="Forward">&#8594;</button>
+      <button class="sc-nav-btn" data-action="nav-reload" title="Reload" aria-label="Reload">&#8635;</button>
+      <button class="sc-nav-btn" data-action="nav-home" title="SOUP home" aria-label="SOUP home">&#8962;</button>
+      <form class="sc-navbar-form" data-role="nav-form">
+        <input id="nav-url" class="sc-nav-input" placeholder="Go to a university, visa or accommodation site..." value="${escapeHtml(draftUrl || "")}" autocomplete="off" />
+      </form>
+    </div>
+  `);
 }
 
 function el(html) {
@@ -428,6 +461,12 @@ function bindEvents() {
       handleAction(action, node, event);
     });
   });
+  const navForm = app.querySelector('[data-role="nav-form"]');
+  navForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = document.getElementById("nav-url");
+    if (input && input.value.trim()) window.soupDesktop.navigate(input.value.trim());
+  });
 }
 
 async function handleAction(action, node) {
@@ -435,6 +474,10 @@ async function handleAction(action, node) {
     case "pair": return doPair();
     case "reconnect": return doReconnect();
     case "rescan": return runScan();
+    case "nav-back": return window.soupDesktop.navBack();
+    case "nav-forward": return window.soupDesktop.navForward();
+    case "nav-reload": return window.soupDesktop.navReload();
+    case "nav-home": return window.soupDesktop.navHome();
     case "toggle-documents": state.documentsOpen = !state.documentsOpen; return render();
     case "open-document": return openDocument(node.dataset.documentId);
     case "open-review": state.screen = "review"; return render();
@@ -589,13 +632,22 @@ function submitAsk() {
 
 // ---------- init ----------
 async function init() {
+  render(); // paint the nav bar immediately, before the token lookup resolves
   const stored = await storageGet([STORAGE_KEY_TOKEN, STORAGE_KEY_PROFILE]);
   state.token = stored[STORAGE_KEY_TOKEN] || null;
   state.profile = stored[STORAGE_KEY_PROFILE] || null;
+  const currentUrl = await window.soupDesktop.currentUrl();
+  if (currentUrl) state.currentPortalUrl = currentUrl;
   if (!state.token) { state.screen = "connect"; return render(); }
   await runScan();
 }
 
 window.soupDesktop.onTabChanged(() => { if (state.token) runScanQuiet(); });
+window.soupDesktop.onPortalUrlChanged((url) => {
+  state.currentPortalUrl = url;
+  const input = document.getElementById("nav-url");
+  // Don't clobber the URL the student is actively typing/editing.
+  if (input && document.activeElement !== input) input.value = url;
+});
 
 init();
