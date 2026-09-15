@@ -123,15 +123,28 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
   return (
     <div>
       <div className="rounded-2xl border border-hair bg-white p-4 sm:p-5">
-        <div className="relative">
+        <form
+          role="search"
+          onSubmit={(event) => { event.preventDefault(); resetPage(); (event.currentTarget.elements.namedItem("catalog-search") as HTMLInputElement | null)?.blur(); }}
+          className="relative"
+        >
           <Search size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-mute" />
           <input
+            name="catalog-search"
             value={query}
             onChange={(event) => { setQuery(event.target.value); resetPage(); }}
             placeholder="Search by university, city or country..."
-            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-4 text-sm text-ink outline-none focus:border-navy/40"
+            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-11 text-sm text-ink outline-none focus:border-navy/40"
           />
-        </div>
+          <button
+            type="submit"
+            aria-label="Search"
+            title="Search"
+            className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-navy text-white hover:bg-[#16314F]"
+          >
+            <Search size={13} />
+          </button>
+        </form>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           <select value={country} onChange={(event) => { setCountry(event.target.value); resetPage(); }} className={selectClass} aria-label="Filter by country">
