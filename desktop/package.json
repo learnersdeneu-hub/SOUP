@@ -1,0 +1,33 @@
+{
+  "name": "soup-companion-desktop",
+  "productName": "SOUP Companion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SOUP Companion as a standalone desktop app: a built-in browser with the SOUP assistant panel alongside it, for filling university, visa and accommodation application forms.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.soupassist.companion",
+    "productName": "SOUP Companion",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload-panel.js", "panel/**/*", "inject/**/*", "icons/**/*"],
+    "win": {
+      "target": ["nsis"],
+      "icon": "icons/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
