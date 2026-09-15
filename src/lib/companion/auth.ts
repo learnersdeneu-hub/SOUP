@@ -60,6 +60,6 @@ export async function authenticateCompanionToken(request: Request) {
 
 export async function requireCompanionAuth(request: Request) {
   const current = await authenticateCompanionToken(request);
-  if (!current) return { ok: false as const, response: Response.json({ error: "Companion is not connected to a SOUP account. Reconnect from the side panel." }, { status: 401 }) };
+  if (!current) return { ok: false as const, response: Response.json({ error: "Companion is not connected to a SOUP account. Reconnect from the app." }, { status: 401 }) };
   return { ok: true as const, ...current };
 }

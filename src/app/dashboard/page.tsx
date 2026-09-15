@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Bell, BriefcaseBusiness, CheckCircle2, CreditCard, FileText, GraduationCap, LifeBuoy, MessageCircle, PlaneTakeoff, Puzzle, Search, ShieldCheck, Sparkles, Upload } from "lucide-react";
+import { AlertTriangle, ArrowRight, Bell, BriefcaseBusiness, CheckCircle2, CreditCard, Download, FileText, GraduationCap, LifeBuoy, MessageCircle, PlaneTakeoff, Search, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SupportLauncher } from "@/components/support/SupportLauncher";
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
             ["/visa", PlaneTakeoff, "Visa centre", data.offers.length ? "Post-offer visa checklist and next actions" : "Opens when an offer is recorded"],
             ["/documents", Upload, "Documents", `${data.documentCount} document${data.documentCount === 1 ? "" : "s"} stored`],
             ["/payments", CreditCard, "Payments", `${data.pendingPayments.length + data.pendingApplicationFees.length} item${data.pendingPayments.length + data.pendingApplicationFees.length === 1 ? "" : "s"} pending`],
-            ["/companion/connect", Puzzle, "SOUP Companion", "Connect the browser extension for on-portal help"],
+            ["/companion/connect", Download, "SOUP Companion", "Download the app for on-portal application help"],
             ["/notifications", Bell, "Updates", `${data.notifications.filter((item) => !item.readAt).length} unread`],
             ["/support", LifeBuoy, "Help & support", "Message SOUP or open an existing request"],
           ] satisfies Array<[string, LucideIcon, string, string]>).map(([href, Icon, title, note]) => <Link key={href} href={href} className="group flex items-start gap-3 rounded-2xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EAF0F5]"><Icon size={15} className="text-navy"/></div><div><div className="text-xs font-semibold text-ink">{title}</div><div className="mt-1 text-[11px] leading-4 text-mute">{note}</div></div></Link>)}

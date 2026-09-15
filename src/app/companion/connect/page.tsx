@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { Header } from "@/components/Header";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { CompanionConnect } from "@/components/companion/CompanionConnect";
 import { revokeCompanionDevice } from "@/app/actions/companion";
+
+// Unset until the installer is actually hosted somewhere real and pricing/
+// rollout is decided — the download button below stays visible but disabled
+// until this is set. Set COMPANION_DOWNLOAD_URL to enable it.
+const DOWNLOAD_URL = process.env.COMPANION_DOWNLOAD_URL?.trim() || null;
 
 export default async function CompanionConnectPage() {
   const { profile } = await requireProfile();
@@ -18,8 +24,19 @@ export default async function CompanionConnectPage() {
       <Header signedIn />
       <main className="mx-auto max-w-2xl px-5 py-10 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP Companion</div>
-        <h1 className="mt-2 text-2xl font-semibold text-ink">Connect the browser extension</h1>
-        <p className="mt-2 text-sm leading-6 text-mute">SOUP Companion helps you fill out university, visa and accommodation application forms directly on the official site, using information already saved in your SOUP account. Generate a one-time code below, then enter it into the Companion side panel.</p>
+        <h1 className="mt-2 text-2xl font-semibold text-ink">Download SOUP Companion</h1>
+        <p className="mt-2 text-sm leading-6 text-mute">SOUP Companion is a Windows app with a built-in browser and the SOUP assistant panel alongside it, so you can fill university, visa and accommodation application forms directly on the official site using information already saved in your SOUP account.</p>
+
+        <div className="mt-6 rounded-2xl border border-hair bg-white p-5">
+          <div className="text-xs font-semibold text-ink">Get the app</div>
+          {DOWNLOAD_URL ? (
+            <a href={DOWNLOAD_URL} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Download for Windows</a>
+          ) : (
+            <button disabled className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-[#D8DDE2] px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Coming soon</button>
+          )}
+          <p className="mt-2 text-[11px] text-mute">Windows only for now. Once installed, generate a one-time code below and enter it into the app to connect your SOUP account.</p>
+        </div>
+
         <div className="mt-6"><CompanionConnect /></div>
 
         <div className="mt-8 rounded-2xl border border-hair bg-white p-5">

@@ -55,7 +55,7 @@ export function CompanionConnect() {
         </>
       ) : (
         <>
-          <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-mute">{expired ? "Code expired" : "Enter this in the Companion side panel"}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-mute">{expired ? "Code expired" : "Enter this in the SOUP Companion app"}</div>
           <div className="mt-3 flex items-center gap-3">
             <div className={`select-all rounded-xl border px-5 py-4 font-mono text-2xl font-semibold tracking-[.3em] ${expired ? "border-hair bg-paper text-mute" : "border-navy/30 bg-[#F0F4F8] text-navy"}`}>{code}</div>
             {!expired && (

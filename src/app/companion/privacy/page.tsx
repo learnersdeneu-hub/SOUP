@@ -17,13 +17,13 @@ export default async function CompanionPrivacyPage() {
 
         <section className="mt-6 space-y-3">
           <h2 className="text-sm font-semibold text-ink">What SOUP Companion is</h2>
-          <p className="text-sm leading-6 text-mute">SOUP Companion is a browser extension that opens a side panel beside external university, visa and accommodation application websites. It reads the form fields on the page you're currently viewing and offers to fill fields it recognises using information already saved in your SOUP account, so you review and confirm every field before it's used.</p>
+          <p className="text-sm leading-6 text-mute">SOUP Companion is a downloadable Windows app with a built-in browser and the SOUP assistant panel alongside it. It reads the form fields on the page you're currently viewing inside the app and offers to fill fields it recognises using information already saved in your SOUP account, so you review and confirm every field before it's used.</p>
         </section>
 
         <section className="mt-6 space-y-3">
           <h2 className="text-sm font-semibold text-ink">What it can access, and why</h2>
           <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-mute">
-            <li><strong className="text-ink">Pages you open it on.</strong> The extension's content script can read the visible form fields (labels, input types, current values) of the active tab so it can detect what the page is asking for. It does not read page content when the side panel is closed or on a page you haven't opened it on, and it never transmits page content anywhere other than to fill fields locally in your own browser.</li>
+            <li><strong className="text-ink">Pages you open inside the app.</strong> The app can read the visible form fields (labels, input types, current values) of the page you've navigated to in its built-in browser, so it can detect what the page is asking for. It does not read anything outside the app — it has no access to your regular web browser at all — and it never transmits page content anywhere other than to fill fields locally within the app.</li>
             <li><strong className="text-ink">Your SOUP profile data.</strong> Name, date of birth, nationality, country of residence, and the study preferences you've told Noodles — only the fields that genuinely exist in your SOUP account. Nothing is invented; a field SOUP doesn't have an answer for is always shown to you as "needs your input," never guessed.</li>
             <li><strong className="text-ink">Document metadata.</strong> A list of documents in your SOUP vault (type, filename, review status) so Companion can tell you what's ready. Raw document files are only opened when you explicitly click to view one, via a short-lived secure link.</li>
             <li><strong className="text-ink">What it fills.</strong> A record of which fields were filled, on which site, is kept as an audit trail visible to you and authorised SOUP staff — the same way other SOUP account activity is recorded.</li>
@@ -34,15 +34,15 @@ export default async function CompanionPrivacyPage() {
           <h2 className="text-sm font-semibold text-ink">What it never does</h2>
           <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-mute">
             <li>Never submits an application, form, or payment on your behalf.</li>
-            <li>Never fills a field without you triggering the action from the side panel.</li>
-            <li>Never sends your SOUP session credentials to the extension — connecting uses a short-lived, single-use pairing code instead, exchanged once for a device-specific access token.</li>
+            <li>Never fills a field without you triggering the action from the panel.</li>
+            <li>Never sends your SOUP session credentials to the app — connecting uses a short-lived, single-use pairing code instead, exchanged once for a device-specific access token.</li>
             <li>Never sells or shares your data with the university, visa authority, or accommodation provider whose site you're on, beyond what you choose to submit yourself.</li>
           </ul>
         </section>
 
         <section className="mt-6 space-y-3">
           <h2 className="text-sm font-semibold text-ink">Your control</h2>
-          <p className="text-sm leading-6 text-mute">You can revoke a connected device's access at any time from <Link href="/companion/connect" className="font-semibold text-navy">My SOUP → SOUP Companion</Link>. A revoked device immediately loses the ability to read your SOUP data or fill anything, even if it's still installed in a browser.</p>
+          <p className="text-sm leading-6 text-mute">You can revoke a connected device's access at any time from <Link href="/companion/connect" className="font-semibold text-navy">My SOUP → SOUP Companion</Link>. A revoked device immediately loses the ability to read your SOUP data or fill anything, even if it's still installed.</p>
         </section>
 
         <section className="mt-6 space-y-3">
