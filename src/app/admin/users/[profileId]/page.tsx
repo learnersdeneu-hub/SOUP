@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { requireRole } from "@/lib/auth/currentUser";
 import { CASE_ROLES } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
-import { addInternalUserNote } from "@/app/actions/support";
+import { addInternalUserNote, addStudentAlert } from "@/app/actions/support";
 import { updateUserRole } from "@/app/actions/userRoles";
 
 function pretty(value?: string | null) {
@@ -173,6 +173,16 @@ export default async function AdminUserDetailPage({ params }: { params: { profil
                   <div key={session.id} className="rounded-xl bg-[#F7F8FA] p-3"><div className="text-xs font-semibold text-ink">{session.title || pretty(session.workflow)}</div><div className="mt-1 text-[10px] text-mute">{pretty(session.workflow)} · {session.updatedAt.toLocaleString()}</div></div>
                 ))}
               </div>
+            </section>
+
+            <section className="rounded-2xl border border-hair bg-white p-5">
+              <h2 className="text-sm font-semibold text-ink">Add alert</h2>
+              <p className="mt-1 text-xs leading-5 text-mute">Sent to the student — appears on their dashboard (and by email, if enabled). Never use this for internal-only commentary.</p>
+              <form action={addStudentAlert.bind(null, profile.id)} className="mt-4 space-y-2">
+                <input name="title" required maxLength={200} placeholder="Alert title" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm outline-none focus:border-navy"/>
+                <textarea name="body" required rows={3} placeholder="What does the student need to know?" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm leading-6 outline-none focus:border-navy"/>
+                <button className="rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white">Send alert to student</button>
+              </form>
             </section>
 
             <section className="rounded-2xl border border-hair bg-white p-5">

@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { Bell, LayoutDashboard, LifeBuoy, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { StudentSidebar } from "@/components/StudentSidebar";
 import { signOut } from "@/app/actions/auth";
 
 export function Header({ signedIn }: { signedIn: boolean }) {
   return (
     <header className="flex min-h-[56px] w-full flex-shrink-0 items-center justify-between gap-2 px-3 py-3 sm:px-6">
-      <BrandLogo priority className="min-w-0 shrink" />
+      <div className="flex min-w-0 items-center gap-1.5">
+        <StudentSidebar signedIn={signedIn} />
+        <BrandLogo priority className="min-w-0 shrink" />
+      </div>
       <nav aria-label="Primary" className="flex shrink-0 items-center gap-0.5 sm:gap-2">
         <Link href="/premium" className="hidden rounded-full px-3 py-1.5 text-sm text-ink hover:bg-white sm:inline-flex">Plans</Link>
         {signedIn ? (

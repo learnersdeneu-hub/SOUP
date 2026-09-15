@@ -77,7 +77,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  href={`/counselor?intent=universities&prompt=${encodeURIComponent(`Tell me whether ${university.name} is suitable for me. Verify current fees, intakes, deadlines and the best programs for my profile.`)}`}
+                  href={`/counselor?intent=universities&universityId=${encodeURIComponent(university.id)}&prompt=${encodeURIComponent(`Tell me whether ${university.name} is suitable for me. Verify current fees, intakes, deadlines and the best programs for my profile.`)}`}
                   className="rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white"
                 >Ask Noodles about this university</Link>
                 {website ? <a href={website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-hair px-4 py-2.5 text-xs font-semibold text-ink">Official website <ArrowUpRight size={12}/></a> : null}
@@ -126,7 +126,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
                     <div className="mt-2"><SourceFreshnessBadge checkedAt={program.sourceCheckedAt}/></div>
                   </div>
                   <Link
-                    href={`/counselor?intent=universities&prompt=${encodeURIComponent(`I want to discuss ${program.title} at ${university.name}. Check my suitability and verify the current fee, intake, deadline and requirements.`)}`}
+                    href={`/counselor?intent=universities&universityId=${encodeURIComponent(university.id)}&prompt=${encodeURIComponent(`I want to discuss ${program.title} at ${university.name}. Check my suitability and verify the current fee, intake, deadline and requirements.`)}`}
                     className="shrink-0 self-start rounded-full border border-hair px-3 py-2 text-[11px] font-semibold text-navy"
                   >Discuss with Noodles</Link>
                 </div>
@@ -136,7 +136,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
               <div className="py-8 text-center">
                 <div className="text-sm font-semibold text-ink">Current programs are not stored yet.</div>
                 <p className="mx-auto mt-2 max-w-xl text-xs leading-5 text-mute">This does not mean the university has no programs. Noodles can check the university's current official catalog, fees, intakes and requirements for your profile.</p>
-                <Link href={`/counselor?intent=universities&prompt=${encodeURIComponent(`Find current programs at ${university.name} for my profile. Verify fees, intakes, deadlines and requirements from current sources.`)}`} className="mt-4 inline-flex rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white">Search current programs</Link>
+                <Link href={`/counselor?intent=universities&universityId=${encodeURIComponent(university.id)}&prompt=${encodeURIComponent(`Find current programs at ${university.name} for my profile. Verify fees, intakes, deadlines and requirements from current sources.`)}`} className="mt-4 inline-flex rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white">Search current programs</Link>
               </div>
             ) : null}
           </div>

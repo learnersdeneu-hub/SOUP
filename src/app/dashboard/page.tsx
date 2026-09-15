@@ -6,6 +6,8 @@ import { SupportLauncher } from "@/components/support/SupportLauncher";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { getCustomerDashboardData } from "@/lib/queries/dashboard";
 import { syncStudentAlerts } from "@/lib/student/alerts";
+import { prisma } from "@/lib/prisma";
+import { DirectApplicationBox, type DirectApplyUniversity } from "@/components/applications/DirectApplicationBox";
 
 function stageLabel(stage?: string | null) {
   if (!stage) return "Exploring";
@@ -23,8 +25,27 @@ function nice(value: string) {
 export default async function DashboardPage() {
   const { user, profile } = await requireProfile();
   await syncStudentAlerts(profile.id);
-  const data = await getCustomerDashboardData(user.id);
+  const [data, directApplyCatalog] = await Promise.all([
+    getCustomerDashboardData(user.id),
+    prisma.university.findMany({
+      orderBy: [{ partnerId: "desc" }, { country: "asc" }, { name: "asc" }],
+      take: 400,
+      select: {
+        id: true, name: true, country: true, city: true,
+        partner: { select: { status: true, type: true } },
+        programs: { where: { active: true }, take: 8, select: { id: true, title: true, level: true, intake: true } },
+      },
+    }).catch(() => []),
+  ]);
   if (!data) return null;
+  const directApplyUniversities: DirectApplyUniversity[] = directApplyCatalog.map((u) => ({
+    id: u.id,
+    name: u.name,
+    country: u.country,
+    city: u.city,
+    isPartner: Boolean(u.partner && u.partner.status === "ACTIVE" && u.partner.type === "UNIVERSITY"),
+    programs: u.programs,
+  }));
 
   const firstName = user.fullName.split(" ")[0] || user.fullName;
   const currentStage = data.studentCase?.stage || "EXPLORING";
@@ -128,15 +149,18 @@ export default async function DashboardPage() {
             {data.latestShortlist?.items.length ? <div className="mt-4 flex flex-wrap gap-2">{data.latestShortlist.items.slice(0, 6).map((item) => <Link key={item.id} href={`/universities/${item.university.id}`} className="rounded-full border border-hair px-3 py-1.5 text-[11px] font-semibold text-ink">{item.university.name}</Link>)}</div> : <p className="mt-4 text-xs leading-5 text-mute">Noodles will save your first broad university match list here once your profile is ready.</p>}
           </div>
 
-          <div className="rounded-2xl border border-hair bg-white p-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Your case · Services & partner activity</div>
-            <div className="mt-3 space-y-3 text-xs">
-              <div className="flex items-center justify-between"><span className="text-mute">Profile readiness</span><span className="font-semibold text-ink">{data.completeness}%</span></div>
-              <div className="flex items-center justify-between"><span className="text-mute">Verified documents</span><span className="font-semibold text-ink">{data.approvedDocuments.length}</span></div>
-              <div className="flex items-center justify-between"><span className="text-mute">Open applications</span><span className="font-semibold text-ink">{data.activeApplications.length}</span></div>
-              <div className="flex items-center justify-between"><span className="text-mute">Support plan</span><span className="font-semibold text-ink">{data.conciergeActive ? "SOUP Concierge" : data.plusActive ? "SOUP Plus" : "SOUP"}</span></div>
+          <div className="space-y-4">
+            <DirectApplicationBox universities={directApplyUniversities}/>
+            <div className="rounded-2xl border border-hair bg-white p-5">
+              <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Your case summary</div>
+              <div className="mt-3 space-y-3 text-xs">
+                <div className="flex items-center justify-between"><span className="text-mute">Profile readiness</span><span className="font-semibold text-ink">{data.completeness}%</span></div>
+                <div className="flex items-center justify-between"><span className="text-mute">Verified documents</span><span className="font-semibold text-ink">{data.approvedDocuments.length}</span></div>
+                <div className="flex items-center justify-between"><span className="text-mute">Open applications</span><span className="font-semibold text-ink">{data.activeApplications.length}</span></div>
+                <div className="flex items-center justify-between"><span className="text-mute">Support plan</span><span className="font-semibold text-ink">{data.conciergeActive ? "SOUP Concierge" : data.plusActive ? "SOUP Plus" : "SOUP"}</span></div>
+              </div>
+              {data.assignedCounselor ? <div className="mt-4 rounded-xl bg-[#F7FAFC] p-3"><div className="text-[10px] uppercase tracking-[.12em] text-mute">Assigned counselor</div><div className="mt-1 text-xs font-semibold text-ink">{data.assignedCounselor.fullName}</div></div> : null}
             </div>
-            {data.assignedCounselor ? <div className="mt-4 rounded-xl bg-[#F7FAFC] p-3"><div className="text-[10px] uppercase tracking-[.12em] text-mute">Assigned counselor</div><div className="mt-1 text-xs font-semibold text-ink">{data.assignedCounselor.fullName}</div></div> : null}
           </div>
         </section>
 

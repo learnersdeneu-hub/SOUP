@@ -33,7 +33,7 @@ export default async function UniversitiesPage() {
       partnerId: true,
       programs: {
         where: { active: true },
-        select: { level: true, field: true, intake: true, tuitionAmount: true, tuitionCurrency: true },
+        select: { level: true, field: true, intake: true, language: true, tuitionAmount: true, tuitionCurrency: true },
         take: 8,
       },
     },
@@ -43,6 +43,7 @@ export default async function UniversitiesPage() {
     const summary = summarizeUniversityPrograms(university.programs);
     const networks = networksFromMetadata(university.publicMetadata);
     const fields = [...new Set(university.programs.map((program) => normalizeField(program.field)).filter((value): value is string => Boolean(value)))];
+    const languages = [...new Set(university.programs.map((program) => String(program.language || "").trim()).filter(Boolean))].slice(0, 4);
     return {
       id: university.id,
       name: university.name,
@@ -56,6 +57,7 @@ export default async function UniversitiesPage() {
       intakes: summary.intakes,
       levels: summary.levels,
       fields,
+      languages,
     };
   });
 

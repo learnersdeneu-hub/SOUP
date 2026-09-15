@@ -83,16 +83,15 @@ export function ApplicationJourneyPanel({ signedIn, refreshKey, onStatus }: { si
           </div>
         </div>
 
-        <div className="mt-2 grid grid-cols-4 gap-1 sm:grid-cols-8">
-          {STAGES.map(([key, label, href], index) => {
-            const done = index < currentIndex;
-            const active = index === currentIndex;
-            return <Link key={key} href={href} title={`Open ${label}`} className={`rounded-lg px-2 py-1.5 transition hover:ring-1 hover:ring-navy/20 ${active ? "bg-[#EAF0F5]" : "bg-paper"}`}><div className="flex items-center gap-1.5">{done ? <Check size={10} className="text-teal"/> : <Circle size={8} className={active ? "fill-navy text-navy" : "text-[#B8C0C7]"}/>}<span className={`truncate text-[9px] font-semibold ${active ? "text-navy" : done ? "text-teal" : "text-mute"}`}>{label}</span></div></Link>;
-          })}
-        </div>
-
         {expanded && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3">
+            <div className="grid grid-cols-4 gap-1 sm:grid-cols-8">
+              {STAGES.map(([key, label, href], index) => {
+                const done = index < currentIndex;
+                const active = index === currentIndex;
+                return <Link key={key} href={href} title={`Open ${label}`} className={`rounded-lg px-2 py-1.5 transition hover:ring-1 hover:ring-navy/20 ${active ? "bg-[#EAF0F5]" : "bg-paper"}`}><div className="flex items-center gap-1.5">{done ? <Check size={10} className="text-teal"/> : <Circle size={8} className={active ? "fill-navy text-navy" : "text-[#B8C0C7]"}/>}<span className={`truncate text-[9px] font-semibold ${active ? "text-navy" : done ? "text-teal" : "text-mute"}`}>{label}</span></div></Link>;
+              })}
+            </div>
             {signedIn && (
               <div className="grid gap-2 lg:grid-cols-2">
                 <div className="rounded-xl border border-hair bg-paper/70 p-3">

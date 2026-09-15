@@ -2,7 +2,10 @@ import { z } from "zod";
 import { idSchema, optionalIdSchema, optionalShortTextSchema } from "@/lib/validation/http";
 
 export const startApplicationSchema = z.object({
-  shortlistItemId: idSchema,
+  // Optional: present when starting from an AI-generated shortlist recommendation.
+  // Absent for a Direct Application started by the student without going through
+  // Noodles — both paths create the same StudentApplication record.
+  shortlistItemId: optionalIdSchema,
   universityId: idSchema,
   programId: optionalIdSchema,
   intake: optionalShortTextSchema(160),

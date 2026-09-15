@@ -19,10 +19,14 @@ export type CatalogUniversity = {
   intakes: string[];
   levels: string[];
   fields: string[];
+  languages: string[];
 };
 
 const PAGE_SIZE = 30;
-const SELECTABLE_LEVELS = ["Bachelors", "Masters"];
+// Preferred display order for degree levels commonly present in the catalog;
+// any level not listed here (e.g. a data-entry variant) still appears,
+// sorted alphabetically after the known ones, rather than being hidden.
+const LEVEL_ORDER = ["Foundation", "Diploma", "Bachelors", "Masters", "MBA", "PhD"];
 
 export function UniversityCatalogBrowser({ universities }: { universities: CatalogUniversity[] }) {
   const router = useRouter();
@@ -31,6 +35,8 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
   const [country, setCountry] = useState("ALL");
   const [level, setLevel] = useState("ALL");
   const [field, setField] = useState("ALL");
+  const [intake, setIntake] = useState("ALL");
+  const [language, setLanguage] = useState("ALL");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const availableChannels = useMemo(() => {
@@ -44,12 +50,32 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
   );
 
   const availableLevels = useMemo(() => {
-    const present = new Set(universities.flatMap((u) => u.levels));
-    return SELECTABLE_LEVELS.filter((l) => present.has(l));
+    const present = [...new Set(universities.flatMap((u) => u.levels))];
+    return present.sort((a, b) => {
+      const ai = LEVEL_ORDER.indexOf(a);
+      const bi = LEVEL_ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
   }, [universities]);
 
   const availableFields = useMemo(
     () => [...new Set(universities.flatMap((u) => u.fields))].sort((a, b) => a.localeCompare(b)),
+    [universities],
+  );
+
+  const availableIntakes = useMemo(
+    () => [...new Set(universities.flatMap((u) => u.intakes))].sort((a, b) => a.localeCompare(b)),
+    [universities],
+  );
+
+  // Language is only worth offering as a filter when at least some catalog
+  // programs actually record it — otherwise the control would always be a
+  // no-op "All languages" dropdown with nothing to select.
+  const availableLanguages = useMemo(
+    () => [...new Set(universities.flatMap((u) => u.languages))].sort((a, b) => a.localeCompare(b)),
     [universities],
   );
 
@@ -65,6 +91,8 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
       // point the student to Noodles to verify in that same situation).
       if (level !== "ALL" && u.levels.length > 0 && !u.levels.includes(level)) return false;
       if (field !== "ALL" && u.fields.length > 0 && !u.fields.includes(field)) return false;
+      if (intake !== "ALL" && u.intakes.length > 0 && !u.intakes.includes(intake)) return false;
+      if (language !== "ALL" && u.languages.length > 0 && !u.languages.includes(language)) return false;
       if (!needle) return true;
       return u.name.toLowerCase().includes(needle) || u.country.toLowerCase().includes(needle) || (u.city || "").toLowerCase().includes(needle);
     });
@@ -76,10 +104,10 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
         return rank !== 0 ? rank : a.index - b.index;
       })
       .map(({ u }) => u);
-  }, [universities, query, channel, country, level, field]);
+  }, [universities, query, channel, country, level, field, intake, language]);
 
   const visible = filtered.slice(0, visibleCount);
-  const filtersActive = query || channel !== "ALL" || country !== "ALL" || level !== "ALL" || field !== "ALL";
+  const filtersActive = query || channel !== "ALL" || country !== "ALL" || level !== "ALL" || field !== "ALL" || intake !== "ALL" || language !== "ALL";
 
   function resetPage() {
     setVisibleCount(PAGE_SIZE);
@@ -118,6 +146,16 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
             <option value="ALL">All subjects</option>
             {availableFields.map((f) => <option key={f} value={f}>{f}</option>)}
           </select>
+          <select value={intake} onChange={(event) => { setIntake(event.target.value); resetPage(); }} className={selectClass} aria-label="Filter by intake">
+            <option value="ALL">All intakes</option>
+            {availableIntakes.map((i) => <option key={i} value={i}>{i}</option>)}
+          </select>
+          {availableLanguages.length > 0 && (
+            <select value={language} onChange={(event) => { setLanguage(event.target.value); resetPage(); }} className={selectClass} aria-label="Filter by language of instruction">
+              <option value="ALL">All languages</option>
+              {availableLanguages.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          )}
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">

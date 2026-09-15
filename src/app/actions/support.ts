@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCurrentUser, requireProfile, requireRole } from "@/lib/auth/currentUser";
 import { CASE_ROLES, SUPPORT_ROLES } from "@/lib/auth/roles";
 import { escapeHtml, sendTransactionalEmail } from "@/lib/notifications/email";
+import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { logServerError } from "@/lib/logging/safe";
 import { SOUP_SUPPORT_EMAIL } from "@/lib/support/config";
 
@@ -182,6 +183,32 @@ export async function addInternalUserNote(profileId: string, formData: FormData)
   });
   revalidatePath(`/admin/users`);
   revalidatePath(`/admin/users/${profileId}`);
+}
+
+// Staff-facing "Add alert": a short, student-visible message shown on the
+// student's dashboard, distinct from addInternalUserNote which is staff-only
+// and must never reach the student.
+export async function addStudentAlert(profileId: string, formData: FormData) {
+  const current = await requireRole(CASE_ROLES);
+  const title = String(formData.get("title") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  if (title.length < 3 || body.length < 3) throw new Error("Provide a short title and message for the student alert.");
+  const profile = await prisma.profile.findUniqueOrThrow({ where: { id: profileId }, include: { user: true } });
+  if (current.user.role === "SUPPORT") {
+    const assigned = await prisma.supportTicket.findFirst({ where: { profileId, assignedToUserId: current.user.id }, select: { id: true } });
+    if (!assigned) throw new Error("This customer is not assigned to your support queue.");
+  }
+  await prisma.notification.create({
+    data: { profileId, type: "SYSTEM", title: title.slice(0, 200), body: body.slice(0, 2000), href: "/dashboard" },
+  });
+  if (shouldSendStudentEmail(profile, true)) await sendTransactionalEmail({
+    to: profile.user.email,
+    subject: title.slice(0, 200),
+    html: `<p>Hello ${escapeHtml(profile.user.fullName)},</p><p>${escapeHtml(body).replace(/\n/g, "<br/>")}</p>`,
+    idempotencyKey: `student-alert-${profileId}-${Date.now()}`,
+  }).catch((error) => logServerError("SOUP_STUDENT_ALERT_EMAIL_ERROR", error));
+  revalidatePath(`/admin/users/${profileId}`);
+  revalidatePath("/dashboard");
 }
 
 export async function requestHumanCounselor(formData?: FormData) {

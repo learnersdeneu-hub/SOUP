@@ -4,6 +4,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/currentUser";
 import { DOCUMENT_ROLES } from "@/lib/auth/roles";
+import { escapeHtml, sendTransactionalEmail } from "@/lib/notifications/email";
+import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
+import { logServerError } from "@/lib/logging/safe";
 import type { DocumentReviewAction, DocumentReviewStatus } from "@prisma/client";
 
 
@@ -29,7 +32,7 @@ export async function updateDocumentReview(
   const current = await requireRole(DOCUMENT_ROLES);
   const document = await prisma.document.findUniqueOrThrow({
     where: { id: documentId },
-    include: { profile: true, credential: { include: { credentialType: true } } },
+    include: { profile: { include: { user: true } }, credential: { include: { credentialType: true } } },
   });
   await assertDocumentAccess(current, document.profileId);
 
@@ -83,6 +86,25 @@ export async function updateDocumentReview(
   revalidatePath("/admin/documents");
   revalidatePath("/documents");
   revalidatePath("/dashboard");
+
+  // Server-side, non-blocking: the review outcome above is already committed
+  // regardless of whether this email succeeds, so a provider failure here must
+  // never surface as a failed staff action.
+  if (["APPROVED", "MORE_INFO_REQUIRED", "REJECTED"].includes(status) && shouldSendStudentEmail(document.profile, true)) {
+    const label = document.credential?.credentialType.label || document.documentType;
+    const subject = status === "APPROVED" ? `Document approved — ${label}` : status === "MORE_INFO_REQUIRED" ? `SOUP needs more information — ${label}` : `Document needs attention — ${label}`;
+    const html = status === "APPROVED"
+      ? `<p>Hello ${escapeHtml(document.profile.user.fullName)},</p><p>Your document <strong>${escapeHtml(label)}</strong> has passed SOUP document review.</p>`
+      : status === "MORE_INFO_REQUIRED"
+        ? `<p>Hello ${escapeHtml(document.profile.user.fullName)},</p><p>SOUP needs more information about <strong>${escapeHtml(label)}</strong> before it can be used.</p><p>${escapeHtml(reason?.trim() || "Please open My SOUP for details.")}</p>`
+        : `<p>Hello ${escapeHtml(document.profile.user.fullName)},</p><p>Your document <strong>${escapeHtml(label)}</strong> could not be accepted.</p><p>${escapeHtml(reason?.trim() || "Please open My SOUP for details.")}</p>`;
+    await sendTransactionalEmail({
+      to: document.profile.user.email,
+      subject,
+      html: `${html}<p>Open My SOUP → Documents to see the current status.</p>`,
+      idempotencyKey: `document-review-${documentId}-${status}-${Date.now()}`,
+    }).catch((error) => logServerError("SOUP_DOCUMENT_REVIEW_EMAIL_ERROR", error));
+  }
 }
 
 export async function getAdminDocumentSignedUrl(documentId: string) {
