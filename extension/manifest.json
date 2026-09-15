@@ -24,8 +24,7 @@
   "side_panel": {
     "default_path": "sidepanel.html"
   },
-  "permissions": ["sidePanel", "storage", "activeTab", "scripting"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["sidePanel", "storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

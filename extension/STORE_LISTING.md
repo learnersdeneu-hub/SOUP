@@ -80,23 +80,23 @@ https://www.soupassist.com/companion/privacy
 
 ## Permission justifications
 
-Chrome's review asks you to justify every requested permission. Use these:
+The manifest requests the minimum needed — two ordinary permissions, plus
+one content-script match pattern. No `host_permissions`, `activeTab`, or
+`scripting` grant is requested at all, since no code uses them.
 
 - **sidePanel** — "The entire UI is a side panel, per Chrome's side panel
   API, opened from the toolbar icon."
 - **storage** — "Stores the device's SOUP access token locally
   (chrome.storage.local) after the user connects their account, so they
   don't have to re-pair every session."
-- **activeTab** / **scripting** — "Used to read the current tab's form
-  fields and to fill them after the user clicks Fill this page; never used
-  without an explicit user action in the side panel."
-- **host_permissions: `<all_urls>`** — "Students apply through hundreds of
-  different university, visa and accommodation portals on their own
-  domains, decided by the student, not the extension. A fixed allowlist
-  would make the extension only work on a handful of pre-approved sites.
-  The content script only reads form-field labels/values and fills fields
-  after an explicit user action — it does not run on soupassist.com itself
-  (excluded in the manifest) and sends nothing anywhere on its own."
+- **Content script `matches: ["<all_urls>"]`** — "Students apply through
+  hundreds of different university, visa and accommodation portals on
+  their own domains, decided by the student, not the extension. A fixed
+  allowlist would make the extension only work on a handful of
+  pre-approved sites. The content script only reads form-field
+  labels/values and fills fields after an explicit user action in the side
+  panel — it does not run on soupassist.com itself (excluded in the
+  manifest) and makes no network requests of its own."
 
 ## Data usage disclosure checkboxes
 
