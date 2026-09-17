@@ -141,6 +141,27 @@ export async function POST(request: Request) {
     await tx.notification.create({ data: { profileId: profile.id, type: "SYSTEM", title: "Application started", body: `${university.name} is now tracked in My SOUP applications.`, href: "/applications" } });
     return created;
   });
+  // Staff previously only learned about a new application by happening to
+  // check /admin/applications: unlike document uploads (see
+  // /api/evidence/process), nothing landed in their own notification feed.
+  // Every path that creates a StudentApplication goes through this one route
+  // (shortlist-originated, the dashboard's Direct Application box, and a
+  // university page's own apply panel), so fixing it here covers all of them.
+  const staffProfiles = await prisma.profile.findMany({
+    where: { user: { role: { in: ["ADMIN", "SUPPORT"] }, accountStatus: "ACTIVE" } },
+    select: { id: true },
+  }).catch(() => []);
+  if (staffProfiles.length) {
+    await prisma.notification.createMany({
+      data: staffProfiles.map((staffProfile) => ({
+        profileId: staffProfile.id,
+        type: "SYSTEM" as const,
+        title: ownership === "SOUP_MANAGED" ? "New SOUP-managed application" : "New self-managed application logged",
+        body: `${profile.user.fullName} started an application to ${university.name}${program?.title ? ` (${program.title})` : ""}.`,
+        href: `/admin/applications/${application.id}`,
+      })),
+    }).catch(() => undefined);
+  }
   if (shouldSendStudentEmail(profile, false)) await sendTransactionalEmail({
     to: profile.user.email,
     subject: `Application started — ${university.name}`,

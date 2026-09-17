@@ -5,8 +5,9 @@ import { Header } from "@/components/Header";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 import { ApplicationNetworkPanel } from "@/components/partners/ApplicationNetworkPanel";
+import { UniversityApplyPanel } from "@/components/applications/UniversityApplyPanel";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { safeHttpUrl } from "@/lib/security/urls";
 import { SourceFreshnessBadge } from "@/components/SourceFreshnessBadge";
 import { summarizeUniversityPrograms } from "@/lib/universities/presentation";
@@ -28,8 +29,7 @@ function SummaryCard({ label, value, note }: { label: string; value: string; not
 }
 
 export default async function UniversityDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const current = await getCurrentUser();
   const university = await prisma.university.findUnique({
     where: { id: params.id },
     include: {
@@ -44,6 +44,18 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
 
   if (!university) notFound();
 
+  // Checked here, server-side, so a returning student sees "continue" instead
+  // of being able to start a second application to the same university by
+  // mistake — /api/applications already de-duplicates on the backend, but
+  // this avoids the confusing round trip of finding that out after submitting.
+  const existingApplication = current?.user.profile
+    ? await prisma.studentApplication.findFirst({
+        where: { profileId: current.user.profile.id, universityId: university.id },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, status: true, ownership: true },
+      })
+    : null;
+
   const website = safeHttpUrl(university.websiteUrl, 1500)
     || safeHttpUrl(university.partner?.websiteUrl, 1500)
     || safeHttpUrl(knownPartnerWebsite(university.name), 1500);
@@ -54,7 +66,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn={!!user}/>
+      <Header signedIn={!!current}/>
       <main className="mx-auto w-full max-w-5xl px-4 pb-14 pt-6 sm:px-8 sm:pt-8">
         <Link href="/universities" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>University network</Link>
 
@@ -89,7 +101,16 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
               </div>
               <p className="mt-4 max-w-3xl text-sm leading-6 text-mute">SOUP can manage eligible applications when a suitable program is selected. Fees, intakes, deadlines and entry requirements can change, so missing or stale values are verified live before you rely on them.</p>
             </div>
-            <div className="min-w-0 lg:justify-self-end"><ApplicationNetworkPanel metadata={university.publicMetadata || university.partner?.publicMetadata}/></div>
+            <div className="min-w-0 space-y-4 lg:justify-self-end">
+              <ApplicationNetworkPanel metadata={university.publicMetadata || university.partner?.publicMetadata}/>
+              <UniversityApplyPanel
+                universityId={university.id}
+                universityName={university.name}
+                programs={university.programs.map((p) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake }))}
+                signedIn={!!current}
+                existingApplication={existingApplication}
+              />
+            </div>
           </div>
 
           <div className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
