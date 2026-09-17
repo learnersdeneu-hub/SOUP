@@ -35,12 +35,13 @@ export async function extractDocument(file: File): Promise<DocumentExtraction> {
     return { text, method: "TEXT" };
   }
   if (mime.startsWith("image/") || ["png", "jpg", "jpeg"].includes(ext)) {
-    let text = "";
-    try {
-      const { recognize } = await import("tesseract.js");
-      text = (await recognize(buffer, "eng", { logger: () => undefined })).data.text || "";
-    } catch { /* vision fallback below */ }
-    if (useful(text)) return { text, method: "OCR" };
+    // tesseract.js is not used here: its worker-thread OCR engine does not
+    // reliably initialize in this serverless environment — confirmed by
+    // direct testing, it hangs indefinitely rather than failing fast, which
+    // silently stalled every image upload until the platform's outer
+    // timeout eventually killed the request. Gemini Vision reads images
+    // directly and responds in seconds either way, so it is now the only
+    // path for images rather than a fallback.
     const normalizedMime = mime.startsWith("image/") ? mime : ext === "png" ? "image/png" : "image/jpeg";
     const visionText = await transcribeScannedDocument(buffer, normalizedMime);
     if (!useful(visionText)) throw new Error("SOUP could not read enough information from that image. Try a clearer image.");

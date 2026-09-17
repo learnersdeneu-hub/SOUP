@@ -5,6 +5,7 @@ import { generateResumeFromSource } from "@/lib/resume/ai";
 import type { ResumeTemplateKey } from "@/lib/resume/types";
 import { aiRateLimitResponse } from "@/lib/ai/httpRateLimit";
 import { resumeImportFormSchema } from "@/lib/validation/schemas";
+import { transcribeScannedDocument } from "@/lib/documents/vision";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -32,9 +33,12 @@ async function extractText(file: File) {
   }
 
   if (mime.startsWith("image/") || ["png", "jpg", "jpeg"].includes(extension)) {
-    const { recognize } = await import("tesseract.js");
-    const result = await recognize(buffer, "eng", { logger: () => undefined });
-    return result.data.text;
+    // Same fix as src/lib/documents/extract.ts: tesseract.js's worker-thread
+    // OCR hangs indefinitely in this serverless environment rather than
+    // failing fast (confirmed by direct testing), so it silently stalled
+    // every image resume upload. Gemini Vision reads the image directly.
+    const normalizedMime = mime.startsWith("image/") ? mime : extension === "png" ? "image/png" : "image/jpeg";
+    return transcribeScannedDocument(buffer, normalizedMime);
   }
 
   throw new Error("Use a PDF, DOCX, PNG, JPG or JPEG resume.");
