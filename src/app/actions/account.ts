@@ -9,10 +9,23 @@ function clean(value: FormDataEntryValue | null, max = 160) {
   return text ? text.slice(0, max) : null;
 }
 
+function parseDateOfBirth(value: FormDataEntryValue | null) {
+  const raw = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return undefined;
+  const parsed = new Date(`${raw}T00:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
 export async function updateCustomerProfile(formData: FormData) {
   const { user, profile } = await requireProfile();
   const fullName = clean(formData.get("fullName"), 120);
   if (!fullName) throw new Error("Your name is required.");
+  const dateOfBirth = parseDateOfBirth(formData.get("dateOfBirth"));
+  // Only ever tracked through this action and the direct application form on
+  // a university page — both write the same fields so "core application
+  // information" (see missingCoreApplicationInformation) is completed once,
+  // in one place, rather than only being fillable through a Noodles chat.
+  const academicBackgroundSummary = clean(formData.get("academicBackgroundSummary"), 600);
 
   await prisma.$transaction([
     prisma.user.update({
@@ -21,11 +34,17 @@ export async function updateCustomerProfile(formData: FormData) {
         fullName,
         nationality: clean(formData.get("nationality"), 80),
         currentCountry: clean(formData.get("currentCountry"), 80),
+        ...(dateOfBirth ? { dateOfBirth } : {}),
       },
     }),
     prisma.profile.update({
       where: { id: profile.id },
       data: { headlineSummary: clean(formData.get("headlineSummary"), 240) },
+    }),
+    prisma.studentCase.upsert({
+      where: { profileId: profile.id },
+      update: { academicBackgroundSummary },
+      create: { profileId: profile.id, academicBackgroundSummary },
     }),
   ]);
 

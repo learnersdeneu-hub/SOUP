@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { requireProfile } from "@/lib/auth/currentUser";
+import { prisma } from "@/lib/prisma";
 import { updateCustomerProfile, updateCommunicationPreferences } from "@/app/actions/account";
 
 export default async function AccountPage() {
   const { user, profile, authUser } = await requireProfile();
+  const studentCase = await prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { academicBackgroundSummary: true } });
   const prefs = profile.communicationPreferences && typeof profile.communicationPreferences === "object" && !Array.isArray(profile.communicationPreferences) ? profile.communicationPreferences as Record<string, unknown> : {};
   return (
     <div className="min-h-screen bg-paper">
@@ -21,8 +23,10 @@ export default async function AccountPage() {
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">Email</span><input value={authUser.email || user.email} disabled className="w-full rounded-xl border border-hair bg-[#F7F8F9] px-3.5 py-2.5 text-sm text-mute" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">Nationality</span><input name="nationality" defaultValue={user.nationality || ""} className="w-full rounded-xl border border-hair px-3.5 py-2.5 text-sm outline-none focus:border-navy" /></label>
             <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">Current country</span><input name="currentCountry" defaultValue={user.currentCountry || ""} className="w-full rounded-xl border border-hair px-3.5 py-2.5 text-sm outline-none focus:border-navy" /></label>
+            <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">Date of birth</span><input type="date" name="dateOfBirth" defaultValue={user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : ""} className="w-full rounded-xl border border-hair px-3.5 py-2.5 text-sm outline-none focus:border-navy" /></label>
           </div>
           <label className="mt-4 block"><span className="mb-1.5 block text-xs font-medium text-ink">Profile headline</span><textarea name="headlineSummary" rows={3} defaultValue={profile.headlineSummary || ""} className="w-full rounded-xl border border-hair px-3.5 py-2.5 text-sm leading-6 outline-none focus:border-navy" /></label>
+          <label className="mt-4 block"><span className="mb-1.5 block text-xs font-medium text-ink">Academic background</span><span className="mb-1.5 block text-[11px] text-mute">Used as your core academic summary across every SOUP-managed application, not just this one.</span><textarea name="academicBackgroundSummary" rows={3} defaultValue={studentCase?.academicBackgroundSummary || ""} className="w-full rounded-xl border border-hair px-3.5 py-2.5 text-sm leading-6 outline-none focus:border-navy" /></label>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <Link href="/forgot-password" className="text-xs font-semibold text-navy">Reset password</Link>
             <button className="rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white">Save account</button>

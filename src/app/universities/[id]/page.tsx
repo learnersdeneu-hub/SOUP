@@ -56,6 +56,20 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
       })
     : null;
 
+  // Prefills UniversityApplyPanel's form so a student is never asked for
+  // something SOUP already has — the same core fields used everywhere else
+  // (see missingCoreApplicationInformation), just fetched once here.
+  const applicantStudentCase = current?.user.profile
+    ? await prisma.studentCase.findUnique({ where: { profileId: current.user.profile.id }, select: { academicBackgroundSummary: true } })
+    : null;
+  const applicantPrefill = {
+    fullName: current?.user.fullName || "",
+    dateOfBirth: current?.user.dateOfBirth ? current.user.dateOfBirth.toISOString().slice(0, 10) : "",
+    nationality: current?.user.nationality || "",
+    currentCountry: current?.user.currentCountry || "",
+    academicBackgroundSummary: applicantStudentCase?.academicBackgroundSummary || "",
+  };
+
   const website = safeHttpUrl(university.websiteUrl, 1500)
     || safeHttpUrl(university.partner?.websiteUrl, 1500)
     || safeHttpUrl(knownPartnerWebsite(university.name), 1500);
@@ -109,6 +123,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
                 programs={university.programs.map((p) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake }))}
                 signedIn={!!current}
                 existingApplication={existingApplication}
+                prefill={applicantPrefill}
               />
             </div>
           </div>
