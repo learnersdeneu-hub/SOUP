@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 export type DirectApplyProgram = { id: string; title: string; level: string; intake: string | null };
@@ -30,12 +30,32 @@ function programLabel(p: DirectApplyProgram) {
 // It calls the same /api/applications endpoint Noodles uses, so a Direct
 // Application and an AI-started one produce the identical StudentApplication
 // record — there is no separate "manual" application architecture.
-export function DirectApplicationBox({ universities }: { universities: DirectApplyUniversity[] }) {
+//
+// The university list is fetched client-side from a cached API route
+// (/api/universities/lite) rather than passed in as a server-rendered prop:
+// this was previously a full-catalog Prisma query (300+ rows, each with a
+// nested partner + programs include) run on every dashboard page load for a
+// feature most visits never touch, measurably slowing dashboard TTFB. Now it
+// loads lazily after the page has already rendered, and repeat loads mostly
+// hit the API route's shared cache instead of the database at all.
+export function DirectApplicationBox() {
+  const [universities, setUniversities] = useState<DirectApplyUniversity[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [universityText, setUniversityText] = useState("");
   const [programText, setProgramText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [started, setStarted] = useState<{ id: string; ownership: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/universities/lite")
+      .then((response) => (response.ok ? response.json() : { universities: [] }))
+      .then((body) => { if (!cancelled) setUniversities(body.universities || []); })
+      .catch(() => undefined)
+      .finally(() => { if (!cancelled) setCatalogLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   // Always the full catalogue, alphabetical — no artificial cap, so a student
   // can type-to-find any university, not just the first page of results.
@@ -99,13 +119,14 @@ export function DirectApplicationBox({ universities }: { universities: DirectApp
       <h2 className="mt-2 text-sm font-semibold text-ink">Start an application without Noodles</h2>
       <p className="mt-1 text-xs leading-5 text-mute">Type a university and, if known, a program — this works even if AI guidance is unavailable, and creates the same application record Noodles would.</p>
 
-      <label className="mt-3 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">University ({sortedUniversities.length} in the SOUP catalogue)</label>
+      <label className="mt-3 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">{catalogLoading ? "University (loading catalogue…)" : `University (${sortedUniversities.length} in the SOUP catalogue)`}</label>
       <input
         list="direct-apply-universities"
         value={universityText}
         onChange={(event) => { setUniversityText(event.target.value); setProgramText(""); setError(null); }}
-        placeholder="Start typing a university, city or country..."
-        className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+        placeholder={catalogLoading ? "Loading universities…" : "Start typing a university, city or country..."}
+        disabled={catalogLoading}
+        className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40 disabled:bg-paper disabled:text-mute"
       />
       <datalist id="direct-apply-universities">
         {sortedUniversities.map((u) => <option key={u.id} value={universityLabel(u)} />)}

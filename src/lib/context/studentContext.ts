@@ -3,12 +3,26 @@ import { getActiveServicePartners, getRelevantUniversityPartners } from "@/lib/p
 import { isSupersededChecklist } from "@/lib/journey/checklists";
 
 export async function getStudentCounselorContext(profileId: string) {
-  const [profile, studentCase, documents, applications, checklists, shortlists, referrals, counselorSessions] = await Promise.all([
+  // studentCase is fetched alone, first: everything below it only needs its
+  // preferredCountries field (for preferredCountryList), while every other
+  // query here is independent of it and of each other. Previously all 8
+  // "wave 1" queries ran in one Promise.all, then a second Promise.all of 4
+  // more queries started only after that batch finished — an unnecessary
+  // fully-serialized network round trip on every single Noodles message
+  // (the second wave was waiting on studentCase, not on documents,
+  // applications, checklists, etc.). Fetching studentCase first and firing
+  // every other query in a single combined batch removes that wait without
+  // changing what's fetched or its freshness.
+  const studentCase = await prisma.studentCase.findUnique({ where: { profileId } });
+  const preferredCountryList = Array.isArray(studentCase?.preferredCountries)
+    ? studentCase!.preferredCountries.map((value) => String(value)).filter(Boolean).slice(0, 8)
+    : [];
+
+  const [profile, documents, applications, checklists, shortlists, referrals, counselorSessions, relevantUniversityPartners, activeServicePartners, catalogUniversityOptions, networkUniversitiesNeedingResearch] = await Promise.all([
     prisma.profile.findUnique({
       where: { id: profileId },
       include: { user: { select: { email: true, fullName: true, dateOfBirth: true, nationality: true, currentCountry: true } } },
     }),
-    prisma.studentCase.findUnique({ where: { profileId } }),
     prisma.document.findMany({
       where: { profileId },
       orderBy: { uploadedAt: "desc" },
@@ -48,12 +62,6 @@ export async function getStudentCounselorContext(profileId: string) {
       include: { partner: { select: { name: true, type: true, transactionUrl: true, websiteUrl: true, status: true } } },
     }),
     prisma.counselorSession.findMany({ where: { profileId, status: { in: ["REQUESTED", "SCHEDULED"] } }, orderBy: { updatedAt: "desc" }, take: 3, select: { id: true, status: true, requestedDate: true, requestedTimeNote: true, scheduledFor: true, durationMinutes: true, meetingUrl: true } }),
-  ]);
-
-  const preferredCountryList = Array.isArray(studentCase?.preferredCountries)
-    ? studentCase!.preferredCountries.map((value) => String(value)).filter(Boolean).slice(0, 8)
-    : [];
-  const [relevantUniversityPartners, activeServicePartners, catalogUniversityOptions, networkUniversitiesNeedingResearch] = await Promise.all([
     getRelevantUniversityPartners(studentCase, 24),
     getActiveServicePartners(),
     prisma.university.findMany({

@@ -6,8 +6,7 @@ import { SupportLauncher } from "@/components/support/SupportLauncher";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { getCustomerDashboardData } from "@/lib/queries/dashboard";
 import { syncStudentAlerts } from "@/lib/student/alerts";
-import { prisma } from "@/lib/prisma";
-import { DirectApplicationBox, type DirectApplyUniversity } from "@/components/applications/DirectApplicationBox";
+import { DirectApplicationBox } from "@/components/applications/DirectApplicationBox";
 
 function stageLabel(stage?: string | null) {
   if (!stage) return "Exploring";
@@ -25,30 +24,8 @@ function nice(value: string) {
 export default async function DashboardPage() {
   const { user, profile } = await requireProfile();
   await syncStudentAlerts(profile.id);
-  const [data, directApplyCatalog] = await Promise.all([
-    getCustomerDashboardData(user.id),
-    // No `take` cap: Direct Application must be able to reach the full SOUP
-    // catalogue, not a partner-biased subset — alphabetical by name so a
-    // student can find their university without needing to know which
-    // partner channel it is (or isn't) on.
-    prisma.university.findMany({
-      orderBy: { name: "asc" },
-      select: {
-        id: true, name: true, country: true, city: true,
-        partner: { select: { status: true, type: true } },
-        programs: { where: { active: true }, take: 20, select: { id: true, title: true, level: true, intake: true } },
-      },
-    }).catch(() => []),
-  ]);
+  const data = await getCustomerDashboardData(user.id);
   if (!data) return null;
-  const directApplyUniversities: DirectApplyUniversity[] = directApplyCatalog.map((u) => ({
-    id: u.id,
-    name: u.name,
-    country: u.country,
-    city: u.city,
-    isPartner: Boolean(u.partner && u.partner.status === "ACTIVE" && u.partner.type === "UNIVERSITY"),
-    programs: u.programs,
-  }));
 
   const firstName = user.fullName.split(" ")[0] || user.fullName;
   const currentStage = data.studentCase?.stage || "EXPLORING";
@@ -153,7 +130,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="space-y-4">
-            <DirectApplicationBox universities={directApplyUniversities}/>
+            <DirectApplicationBox/>
             <div className="rounded-2xl border border-hair bg-white p-5">
               <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Your case summary</div>
               <div className="mt-3 space-y-3 text-xs">

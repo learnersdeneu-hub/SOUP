@@ -71,15 +71,21 @@ function serviceHref(type: string, name: string) {
   return "/counselor";
 }
 
+const HOMEPAGE_UNIVERSITY_INCLUDE = { partner: true, programs: { where: { active: true }, select: { id: true } } } as const;
+
 export default async function HomePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const [universityCatalog, dbServicePartners] = await Promise.all([
+  // The homepage only ever displays 8 universities. The previous version
+  // fetched up to 240 rows (each with a nested partner + programs include)
+  // just to pick 8 by name — measured as a real contributor to homepage
+  // TTFB. This queries directly for the featured names first (a small,
+  // index-friendly IN-list lookup), only falling back to a broader query
+  // for the rare case fewer than 8 of the featured names exist yet.
+  const [featuredMatches, dbServicePartners] = await Promise.all([
     prisma.university.findMany({
-      where: { partner: { type: "UNIVERSITY", status: "ACTIVE" } },
-      orderBy: [{ country: "asc" }, { name: "asc" }],
-      take: 240,
-      include: { partner: true, programs: { where: { active: true }, select: { id: true } } },
+      where: { name: { in: [...FEATURED_EUROPE_UNIVERSITIES] }, partner: { type: "UNIVERSITY", status: "ACTIVE" } },
+      include: HOMEPAGE_UNIVERSITY_INCLUDE,
     }).catch(() => []),
     prisma.partner.findMany({
       where: { status: "ACTIVE", type: { in: ["ACCOMMODATION", "INSURANCE", "STUDENT_FINANCE", "SCHOLARSHIP", "TRAVEL", "OTHER"] } },
@@ -88,17 +94,19 @@ export default async function HomePage() {
     }).catch(() => []),
   ]);
 
-  const universityPartners: Array<(typeof universityCatalog)[number]> = [];
+  const universityPartners: Array<(typeof featuredMatches)[number]> = [];
   for (const featuredName of FEATURED_EUROPE_UNIVERSITIES) {
-    const match = universityCatalog.find((university) => university.name.toLowerCase() === featuredName.toLowerCase());
+    const match = featuredMatches.find((university) => university.name.toLowerCase() === featuredName.toLowerCase());
     if (match) universityPartners.push(match);
   }
   if (universityPartners.length < 8) {
-    for (const university of universityCatalog) {
-      if (universityPartners.some((item) => item.id === university.id)) continue;
-      universityPartners.push(university);
-      if (universityPartners.length >= 8) break;
-    }
+    const fallback = await prisma.university.findMany({
+      where: { partner: { type: "UNIVERSITY", status: "ACTIVE" }, id: { notIn: universityPartners.map((u) => u.id) } },
+      orderBy: [{ country: "asc" }, { name: "asc" }],
+      take: 8 - universityPartners.length,
+      include: HOMEPAGE_UNIVERSITY_INCLUDE,
+    }).catch(() => []);
+    universityPartners.push(...fallback);
   }
 
   const mergedServices = dbServicePartners.flatMap((partner) => {
