@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import type { DocumentReviewStatus } from "@prisma/client";
 import { Header } from "@/components/Header";
 import { OpenDocumentButton } from "@/components/documents/OpenDocumentButton";
+import { DirectDocumentUpload } from "@/components/documents/DirectDocumentUpload";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 
@@ -55,6 +56,10 @@ export default async function DocumentsPage({ searchParams }: { searchParams: { 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Documents requested during your student journey stay in one reusable vault. SOUP can read dates from documents to flag upcoming expiry, but authority acceptance and freshness rules remain separate.</p>
           </div>
           <Link href="/counselor" className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-sm font-semibold text-white"><Upload size={15}/>Continue with Counselor</Link>
+        </div>
+
+        <div className="mt-6 max-w-md">
+          <DirectDocumentUpload/>
         </div>
 
         <section className="mt-6 grid gap-3 sm:grid-cols-4">
