@@ -113,9 +113,13 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
     setVisibleCount(PAGE_SIZE);
   }
 
-  function openInNoodles(university: CatalogUniversity) {
-    const params = new URLSearchParams({ intent: "universities", universityId: university.id, prompt: "I'd like to apply to this university." });
-    router.push(`/counselor?${params.toString()}`);
+  // Goes to the university's own summary page (fees, intakes, levels,
+  // program list) rather than straight into Noodles — a student clicking a
+  // catalogue card wants to see what the university actually offers first.
+  // That page's own "Ask Noodles about this university" button is still the
+  // high-intent entry into Noodles, with the same university context passed.
+  function openUniversity(university: CatalogUniversity) {
+    router.push(`/universities/${university.id}`);
   }
 
   const selectClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-navy/40";
@@ -189,7 +193,7 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
         {visible.map((university) => (
           <button
             key={university.id}
-            onClick={() => openInNoodles(university)}
+            onClick={() => openUniversity(university)}
             className="group min-w-0 rounded-2xl border border-hair bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm"
           >
             <div className="flex min-w-0 items-start gap-3">

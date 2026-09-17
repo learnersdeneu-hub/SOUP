@@ -69,7 +69,7 @@ export default async function UniversitiesPage() {
           <div className="min-w-0">
             <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP university network</div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Explore universities and programs.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Search or filter the full SOUP catalogue. Click any university to continue straight into Noodles, who already knows which one you picked and can help you check fit and start an application.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Search or filter the full SOUP catalogue. Click any university to see its fees, intakes and programs, then continue into Noodles when you're ready — it already knows which one you picked and can help you check fit and start an application.</p>
           </div>
         </div>
 
