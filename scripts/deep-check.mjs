@@ -170,7 +170,15 @@ check('AI/provider failures remain customer-neutral', /(?:SOUP Counselor|Noodles
 check('Conversation endpoint has distributed rate limiting and bounded transcript input', /checkRateLimit\(request, profile\?\.id\)/.test(stream) && /Retry-After/.test(stream) && /MAX_HISTORY_MESSAGES = 28/.test(stream) && /MAX_HISTORY_CHARS = 42_000/.test(stream) && /compactConversation/.test(stream));
 check('Authenticated Counselor history is reconstructed from server-owned messages', /prisma\.chatMessage\.findMany/.test(stream) && /server-owned ChatMessage/.test(stream) && /persisted\.reverse\(\)/.test(stream) && /clientMessages\[clientMessages\.length - 1\]/.test(stream));
 check('Browser UI events cannot write arbitrary trusted assistant history', /trustedEvent/.test(conversationMessageRoute) && /SYSTEM_EVENT/.test(conversationMessageRoute) && !/body\?\.content/.test(conversationMessageRoute) && /persistableSystemEvent/.test(workspace));
-check('System events and imported guest assistant text cannot masquerade as trusted model history', /source === \"SYSTEM_EVENT\"/.test(stream) && /source === \"GUEST_IMPORT\"/.test(stream) && /Untrusted pre-signup conversation reference/.test(stream));
+// Regression guard for a confirmed live incident: GUEST_IMPORT downgrading
+// used to apply only to ASSISTANT-role imported messages, so a USER-role
+// imported message (a different, previous person's own typed text on a
+// shared device) flowed through untouched as an ordinary trusted "user"
+// turn — including that person's name, which is how one student's Noodles
+// conversation ended up addressing them by an unrelated student's name. The
+// fix removed the role restriction; this check fails again if it is ever
+// reintroduced.
+check('System events and imported guest text (either role) cannot masquerade as trusted model history', /source === \"SYSTEM_EVENT\"/.test(stream) && /source === \"GUEST_IMPORT\"/.test(stream) && /Untrusted pre-signup/.test(stream) && !/source === \"GUEST_IMPORT\" && message\.role === \"ASSISTANT\"/.test(stream));
 check('Legacy GCI conversation workflows cannot be invoked through SOUP APIs', /new Set<SoupWorkflow>\(\[\"RESUME\", \"COUNSELOR\"\]\)/.test(stream) && /new Set\(\[\"RESUME\", \"COUNSELOR\"\]\)/.test(historyRoute) && /new Set\(\[\"RESUME\", \"COUNSELOR\"\]\)/.test(sessionsRoute));
 check('AI rate limits are database-backed and guest IPs are pseudonymized', /model AiRateLimitCounter/.test(schema) && /ON CONFLICT \("subject"\)/.test(rateLimiter) && /createHash\("sha256"\)/.test(rateLimiter) && /SOUP_RATE_LIMIT_SALT/.test(env));
 check('All expensive Counselor/document research routes use the shared AI limit', /aiRateLimitResponse/.test(planRoute) && /aiRateLimitResponse/.test(checklistRoute) && /aiRateLimitResponse/.test(evidenceRoute) && /aiRateLimitResponse/.test(read('src/app/api/applications/[id]/requirements/route.ts')) && /aiRateLimitResponse/.test(read('src/app/api/admin/applications/[id]/requirements/route.ts')) && /Retry-After/.test(httpRateLimit));
