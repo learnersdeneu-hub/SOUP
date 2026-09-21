@@ -18,5 +18,15 @@ export default async function CounselorPage({ searchParams }: { searchParams?: {
   // never inject fabricated "verified" data into the prompt.
   const entryUniversityId = String(searchParams?.universityId || "").trim().slice(0, 191) || undefined;
   const initialPrompt = String(searchParams?.prompt || "").trim().slice(0, 2000) || (entryUniversityId ? "I'd like to apply to this university." : undefined);
-  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><Header signedIn={!!user}/><CounselorConversation signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
+  // Keyed by the signed-in user's own id (or "guest"): ConversationWorkspace
+  // keeps its chat history and session id in long-lived client React state,
+  // which nothing otherwise resets if the browser's authenticated identity
+  // changes without a full page reload — e.g. a shared browser where someone
+  // signs into a different account in another tab, since Supabase's session
+  // cookie is shared across tabs in the same browser. Changing this key on
+  // any real navigation back to this page forces React to fully discard the
+  // old instance (and its state) rather than silently keep appending new,
+  // correctly-scoped server responses onto a thread that still shows a
+  // previous account's messages.
+  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><Header signedIn={!!user}/><CounselorConversation key={user?.id || "guest"} signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
 }

@@ -9,7 +9,11 @@ export default async function ResumePage({ searchParams }: { searchParams: { gen
   return (
     <div className="h-[100dvh] overflow-hidden bg-paper">
       <Header signedIn={!!user} />
-      <ResumeConversation signedIn={!!user} autoGenerate={searchParams.generate === "1"} />
+      {/* Keyed by user id/"guest" for the same reason as CounselorConversation
+          in /counselor: forces a full remount, discarding stale client
+          state, whenever the authenticated identity changes across a
+          navigation back to this page. */}
+      <ResumeConversation key={user?.id || "guest"} signedIn={!!user} autoGenerate={searchParams.generate === "1"} />
     </div>
   );
 }
