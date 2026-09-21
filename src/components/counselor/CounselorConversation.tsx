@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FileUp, GraduationCap, Loader2, LockKeyhole, Sparkles, ShieldCheck } from "lucide-react";
+import { Download, FileUp, GraduationCap, Loader2, LockKeyhole, Sparkles, ShieldCheck, X } from "lucide-react";
 import { ConversationWorkspace } from "@/components/conversation/ConversationWorkspace";
 import { ApplicationJourneyPanel, type JourneyStatus } from "@/components/counselor/ApplicationJourneyPanel";
 import type { ConversationMessage } from "@/lib/conversation/types";
@@ -52,6 +52,14 @@ function latestAssistant(messages: ConversationMessage[]) {
   return [...messages].reverse().find((message) => message.role === "assistant")?.content || "";
 }
 
+// Dismissed document-request labels for this browser tab session — cleared
+// automatically when the tab/browser session ends, per the dismiss control's
+// own "for the current session" scope. Kept separate from the persisted
+// server-side note (see /api/counselor/dismiss-document): this is what stops
+// the card reappearing in THIS tab; the server note is what stops Noodles
+// itself re-asking in a future reply.
+const DISMISSED_DOCS_STORAGE_KEY = "soup_dismissed_document_requests_v1";
+
 // Pure decision for the composer's attach affordance, kept separate from the
 // component so it is directly testable: a signed-in student always gets the
 // real file picker (the affordance is general now, not only when Noodles has
@@ -89,6 +97,31 @@ export function CounselorConversation({ signedIn, intent, requestedItemId, reque
   const [checklist, setChecklist] = useState<{ checklistId: string; title: string; count: number } | null>(null);
   const [journeyRefresh, setJourneyRefresh] = useState(0);
   const [pendingRequirement, setPendingRequirement] = useState<{ itemId: string; label: string; applicationId?: string; university?: string } | null>(null);
+  const [dismissedLabels, setDismissedLabels] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DISMISSED_DOCS_STORAGE_KEY);
+      if (raw) setDismissedLabels(new Set(JSON.parse(raw) as string[]));
+    } catch {}
+  }, []);
+
+  const dismissDocumentRequest = useCallback((label: string) => {
+    const key = label.trim().toLowerCase();
+    setDismissedLabels((prev) => {
+      const next = new Set(prev);
+      next.add(key);
+      try { sessionStorage.setItem(DISMISSED_DOCS_STORAGE_KEY, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+    if (signedIn) {
+      fetch("/api/counselor/dismiss-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: activeSessionId, documentLabel: label }),
+      }).catch(() => undefined);
+    }
+  }, [signedIn, activeSessionId]);
 
   const copy = intent && INTENT_COPY[intent] ? INTENT_COPY[intent] : {
     title: "Noodles",
@@ -98,7 +131,8 @@ export function CounselorConversation({ signedIn, intent, requestedItemId, reque
 
   const last = useMemo(() => latestAssistant(messages), [messages]);
   const aiDocumentLabel = last.match(/\[\[DOCUMENT_REQUEST:([^\]]+)\]\]/)?.[1]?.trim() || null;
-  const documentLabel = aiDocumentLabel || requestedLabel || pendingRequirement?.label || null;
+  const rawDocumentLabel = aiDocumentLabel || requestedLabel || pendingRequirement?.label || null;
+  const documentLabel = rawDocumentLabel && dismissedLabels.has(rawDocumentLabel.trim().toLowerCase()) ? null : rawDocumentLabel;
   const effectiveChecklistItemId = requestedItemId || pendingRequirement?.itemId || undefined;
   const effectiveApplicationId = applicationId || pendingRequirement?.applicationId || undefined;
   const applicationPlanReady = last.includes("[[APPLICATION_PLAN_READY]]");
@@ -241,7 +275,13 @@ export function CounselorConversation({ signedIn, intent, requestedItemId, reque
         onSessionChange={setActiveSessionId}
         onReset={() => { setNotice(null); setPlan(null); setChecklist(null); }}
         bottomAction={documentLabel ? (
-          <div className="rounded-2xl border border-[#D9C98E] bg-[#FFFDF7] p-4 shadow-[0_12px_32px_rgba(20,32,48,0.08)]">
+          <div className="relative rounded-2xl border border-[#D9C98E] bg-[#FFFDF7] p-4 pr-9 shadow-[0_12px_32px_rgba(20,32,48,0.08)]">
+            <button
+              onClick={() => dismissDocumentRequest(documentLabel)}
+              aria-label={`Dismiss request for ${documentLabel}`}
+              title="Dismiss for now"
+              className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-mute hover:bg-black/5 hover:text-ink"
+            ><X size={13}/></button>
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEF3F7] text-navy">{signedIn ? <FileUp size={14}/> : <LockKeyhole size={14}/>}</div>
               <div className="flex-1"><div className="text-xs font-semibold text-ink">{documentLabel}</div><p className="mt-1 text-[11px] leading-5 text-mute">The Noodles asked for this document now because it is relevant to the current step. It will be read and saved in your SOUP document vault.</p>{notice && <p className="mt-2 text-[11px] font-medium text-teal">{notice}</p>}</div>

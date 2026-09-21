@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { idSchema, optionalIdSchema, optionalShortTextSchema } from "@/lib/validation/http";
+import { idSchema, optionalIdSchema, optionalShortTextSchema, shortTextSchema } from "@/lib/validation/http";
+
+export const dismissDocumentRequestSchema = z.object({
+  sessionId: optionalIdSchema,
+  documentLabel: shortTextSchema(200).min(1),
+}).strict();
 
 export const startApplicationSchema = z.object({
   // Optional: present when starting from an AI-generated shortlist recommendation.
