@@ -165,6 +165,12 @@ export function ConversationWorkspace({ workflow, signedIn, title, subtitle, int
             if (response.ok) {
               setSessionId(body.sessionId || null);
               if (body.messages?.length) localMessages = body.messages;
+              // Once reconciled, the server session is the source of truth for this
+              // account. Clearing this now — not only on sign-out — means a guest
+              // draft can never sit in this browser's storage waiting to be read by
+              // whichever account signs in next, even if this person never
+              // explicitly signs out (walks away from a shared/school computer).
+              try { localStorage.removeItem(storageKey); } catch {}
             }
           } catch {}
         }
