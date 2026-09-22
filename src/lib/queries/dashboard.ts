@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { isSupersededChecklist } from "@/lib/journey/checklists";
+import { computeApplicationProgress } from "@/lib/applications/progress";
 
 export async function getCustomerDashboardData(userId: string) {
   const profile = await prisma.profile.findUnique({ where: { userId }, include: { user: true } });
@@ -56,16 +57,21 @@ export async function getCustomerDashboardData(userId: string) {
     ? await prisma.user.findUnique({ where: { id: studentCase.assignedStaffUserId }, select: { id: true, fullName: true, email: true, role: true } })
     : null;
 
-  const completenessParts = [
-    profile.user.fullName ? 15 : 0,
-    profile.user.nationality ? 10 : 0,
-    studentCase?.targetDegreeLevel ? 15 : 0,
-    studentCase?.targetSubject ? 15 : 0,
-    studentCase?.searchScope ? 15 : 0,
-    documentCount ? 15 : 0,
-    shortlists.length ? 15 : 0,
-  ];
-  const computedCompleteness = completenessParts.reduce((sum, value) => sum + value, 0);
+  // Single source of truth for "how complete is this student's application"
+  // on the dashboard: the same six sections shown in the My Application
+  // Progress card below, not a separately-tuned formula that could disagree
+  // with what the detailed breakdown actually shows.
+  const applicationProgress = computeApplicationProgress({
+    fullName: profile.user.fullName,
+    nationality: profile.user.nationality,
+    dateOfBirth: profile.user.dateOfBirth,
+    currentCountry: profile.user.currentCountry,
+    fundingSummary: studentCase?.fundingSummary,
+    academicBackgroundSummary: studentCase?.academicBackgroundSummary,
+    englishProficiencySummary: studentCase?.englishProficiencySummary,
+    documentCount,
+    applicationCount: applications.length,
+  });
 
   return {
     profile,
@@ -96,7 +102,8 @@ export async function getCustomerDashboardData(userId: string) {
     plusActive,
     counselorSessions,
     nextCounselorSession: counselorSessions.find((session) => session.status === "SCHEDULED") || counselorSessions[0] || null,
-    completeness: Math.max(profile.profileCompletenessPct, computedCompleteness),
+    applicationProgress,
+    completeness: applicationProgress.percent,
   };
 }
 

@@ -8,6 +8,7 @@ import { getCustomerDashboardData } from "@/lib/queries/dashboard";
 import { syncStudentAlerts } from "@/lib/student/alerts";
 import { DirectApplicationBox } from "@/components/applications/DirectApplicationBox";
 import { DirectDocumentUpload } from "@/components/documents/DirectDocumentUpload";
+import { ApplicationProgressCard } from "@/components/dashboard/ApplicationProgressCard";
 
 function stageLabel(stage?: string | null) {
   if (!stage) return "Exploring";
@@ -100,6 +101,8 @@ export default async function DashboardPage() {
             })}
           </div>
         </section>
+
+        <ApplicationProgressCard progress={data.applicationProgress}/>
 
         <section className="mt-5 grid gap-4 lg:grid-cols-2">
           <div className="rounded-2xl border border-hair bg-white p-5">
