@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CheckCircle2, Circle } from "lucide-react";
 import type { ApplicationProgressSummary } from "@/lib/applications/progress";
 
@@ -34,12 +35,17 @@ export function ApplicationProgressCard({ progress }: { progress: ApplicationPro
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {sections.map((section) => (
-          <div key={section.key} className="flex flex-col items-center gap-1.5 text-center">
+          <Link
+            key={section.key}
+            href={section.href}
+            aria-label={`${section.label} — ${section.complete ? "complete, view or edit" : "start now"}`}
+            className="flex flex-col items-center gap-1.5 rounded-xl p-2 text-center transition hover:bg-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          >
             {section.complete
               ? <CheckCircle2 size={20} className="text-teal" />
               : <Circle size={20} className="text-hair" />}
             <span className={`text-[10px] leading-4 ${section.complete ? "font-semibold text-ink" : "text-mute"}`}>{section.label}</span>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

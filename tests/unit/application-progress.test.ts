@@ -39,6 +39,13 @@ describe("computeApplicationProgress", () => {
     expect(academicSection?.complete).toBe(false);
   });
 
+  it("gives every section a distinct, real navigation target", () => {
+    const result = computeApplicationProgress({});
+    const hrefs = result.sections.map((section) => section.href);
+    expect(hrefs).toEqual(["/profile/details", "/profile/funding", "/profile/education", "/documents", "/profile/testing", "/applications"]);
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+  });
+
   it("computes a partial fraction correctly", () => {
     const result = computeApplicationProgress({
       fullName: "Ada Lovelace",

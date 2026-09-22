@@ -1436,6 +1436,20 @@ model StudentCase {
   studyLanguage       String?
   goals               Json?
   constraints         Json?
+  // The Common-App-style "fill once" core profile (see
+  // src/lib/applications/coreProfile.ts): structured detail beyond the
+  // existing free-text summary fields above, entered once via /profile/*
+  // and reused across every university-specific application rather than
+  // re-collected per school. Kept as JSON, matching goals/constraints above,
+  // because each of these is a loosely-structured bundle of many optional
+  // sub-fields (see the field spec in coreProfile.ts) rather than a single
+  // scalar — a JSON column here is one additive, low-risk migration instead
+  // of dozens of new individual nullable columns for fields most students
+  // will only partially fill in.
+  coreProfileDetails  Json?
+  fundingDetails      Json?
+  educationHistory    Json?
+  testingDetails      Json?
   nextAction          String?
   humanHandoffActive  Boolean             @default(false)
   assignedStaffUserId String?
