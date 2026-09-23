@@ -30,7 +30,7 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
     if (!email.trim()) { setError("Enter your email address."); return; }
     setSending(true);
     setError(null);
-    const result = await startEmailOtp({ email });
+    const result = await startEmailOtp({ email, next });
     setSending(false);
     if (!result.ok) { setError(result.error); return; }
     setStep("otp");

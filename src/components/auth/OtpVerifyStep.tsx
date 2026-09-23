@@ -58,7 +58,7 @@ export function OtpVerifyStep({
     setResending(true);
     setError(null);
     setResendNotice(null);
-    const result = await startEmailOtp({ email, fullName, institutionName });
+    const result = await startEmailOtp({ email, fullName, institutionName, next });
     setResending(false);
     if (!result.ok) { setError(result.error); return; }
     setResendNotice("A new code has been sent.");

@@ -33,7 +33,7 @@ export function SignUpCard({ next, subtitle }: { next: string; subtitle: string 
     // in production that a thrown error here was not reliably caught by
     // this try/catch and instead crashed the page. See the comment on
     // startEmailOtp in actions/auth.ts for the full explanation.
-    const result = await startEmailOtp({ email, fullName, institutionName });
+    const result = await startEmailOtp({ email, fullName, institutionName, next });
     setSending(false);
     if (!result.ok) { setError(result.error); return; }
     setStep("otp");

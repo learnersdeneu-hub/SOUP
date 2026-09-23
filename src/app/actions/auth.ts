@@ -134,11 +134,29 @@ export async function signIn(formData: FormData) {
 // CREATION time (see options.data below) and read back out of
 // user_metadata by ensureUserAndProfile after verifyEmailOtp succeeds —
 // they are never used to gate or re-check anything on a later sign-in.
-export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string }): Promise<{ ok: true } | { ok: false; error: string }> {
+//
+// emailRedirectTo is set even though this app's UI asks the student to type
+// a 6-digit code, not click a link: Supabase's default "Confirm signup" /
+// "Magic Link" email templates send a confirmation LINK unless the
+// project's Dashboard templates are edited to include {{ .Token }} (a
+// Dashboard-only setting, reported separately, that this app's code cannot
+// change). Confirmed in production — a real signup email arrived as a
+// "Confirm your email address" link, not a code. Setting emailRedirectTo
+// means that link, if that's what the student's email actually contains
+// right now, still works correctly: it lands on /auth/callback, which
+// already exchanges the code for a session and calls ensureUserAndProfile
+// — the exact same provisioning function verifyEmailOtp calls, reading the
+// same full_name/institution_name back out of user_metadata since that
+// metadata is attached to the user row at creation regardless of which
+// confirmation method completes it. This keeps signup working today,
+// whichever email template ends up configured, rather than being fully
+// blocked on that Dashboard change.
+export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string; next?: string }): Promise<{ ok: true } | { ok: false; error: string }> {
   const email = params.email.trim().toLowerCase();
   if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
   const fullName = params.fullName?.trim().slice(0, 120) || undefined;
   const institutionName = params.institutionName?.trim().slice(0, 200) || undefined;
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
 
   try {
     const supabase = createClient();
@@ -146,6 +164,7 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
       email,
       options: {
         shouldCreateUser: true,
+        emailRedirectTo: `${baseUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
         ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
       },
     });
