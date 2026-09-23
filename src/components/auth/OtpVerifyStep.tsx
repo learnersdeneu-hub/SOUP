@@ -43,11 +43,12 @@ export function OtpVerifyStep({
     event.preventDefault();
     setVerifying(true);
     setError(null);
-    try {
-      await verifyEmailOtp({ email, token: code.trim(), next, fullName, institutionName });
-      // On success verifyEmailOtp redirects server-side; nothing left to do here.
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That code is incorrect. Check it and try again.");
+    // verifyEmailOtp returns { ok: false, error } on failure and redirects
+    // (never returns) on success — see the comment on it in actions/auth.ts
+    // for why this is a return value rather than a thrown exception.
+    const result = await verifyEmailOtp({ email, token: code.trim(), next, fullName, institutionName });
+    if (result && !result.ok) {
+      setError(result.error);
       setVerifying(false);
     }
   }
@@ -57,17 +58,13 @@ export function OtpVerifyStep({
     setResending(true);
     setError(null);
     setResendNotice(null);
-    try {
-      await startEmailOtp({ email, fullName, institutionName });
-      setResendNotice("A new code has been sent.");
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-      setCode("");
-      inputRef.current?.focus();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not resend the code. Please try again.");
-    } finally {
-      setResending(false);
-    }
+    const result = await startEmailOtp({ email, fullName, institutionName });
+    setResending(false);
+    if (!result.ok) { setError(result.error); return; }
+    setResendNotice("A new code has been sent.");
+    setCooldown(RESEND_COOLDOWN_SECONDS);
+    setCode("");
+    inputRef.current?.focus();
   }
 
   return (

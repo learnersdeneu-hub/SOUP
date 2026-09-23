@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserAndProfile } from "@/lib/auth/provision";
+import { logServerError as logAuthError } from "@/lib/logging/safe";
 
 // CRITICAL, security-relevant: Next.js's client-side Router Cache stores
 // previously-rendered pages per URL for up to ~30s on dynamic routes (this
@@ -114,48 +115,68 @@ export async function signIn(formData: FormData) {
 // sign-in — the same call either way, unified by Supabase's own
 // shouldCreateUser semantics: a brand-new email creates the account, a
 // known email just signs it in. Called directly from client code (the
-// multi-step sign-up/sign-in UI manages its own step transitions), so
-// unlike signUp/signIn above these throw on failure instead of redirecting
-// — the caller decides what the current step's UI should show.
+// multi-step sign-up/sign-in UI manages its own step transitions).
+//
+// These return a plain { ok, error } result on failure rather than
+// throwing. Confirmed in production (real log, not a guess): when
+// Supabase's own email send fails ("Error sending confirmation email" —
+// Supabase's default email sender, unrelated to this app's own
+// sendTransactionalEmail/Resend setup, is what actually sends this OTP;
+// see the SMTP configuration note elsewhere), the resulting thrown error
+// was NOT reliably caught by the calling client component's try/catch and
+// instead surfaced as a full framework error page. Returning a result
+// object sidesteps that failure mode entirely — a normal return value
+// crossing the Server Action boundary has no such ambiguity, unlike a
+// thrown exception. Do not change this back to throwing without confirming
+// the underlying Next.js behavior first.
 //
 // fullName/institutionName are only ever applied by Supabase at account
 // CREATION time (see options.data below) and read back out of
 // user_metadata by ensureUserAndProfile after verifyEmailOtp succeeds —
 // they are never used to gate or re-check anything on a later sign-in.
-export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string }) {
+export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string }): Promise<{ ok: true } | { ok: false; error: string }> {
   const email = params.email.trim().toLowerCase();
-  if (!email || !email.includes("@")) throw new Error("Enter a valid email address.");
+  if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
   const fullName = params.fullName?.trim().slice(0, 120) || undefined;
   const institutionName = params.institutionName?.trim().slice(0, 200) || undefined;
 
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: true,
-      ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
-    },
-  });
-  if (error) throw new Error(error.message || "Could not send a verification code. Please try again.");
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+        ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
+      },
+    });
+    if (error) {
+      logAuthError("SOUP_START_EMAIL_OTP_FAILED", error);
+      return { ok: false, error: /confirmation email|sending/i.test(error.message || "") ? "SOUP could not send the verification email right now. Please try again shortly." : (error.message || "Could not send a verification code. Please try again.") };
+    }
+    return { ok: true };
+  } catch (caught) {
+    logAuthError("SOUP_START_EMAIL_OTP_UNEXPECTED", caught);
+    return { ok: false, error: "Could not send a verification code. Please try again." };
+  }
 }
 
-export async function verifyEmailOtp(params: { email: string; token: string; next?: string; fullName?: string; institutionName?: string }) {
+export async function verifyEmailOtp(params: { email: string; token: string; next?: string; fullName?: string; institutionName?: string }): Promise<{ ok: false; error: string } | void> {
   const email = params.email.trim().toLowerCase();
   const token = params.token.trim();
-  if (!email) throw new Error("Missing email address.");
-  if (!token || token.length < 6) throw new Error("Enter the 6-digit code sent to your email.");
-
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-  if (error || !data.user) {
-    const expired = /expired/i.test(error?.message || "");
-    throw new Error(expired ? "That code has expired. Request a new one." : "That code is incorrect. Check it and try again.");
-  }
+  if (!email) return { ok: false, error: "Missing email address." };
+  if (!token || token.length < 6) return { ok: false, error: "Enter the 6-digit code sent to your email." };
 
   try {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    if (error || !data.user) {
+      const expired = /expired/i.test(error?.message || "");
+      return { ok: false, error: expired ? "That code has expired. Request a new one." : "That code is incorrect. Check it and try again." };
+    }
     await ensureUserAndProfile(data.user, params.fullName, params.institutionName);
-  } catch {
-    throw new Error("You're verified, but your SOUP profile could not be prepared. Please try again.");
+  } catch (caught) {
+    logAuthError("SOUP_VERIFY_EMAIL_OTP_FAILED", caught);
+    return { ok: false, error: "You're verified, but your SOUP profile could not be prepared. Please try again." };
   }
 
   const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";

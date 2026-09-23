@@ -29,14 +29,14 @@ export function SignUpCard({ next, subtitle }: { next: string; subtitle: string 
     }
     setSending(true);
     setError(null);
-    try {
-      await startEmailOtp({ email, fullName, institutionName });
-      setStep("otp");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not send a verification code. Please try again.");
-    } finally {
-      setSending(false);
-    }
+    // startEmailOtp returns { ok, error } rather than throwing — confirmed
+    // in production that a thrown error here was not reliably caught by
+    // this try/catch and instead crashed the page. See the comment on
+    // startEmailOtp in actions/auth.ts for the full explanation.
+    const result = await startEmailOtp({ email, fullName, institutionName });
+    setSending(false);
+    if (!result.ok) { setError(result.error); return; }
+    setStep("otp");
   }
 
   if (step === "otp") {

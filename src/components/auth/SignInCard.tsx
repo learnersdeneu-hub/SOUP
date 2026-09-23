@@ -30,14 +30,10 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
     if (!email.trim()) { setError("Enter your email address."); return; }
     setSending(true);
     setError(null);
-    try {
-      await startEmailOtp({ email });
-      setStep("otp");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not send a verification code. Please try again.");
-    } finally {
-      setSending(false);
-    }
+    const result = await startEmailOtp({ email });
+    setSending(false);
+    if (!result.ok) { setError(result.error); return; }
+    setStep("otp");
   }
 
   if (step === "otp") {
