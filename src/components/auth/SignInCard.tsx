@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, startEmailOtp } from "@/app/actions/auth";
 import { CheckEmailStep } from "@/components/auth/CheckEmailStep";
 
 const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none";
+const PENDING_STORAGE_KEY = "soup_signin_pending";
 
 // Email + sign-in link is the primary sign-in path; password stays
 // available as a secondary option so existing password accounts are never
@@ -25,6 +26,29 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(errorMessage || null);
 
+  // See the matching comment in SignUpCard: a stray reload of a tab left
+  // open across a deploy can wipe local React state right after the email
+  // send already succeeded server-side. Persisting to sessionStorage means
+  // a reload restores "check your email" instead of silently dropping back
+  // to an empty form.
+  useEffect(() => {
+    if (errorMessage) return;
+    try {
+      const raw = sessionStorage.getItem(PENDING_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { email?: string };
+      if (!saved.email) return;
+      setEmail(saved.email);
+      setStep("sent");
+    } catch {
+      // Private browsing / blocked storage — safe to ignore.
+    }
+    // errorMessage is intentionally read once on mount, not tracked as a
+    // dependency: it reflects the URL this page loaded with, not something
+    // that changes during the component's lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function continueWithEmail(event: React.FormEvent) {
     event.preventDefault();
     if (!email.trim()) { setError("Enter your email address."); return; }
@@ -33,11 +57,17 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
     const result = await startEmailOtp({ email, next });
     setSending(false);
     if (!result.ok) { setError(result.error); return; }
+    try { sessionStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify({ email })); } catch {}
     setStep("sent");
   }
 
+  function changeEmail() {
+    try { sessionStorage.removeItem(PENDING_STORAGE_KEY); } catch {}
+    setStep("email");
+  }
+
   if (step === "sent") {
-    return <CheckEmailStep email={email} next={next} onChangeEmail={() => setStep("email")} />;
+    return <CheckEmailStep email={email} next={next} onChangeEmail={changeEmail} />;
   }
 
   return (
@@ -65,7 +95,7 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
             <button type="submit" className="w-full rounded-xl py-2.5 text-sm font-medium text-white bg-navy">Sign In</button>
           </form>
           <div className="mt-3 text-center">
-            <button type="button" onClick={() => { setShowPassword(false); setError(null); }} className="text-xs font-medium text-navy">Use an email code instead</button>
+            <button type="button" onClick={() => { setShowPassword(false); setError(null); }} className="text-xs font-medium text-navy">Use an email link instead</button>
           </div>
         </>
       )}

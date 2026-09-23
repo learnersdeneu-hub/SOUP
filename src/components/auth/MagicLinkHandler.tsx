@@ -39,6 +39,17 @@ export function MagicLinkHandler({ next }: { next: string }) {
         return;
       }
 
+      // Clear the "pending send" markers SignUpCard/SignInCard use to
+      // survive a stray reload — sign-in just actually completed, so a
+      // later visit to /sign-up or /sign-in should show a fresh form, not
+      // a stale "check your email" screen for this already-finished link.
+      try {
+        sessionStorage.removeItem("soup_signup_pending");
+        sessionStorage.removeItem("soup_signin_pending");
+      } catch {
+        // Private browsing / blocked storage — safe to ignore.
+      }
+
       const result = await completeEmailLinkSignIn({ next });
       if (!cancelled && result && !result.ok) setError(result.error);
     }
