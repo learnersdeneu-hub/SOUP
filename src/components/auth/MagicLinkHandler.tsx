@@ -27,15 +27,24 @@ export function MagicLinkHandler({ next }: { next: string }) {
       const refreshToken = params.get("refresh_token");
       const hashError = params.get("error_description") || params.get("error");
 
-      if (hashError || !accessToken || !refreshToken) {
-        if (!cancelled) setError("That sign-in link is invalid or expired. Please try again.");
+      // Surfacing the specific reason (never the tokens themselves) instead
+      // of one generic message: this flow has failed multiple times in
+      // production for different underlying reasons, and a single vague
+      // message made every failure look identical and undebuggable from a
+      // screenshot alone.
+      if (hashError) {
+        if (!cancelled) setError(`Sign-in link error: ${hashError.replace(/\+/g, " ")}`);
+        return;
+      }
+      if (!accessToken || !refreshToken) {
+        if (!cancelled) setError(`This link didn't include sign-in information (received: "${rawHash || "nothing"}"). Please request a new one.`);
         return;
       }
 
       const supabase = createClient();
       const { error: sessionError } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
       if (sessionError) {
-        if (!cancelled) setError("That sign-in link is invalid or expired. Please try again.");
+        if (!cancelled) setError(`Could not establish your session: ${sessionError.message}`);
         return;
       }
 
