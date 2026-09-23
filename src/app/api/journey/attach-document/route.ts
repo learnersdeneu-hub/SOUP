@@ -4,6 +4,7 @@ import { requireApiProfile } from "@/lib/auth/apiUser";
 import { parseJsonBody } from "@/lib/validation/http";
 import { attachJourneyDocumentSchema } from "@/lib/validation/schemas";
 import { selectAttachmentCandidate } from "@/lib/journey/attachmentMatching";
+import { attachDocumentToChecklistItem } from "@/lib/journey/attachDocumentToItem";
 
 export async function POST(request: Request) {
   const current = await requireApiProfile();
@@ -66,71 +67,12 @@ export async function POST(request: Request) {
     : null;
   if (!item) return Response.json({ attached: false });
 
-  const linkageChanged = item.documentId !== document.id || item.status !== "DOCUMENT_UPLOADED";
-  if (linkageChanged) {
-    await prisma.journeyChecklistItem.update({
-      where: { id: item.id },
-      data: {
-        documentId: document.id,
-        status: "DOCUMENT_UPLOADED",
-        metadata: {
-          ...((item.metadata && typeof item.metadata === "object" && !Array.isArray(item.metadata)) ? item.metadata as Record<string, unknown> : {}),
-          documentLinkedAt: new Date().toISOString(),
-          authorityApproved: false,
-          applicationRequirementSatisfiedByUpload: Boolean(item.checklist.applicationId),
-        },
-      },
-    });
-  }
-
-  if (item.checklist.applicationId) {
-    await prisma.studentApplicationDocument.upsert({
-      where: { applicationId_documentId: { applicationId: item.checklist.applicationId, documentId: document.id } },
-      create: {
-        applicationId: item.checklist.applicationId,
-        documentId: document.id,
-        documentRole: item.title.slice(0, 300),
-        required: item.required,
-      },
-      update: { documentRole: item.title.slice(0, 300), required: item.required },
-    });
-    await prisma.studentApplication.updateMany({
-      where: { id: item.checklist.applicationId, ownership: "SOUP_MANAGED", status: "SHORTLISTED" },
-      data: { status: "DOCUMENTS_REQUIRED" },
-    });
-    if (linkageChanged) {
-      await prisma.studentApplicationEvent.create({
-        data: {
-          applicationId: item.checklist.applicationId,
-          actorUserId: user.id,
-          eventType: "DOCUMENT_SUPPLIED",
-          message: `${item.title} was supplied through Noodles for this application.`,
-          metadata: { checklistId: item.checklistId, checklistItemId: item.id, documentId: document.id, universityApproved: false },
-        },
-      });
-    }
-  }
-
-  const next = await prisma.journeyChecklistItem.findFirst({
-    where: { checklistId: item.checklistId, status: { in: ["WAITING_FOR_DOCUMENT", "ACTION_REQUIRED", "NOT_STARTED"] } },
-    orderBy: { position: "asc" },
+  const result = await attachDocumentToChecklistItem({
+    item,
+    documentId: document.id,
+    actorUserId: user.id,
+    supplyMessage: `${item.title} was supplied through Noodles for this application.`,
   });
 
-  const nextMetadata = next?.metadata && typeof next.metadata === "object" && !Array.isArray(next.metadata)
-    ? next.metadata as Record<string, unknown>
-    : {};
-  return Response.json({
-    attached: true,
-    checklistId: item.checklistId,
-    itemId: item.id,
-    status: "DOCUMENT_UPLOADED",
-    nextItem: next ? {
-      id: next.id,
-      title: next.title,
-      status: next.status,
-      requiresDocument: Boolean(nextMetadata.requiresDocument),
-      externalActionUrl: next.externalActionUrl,
-      externalActionLabel: next.externalActionLabel,
-    } : null,
-  });
+  return Response.json({ attached: true, ...result });
 }

@@ -302,6 +302,10 @@ export const evidenceProcessFormSchema = z.object({
   workflow: z.enum(["COUNSELOR", "RESUME"]).optional().default("COUNSELOR"),
 }).strict();
 
+export const requirementUploadFormSchema = z.object({
+  file: z.unknown(),
+}).strict();
+
 export const premiumCheckoutFormSchema = z.object({
   plan: z.enum(["premium", "premium_plus"]).optional().default("premium"),
 }).strict();

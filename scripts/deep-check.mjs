@@ -30,6 +30,9 @@ const journeyPage = read('src/app/journey/page.tsx');
 const applicationRoute = read('src/app/api/applications/route.ts');
 const applicationRequirements = read('src/lib/applications/requirements.ts');
 const applicationAttach = read('src/app/api/journey/attach-document/route.ts');
+const attachDocumentHelper = read('src/lib/journey/attachDocumentToItem.ts');
+const requirementUploadRoute = read('src/app/api/applications/[id]/requirements/[itemId]/upload/route.ts');
+const applicationDetailPage = read('src/app/applications/[id]/page.tsx');
 const journeyReconcile = read('src/lib/journey/reconcile.ts');
 const applicationStaffStatus = read('src/app/api/admin/applications/[id]/requirements/[itemId]/status/route.ts');
 const applicationStatus = read('src/app/api/admin/applications/[id]/status/route.ts');
@@ -108,7 +111,19 @@ check('Application Plan is versioned and downloadable as PDF', /version = \(late
 check('Only saved genuine partner recommendations can start SOUP-managed applications', /SOUP_MANAGED/.test(applicationRoute) && /shortlistItemId/.test(applicationRoute) && /isPartnerAtGeneration: true/.test(applicationRoute) && /shortlist: \{ profileId: profile\.id \}/.test(applicationRoute) && /partner/.test(applicationRoute) && /SOUP Partner/.test(planPage));
 check('Independent university recommendations cannot become SOUP-managed applications', /independent recommendation/.test(applicationRoute) && /cannot submit this application through the platform/.test(applicationRoute) && /Independent Recommendation/.test(planPage));
 check('Managed applications have source-backed per-application requirements', /Google Search grounding/.test(applicationRequirements) && /applicationId/.test(applicationRequirements) && /const groundingSources = safeResearchSources\(research\.sources\)/.test(applicationRequirements) && /groundingSources,/.test(applicationRequirements) && /kind: "ADMISSION"/.test(applicationRequirements));
-check('Application documents bind to the exact application requirement', /checklistItemId/.test(applicationAttach) && /studentApplicationDocument\.upsert/.test(applicationAttach) && /requestItem/.test(counselor) && /Upload with Counselor/.test(read('src/app/applications/[id]/page.tsx')));
+// studentApplicationDocument.upsert now lives in the shared
+// attachDocumentToChecklistItem helper (see attachDocumentHelper below),
+// used by both the Noodles-driven attach-document route and the direct,
+// AI-independent per-requirement upload route — not duplicated between them.
+// "Upload with Counselor" was intentionally removed from the application
+// page (replaced with a direct upload that never depends on AI/Counselor);
+// this check now asserts its absence, not its presence.
+check('Application documents bind to the exact application requirement', /checklistItemId/.test(applicationAttach) && /attachDocumentToChecklistItem/.test(applicationAttach) && /studentApplicationDocument\.upsert/.test(attachDocumentHelper) && /requestItem/.test(counselor) && !/Upload with Counselor/.test(applicationDetailPage) && /RequirementUploadButton/.test(applicationDetailPage));
+// Matches actual AI-call code patterns (imports/functions), not prose —
+// the route's own comments legitimately name "Gemini" while explaining why
+// this path deliberately avoids it, which a bare word match would wrongly
+// flag.
+check('Application requirement uploads never depend on AI/Counselor succeeding', /export async function POST/.test(requirementUploadRoute) && !/collectAIText\(|collectAIResult\(|getAIProvider\(|googleSearch:|from "@\/lib\/ai\//.test(requirementUploadRoute) && /attachDocumentToChecklistItem/.test(requirementUploadRoute));
 check('Admissions staff controls application-file completion', /Accept for file/.test(read('src/components/admin/ApplicationRequirementOperations.tsx')) && /admissionsDecisionByUserId/.test(applicationStaffStatus) && /READY_TO_SUBMIT/.test(applicationStaffStatus) && /Staff acceptance here means/.test(adminApplicationDetail));
 check('Admissions readiness is calculated from the current checklist only', /where: \{ checklistId: item\.checklistId, required: true \}/.test(applicationStaffStatus));
 check('Staff can refresh official application requirements', /generatedBy: "STAFF"/.test(read('src/app/api/admin/applications/[id]/requirements/route.ts')) && /Refresh official requirements/.test(adminApplicationDetail) && /supersedesChecklistId/.test(applicationRequirements));
@@ -146,7 +161,7 @@ check('Offer upload writes vault document, application state and journey stage',
 check('Offer and enrolment states require an offer document', /OFFER_RECEIVED", "CONDITIONAL_OFFER", "ENROLLED/.test(applicationStatus) && /offerDocumentId/.test(applicationStatus));
 check('Offer event creates notification and optional email', /notification\.create/.test(offerRoute) && /sendTransactionalEmail/.test(offerRoute));
 check('Application operations preserve a chronological event ledger', /model StudentApplicationEvent/.test(schema) && /student_application_events/.test(read('prisma/migrations/20260829203500_soup_application_events/migration.sql')) && /studentApplicationEvent\.create/.test(applicationRoute) && /studentApplicationEvent\.create/.test(applicationStatus) && /studentApplicationEvent\.create/.test(offerRoute));
-check('Student application documents and admissions reviews enter the event ledger', /DOCUMENT_SUPPLIED/.test(applicationAttach) && /REQUIREMENT_REVIEWED/.test(applicationStaffStatus) && /Application history/.test(read('src/app/applications/[id]/page.tsx')) && /Operational history/.test(adminApplicationDetail));
+check('Student application documents and admissions reviews enter the event ledger', /DOCUMENT_SUPPLIED/.test(attachDocumentHelper) && /REQUIREMENT_REVIEWED/.test(applicationStaffStatus) && /Application history/.test(applicationDetailPage) && /Operational history/.test(adminApplicationDetail));
 check('Customer dashboard is a persistent student journey workspace', /Current journey stage/.test(dashboard) && /Applications/.test(dashboard) && /Documents/.test(dashboard) && /Application Plans/.test(dashboard));
 check('Admin customer view acts as case-level CRM', /Applications/.test(adminUser) && /Documents/.test(adminUser) && /Journey/.test(adminUser) && /Conversation/.test(adminUser));
 check('Conversation history supports create/open/rename/delete', /method: "POST"/.test(workspace) && /method: "PATCH"/.test(workspace) && /method: "DELETE"/.test(workspace) && /updatedAt: "desc"/.test(sessionsRoute));
