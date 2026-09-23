@@ -209,6 +209,14 @@ export const applicationRequirementsResearchSchema = z.object({
     externalActionLabel: z.unknown().optional(),
     responsibleParty: z.unknown().optional(),
     approvalBlocking: z.unknown().optional(),
+    // Only present when this requirement is a quantifiable test-score
+    // minimum (e.g. "IELTS 7.0 overall") — lets the server compare it
+    // against the student's saved core-profile test score and auto-satisfy
+    // or flag it, instead of leaving every such item as a manual task. See
+    // reconcileCoreProfileWithChecklist.
+    quantifiableMetric: z.unknown().optional(),
+    quantifiableTestType: z.unknown().optional(),
+    quantifiableMinScore: z.unknown().optional(),
   }).passthrough()).optional().default([]),
 }).passthrough();
 

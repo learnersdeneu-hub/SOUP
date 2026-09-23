@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireProfile } from "@/lib/auth/currentUser";
+import { reconcileCoreProfileWithChecklist } from "@/lib/journey/reconcileCoreProfile";
 
 function clean(value: FormDataEntryValue | null, max = 200) {
   const text = String(value || "").trim();
@@ -169,6 +170,13 @@ export async function saveTestingDetails(formData: FormData) {
     update: { testingDetails: data, ...(summaryParts.length ? { englishProficiencySummary: summaryParts.join(". ") } : {}) },
     create: { profileId: profile.id, testingDetails: data, englishProficiencySummary: summaryParts.join(". ") || null },
   });
+  // Retroactively resolve or flag matching requirements on every one of the
+  // student's existing applications — not just checklists generated after
+  // this save. This is what makes "fill once" genuinely mean once: a score
+  // entered here updates My Colleges immediately, not only on the next
+  // requirements refresh.
+  await reconcileCoreProfileWithChecklist(profile.id).catch(() => undefined);
   revalidatePath("/dashboard");
   revalidatePath("/profile/testing");
+  revalidatePath("/colleges");
 }

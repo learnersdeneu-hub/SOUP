@@ -156,6 +156,7 @@ export default async function DashboardPage() {
         <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {([
             ["/counselor", GraduationCap, "Noodles", "Continue your counseling conversation"],
+            ["/colleges", BriefcaseBusiness, "My Colleges", "Selected universities and their requirements checklists"],
             ["/applications", BriefcaseBusiness, "Applications", `${data.activeApplications.length} active application${data.activeApplications.length === 1 ? "" : "s"}`],
             ["/offers", GraduationCap, "Offers & decisions", `${data.offers.length} recorded offer${data.offers.length === 1 ? "" : "s"}`],
             ["/visa", PlaneTakeoff, "Visa centre", data.offers.length ? "Post-offer visa checklist and next actions" : "Opens when an offer is recorded"],

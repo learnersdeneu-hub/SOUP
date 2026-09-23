@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureStudentCase } from "@/lib/student/case";
-import { applicationKey } from "@/lib/applications/lifecycle";
+import { applicationKey, MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 import { sendTransactionalEmail, escapeHtml } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { requireApiProfile } from "@/lib/auth/apiUser";
@@ -96,6 +96,21 @@ export async function POST(request: Request) {
   const studentCase = await ensureStudentCase(profile.id);
   const existing = await prisma.studentApplication.findFirst({ where: { OR: [{ applicationKey: key }, { profileId: profile.id, universityId, programId, intake }] } });
   if (existing) return Response.json({ application: existing, duplicate: true });
+
+  // "My Colleges" cap (Common App-style): a fixed 3 SOUP-managed
+  // applications at a time, not a plan-tier limit. Self-managed/external
+  // applications never count against it — SOUP isn't running their
+  // checklist, so capping those too would block a student from simply
+  // tracking a school they're applying to entirely on their own. Withdrawn
+  // or rejected applications free up a slot.
+  if (ownership === "SOUP_MANAGED") {
+    const activeManagedCount = await prisma.studentApplication.count({
+      where: { profileId: profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } },
+    });
+    if (activeManagedCount >= MY_COLLEGES_CAP) {
+      return Response.json({ error: `You can track up to ${MY_COLLEGES_CAP} universities at a time. Remove one to add another.` }, { status: 409 });
+    }
+  }
 
   const parsedDeadline = (() => {
     if (!program?.applicationDeadline) return null;

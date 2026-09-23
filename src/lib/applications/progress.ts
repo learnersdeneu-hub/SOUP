@@ -40,7 +40,7 @@ export function computeApplicationProgress(input: ApplicationProgressInput): App
     { key: "academic", label: "Education & Academic Background", complete: filled(input.academicBackgroundSummary), href: "/profile/education" },
     { key: "documents", label: "Standard Documents", complete: (input.documentCount ?? 0) > 0, href: "/documents" },
     { key: "testing", label: "Testing & Requirements", complete: filled(input.englishProficiencySummary), href: "/profile/testing" },
-    { key: "applications", label: "Selected Universities", complete: (input.applicationCount ?? 0) > 0, href: "/applications" },
+    { key: "applications", label: "Selected Universities", complete: (input.applicationCount ?? 0) > 0, href: "/colleges" },
   ];
   const completedCount = sections.filter((section) => section.complete).length;
   const totalCount = sections.length;

@@ -1,5 +1,11 @@
 import type { ChecklistItemStatus, DocumentReviewStatus, EvidenceProcessingStatus, StudentApplicationStatus } from "@prisma/client";
 
+// "My Colleges" cap (Common App-style): fixed at 3 for every student, not a
+// plan-tier limit. Applies only to SOUP_MANAGED applications — see
+// /api/applications POST and the /colleges page, both of which import this
+// single constant rather than each hardcoding the number.
+export const MY_COLLEGES_CAP = 3;
+
 export type ApplicationLike = {
   status: StudentApplicationStatus | string;
   ownership?: string | null;

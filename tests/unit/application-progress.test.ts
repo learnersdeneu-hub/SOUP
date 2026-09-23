@@ -42,7 +42,7 @@ describe("computeApplicationProgress", () => {
   it("gives every section a distinct, real navigation target", () => {
     const result = computeApplicationProgress({});
     const hrefs = result.sections.map((section) => section.href);
-    expect(hrefs).toEqual(["/profile/details", "/profile/funding", "/profile/education", "/documents", "/profile/testing", "/applications"]);
+    expect(hrefs).toEqual(["/profile/details", "/profile/funding", "/profile/education", "/documents", "/profile/testing", "/colleges"]);
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 

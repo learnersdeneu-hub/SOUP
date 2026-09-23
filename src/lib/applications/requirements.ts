@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { collectAIResult, parseJSONObject } from "@/lib/ai/collect";
 import { getStudentCounselorContext } from "@/lib/context/studentContext";
 import { reconcileDocumentWithJourney } from "@/lib/journey/reconcile";
+import { reconcileCoreProfileWithChecklist } from "@/lib/journey/reconcileCoreProfile";
 import { safeHttpUrl, safeResearchSources } from "@/lib/security/urls";
 import { checklistSnapshotRecord, isSupersededChecklist } from "@/lib/journey/checklists";
 import { sourceFreshness } from "@/lib/applications/lifecycle";
@@ -33,7 +34,10 @@ Schema:
       "externalActionUrl":"official action URL if an external action is required, otherwise empty",
       "externalActionLabel":"short action label or empty",
       "responsibleParty":"STUDENT|SOUP",
-      "approvalBlocking":true
+      "approvalBlocking":true,
+      "quantifiableMetric":"ENGLISH_TEST_MIN or NONE — set ENGLISH_TEST_MIN only for an explicit, confirmed minimum overall English test score this exact program requires",
+      "quantifiableTestType":"IELTS|TOEFL|Duolingo|PTE — only when quantifiableMetric is ENGLISH_TEST_MIN",
+      "quantifiableMinScore":0
     }
   ]
 }
@@ -45,8 +49,9 @@ Rules:
 - Do not create visa, insurance, accommodation or travel requirements here unless the university itself explicitly requires one for the application submission.
 - Set responsibleParty=STUDENT for information, documents, declarations, portfolio/questionnaire steps or external actions the student must personally supply/perform. Set responsibleParty=SOUP for application-form entry, portal assembly, final verification, fee handling by staff, or submission operations that SOUP performs for a managed partner application.
 - approvalBlocking=true only when the STUDENT must finish the item before they can approve their file for submission. SOUP operational items should normally have approvalBlocking=false.
-- Do not mark requirements complete. The server will compare the student's existing SOUP document vault after generation.
-- AI document reading is not university approval; staff review remains separate.`;
+- Do not mark requirements complete. The server will compare the student's existing SOUP document vault, and separately their saved test scores for quantifiableMetric items, after generation.
+- AI document reading is not university approval; staff review remains separate.
+- Only set quantifiableMetric when the official source states an explicit numeric minimum for this exact program. Never estimate or infer a threshold — leave it NONE if unclear.`;
 
 function clean(value: unknown, max = 2400) {
   const text = String(value ?? "").trim();
@@ -130,6 +135,9 @@ export async function prepareApplicationRequirements({ applicationId, profileId,
             universityApproved: false,
             responsibleParty: String(item.responsibleParty || "STUDENT").toUpperCase() === "SOUP" ? "SOUP" : "STUDENT",
             approvalBlocking: item.approvalBlocking !== false && String(item.responsibleParty || "STUDENT").toUpperCase() !== "SOUP",
+            ...(String(item.quantifiableMetric || "").toUpperCase() === "ENGLISH_TEST_MIN" && Number.isFinite(Number(item.quantifiableMinScore)) && Number(item.quantifiableMinScore) > 0
+              ? { quantifiableMetric: "ENGLISH_TEST_MIN", quantifiableTestType: clean(item.quantifiableTestType, 20)?.toUpperCase() || null, quantifiableMinScore: Number(item.quantifiableMinScore) }
+              : {}),
           },
         })),
       },
@@ -188,6 +196,7 @@ export async function prepareApplicationRequirements({ applicationId, profileId,
     take: 80,
   });
   for (const document of documents) await reconcileDocumentWithJourney(profileId, document.id, document.documentType).catch(() => undefined);
+  await reconcileCoreProfileWithChecklist(profileId, checklist.id).catch(() => undefined);
 
   const refreshed = await prisma.journeyChecklist.findUnique({ where: { id: checklist.id }, include: { items: true } });
   const supplied = refreshed?.items.filter((item) => item.status === "DOCUMENT_UPLOADED" || item.status === "COMPLETE").length || 0;
