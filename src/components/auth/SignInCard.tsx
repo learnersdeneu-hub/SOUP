@@ -3,17 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signIn, startEmailOtp } from "@/app/actions/auth";
-import { OtpVerifyStep } from "@/components/auth/OtpVerifyStep";
+import { CheckEmailStep } from "@/components/auth/CheckEmailStep";
 
 const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none";
 
-// Email + one-time code is the primary sign-in path; password stays
+// Email + sign-in link is the primary sign-in path; password stays
 // available as a secondary option so existing password accounts are never
 // locked out (same signIn server action as before, untouched). Institution
 // name is intentionally never asked or checked here — it's registration-time
 // data only, not a sign-in credential.
 export function SignInCard({ next, errorMessage, resetNotice }: { next: string; errorMessage?: string; resetNotice?: boolean }) {
-  const [step, setStep] = useState<"email" | "otp">("email");
+  const [step, setStep] = useState<"email" | "sent">("email");
   // An errorMessage prop only ever arrives via a server redirect back to
   // this page with ?error= — the only action that still does that is the
   // password-based signIn (the OTP actions handle their own errors
@@ -33,11 +33,11 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
     const result = await startEmailOtp({ email, next });
     setSending(false);
     if (!result.ok) { setError(result.error); return; }
-    setStep("otp");
+    setStep("sent");
   }
 
-  if (step === "otp") {
-    return <OtpVerifyStep email={email} next={next} onChangeEmail={() => setStep("email")} />;
+  if (step === "sent") {
+    return <CheckEmailStep email={email} next={next} onChangeEmail={() => setStep("email")} />;
   }
 
   return (
@@ -50,7 +50,7 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
         <>
           <form onSubmit={continueWithEmail} className="space-y-3">
             <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" autoComplete="email" required placeholder="Email" className={inputClass} />
-            <button type="submit" disabled={sending} className="w-full rounded-xl py-2.5 text-sm font-medium text-white bg-navy disabled:opacity-60">{sending ? "Sending code…" : "Continue with Email"}</button>
+            <button type="submit" disabled={sending} className="w-full rounded-xl py-2.5 text-sm font-medium text-white bg-navy disabled:opacity-60">{sending ? "Sending link…" : "Continue with Email"}</button>
           </form>
           <div className="mt-3 text-center">
             <button type="button" onClick={() => { setShowPassword(true); setError(null); }} className="text-xs font-medium text-navy">Sign in with password instead</button>

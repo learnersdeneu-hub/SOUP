@@ -111,46 +111,35 @@ export async function signIn(formData: FormData) {
   redirect(next);
 }
 
-// Email OTP is now the primary authentication method for both signup and
-// sign-in — the same call either way, unified by Supabase's own
+// Email + sign-in link is the only authentication method for both signup
+// and sign-in — the same call either way, unified by Supabase's own
 // shouldCreateUser semantics: a brand-new email creates the account, a
 // known email just signs it in. Called directly from client code (the
 // multi-step sign-up/sign-in UI manages its own step transitions).
 //
-// These return a plain { ok, error } result on failure rather than
+// SOUP is link-only by explicit product decision: no numeric code is ever
+// shown or typed anywhere in this flow. Supabase's "Confirm signup" /
+// "Magic Link" email templates must send a confirmation LINK using
+// {{ .ConfirmationURL }} (Supabase's default) — not {{ .Token }} — for this
+// to work as intended; that template choice lives in the Supabase
+// Dashboard and is outside this app's code.
+//
+// emailRedirectTo points the link at /auth/callback, which exchanges the
+// code for a session and calls ensureUserAndProfile — the same function
+// that reads full_name/institution_name back out of user_metadata, since
+// that metadata is attached to the user row at creation via options.data
+// below.
+//
+// This returns a plain { ok, error } result on failure rather than
 // throwing. Confirmed in production (real log, not a guess): when
 // Supabase's own email send fails ("Error sending confirmation email" —
 // Supabase's default email sender, unrelated to this app's own
-// sendTransactionalEmail/Resend setup, is what actually sends this OTP;
-// see the SMTP configuration note elsewhere), the resulting thrown error
-// was NOT reliably caught by the calling client component's try/catch and
-// instead surfaced as a full framework error page. Returning a result
-// object sidesteps that failure mode entirely — a normal return value
-// crossing the Server Action boundary has no such ambiguity, unlike a
-// thrown exception. Do not change this back to throwing without confirming
-// the underlying Next.js behavior first.
-//
-// fullName/institutionName are only ever applied by Supabase at account
-// CREATION time (see options.data below) and read back out of
-// user_metadata by ensureUserAndProfile after verifyEmailOtp succeeds —
-// they are never used to gate or re-check anything on a later sign-in.
-//
-// emailRedirectTo is set even though this app's UI asks the student to type
-// a 6-digit code, not click a link: Supabase's default "Confirm signup" /
-// "Magic Link" email templates send a confirmation LINK unless the
-// project's Dashboard templates are edited to include {{ .Token }} (a
-// Dashboard-only setting, reported separately, that this app's code cannot
-// change). Confirmed in production — a real signup email arrived as a
-// "Confirm your email address" link, not a code. Setting emailRedirectTo
-// means that link, if that's what the student's email actually contains
-// right now, still works correctly: it lands on /auth/callback, which
-// already exchanges the code for a session and calls ensureUserAndProfile
-// — the exact same provisioning function verifyEmailOtp calls, reading the
-// same full_name/institution_name back out of user_metadata since that
-// metadata is attached to the user row at creation regardless of which
-// confirmation method completes it. This keeps signup working today,
-// whichever email template ends up configured, rather than being fully
-// blocked on that Dashboard change.
+// sendTransactionalEmail/Resend setup, is what actually sends this), the
+// resulting thrown error was NOT reliably caught by the calling client
+// component's try/catch and instead surfaced as a full framework error
+// page. Returning a result object sidesteps that failure mode entirely.
+// Do not change this back to throwing without confirming the underlying
+// Next.js behavior first.
 export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string; next?: string }): Promise<{ ok: true } | { ok: false; error: string }> {
   const email = params.email.trim().toLowerCase();
   if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
@@ -177,30 +166,6 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
     logAuthError("SOUP_START_EMAIL_OTP_UNEXPECTED", caught);
     return { ok: false, error: "Could not send a verification code. Please try again." };
   }
-}
-
-export async function verifyEmailOtp(params: { email: string; token: string; next?: string; fullName?: string; institutionName?: string }): Promise<{ ok: false; error: string } | void> {
-  const email = params.email.trim().toLowerCase();
-  const token = params.token.trim();
-  if (!email) return { ok: false, error: "Missing email address." };
-  if (!token || token.length < 6) return { ok: false, error: "Enter the 6-digit code sent to your email." };
-
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-    if (error || !data.user) {
-      const expired = /expired/i.test(error?.message || "");
-      return { ok: false, error: expired ? "That code has expired. Request a new one." : "That code is incorrect. Check it and try again." };
-    }
-    await ensureUserAndProfile(data.user, params.fullName, params.institutionName);
-  } catch (caught) {
-    logAuthError("SOUP_VERIFY_EMAIL_OTP_FAILED", caught);
-    return { ok: false, error: "You're verified, but your SOUP profile could not be prepared. Please try again." };
-  }
-
-  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
-  invalidateAuthenticatedPages();
-  redirect(next);
 }
 
 export async function signInWithGoogle(formData: FormData) {
