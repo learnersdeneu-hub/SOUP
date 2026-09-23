@@ -1,10 +1,11 @@
 import { Header } from "@/components/Header";
 import { HomeAIEntry } from "@/components/home/HomeAIEntry";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/currentUser";
 import { normalizeField, summarizeUniversityPrograms } from "@/lib/universities/presentation";
 import { deriveCatalogChannel, networksFromMetadata } from "@/lib/universities/catalogChannels";
 import { UniversityCatalogBrowser, type CatalogUniversity } from "@/components/universities/UniversityCatalogBrowser";
+import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 
 function metadataLogo(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -13,14 +14,17 @@ function metadataLogo(value: unknown) {
 }
 
 export default async function UniversitiesPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const current = await getCurrentUser();
+  const user = current?.authUser || null;
 
   // Only a light, bounded per-university payload is fetched even though the
-  // full catalogue (300+) renders "as one list" to the student: no internal
-  // database id fields beyond this university's own id are exposed (see the
-  // AI-context leak fix elsewhere), and each university's program list is
-  // capped rather than joining every program row for every institution.
+  // full catalogue (300+) renders "as one list" to the student: each
+  // university's program list is capped rather than joining every program
+  // row for every institution. Program id/title are included specifically
+  // so the "Add to My Colleges" button can let a student pick which program
+  // to apply for — a different, legitimate use from the AI-context id leak
+  // fixed elsewhere (that was about ids echoing back in a Noodles reply,
+  // not about a client needing to reference a program it's choosing).
   const universityCatalog = await prisma.university.findMany({
     orderBy: [{ country: "asc" }, { name: "asc" }],
     select: {
@@ -33,11 +37,24 @@ export default async function UniversitiesPage() {
       partnerId: true,
       programs: {
         where: { active: true },
-        select: { level: true, field: true, intake: true, language: true, tuitionAmount: true, tuitionCurrency: true },
+        select: { id: true, title: true, level: true, field: true, intake: true, language: true, tuitionAmount: true, tuitionCurrency: true },
         take: 8,
       },
     },
   }).catch(() => []);
+
+  // Fetched once here, not per card: every active SOUP-managed application
+  // this student already has, keyed by university, plus whether they're at
+  // the My Colleges cap. AddToMyCollegesButton reads this from props instead
+  // of each of 300+ cards independently checking its own selection state.
+  const myApplications = current?.user.profile
+    ? await prisma.studentApplication.findMany({
+        where: { profileId: current.user.profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } },
+        select: { id: true, universityId: true, programId: true },
+      })
+    : [];
+  const mySelectionsByUniversity = new Map(myApplications.filter((a) => a.universityId).map((a) => [a.universityId as string, { id: a.id, programId: a.programId }]));
+  const capReached = myApplications.length >= MY_COLLEGES_CAP;
 
   const universities: CatalogUniversity[] = universityCatalog.map((university) => {
     const summary = summarizeUniversityPrograms(university.programs);
@@ -58,6 +75,8 @@ export default async function UniversitiesPage() {
       levels: summary.levels,
       fields,
       languages,
+      programs: university.programs.map((p) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake })),
+      mySelection: mySelectionsByUniversity.get(university.id) || null,
     };
   });
 
@@ -75,7 +94,7 @@ export default async function UniversitiesPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="min-w-0">
-            <UniversityCatalogBrowser universities={universities} />
+            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} />
           </div>
           <div className="lg:sticky lg:top-8 lg:self-start">
             <HomeAIEntry compact/>

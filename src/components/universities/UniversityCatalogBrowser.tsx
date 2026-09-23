@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, CalendarDays, Coins, Search } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { CHANNEL_LABELS, type CatalogChannel } from "@/lib/universities/catalogChannels";
+import { AddToMyCollegesButton, type AddToMyCollegesProgram, type AddToMyCollegesSelection } from "@/components/applications/AddToMyCollegesButton";
 
 export type CatalogUniversity = {
   id: string;
@@ -20,6 +21,8 @@ export type CatalogUniversity = {
   levels: string[];
   fields: string[];
   languages: string[];
+  programs: AddToMyCollegesProgram[];
+  mySelection: AddToMyCollegesSelection | null;
 };
 
 const PAGE_SIZE = 30;
@@ -28,7 +31,7 @@ const PAGE_SIZE = 30;
 // sorted alphabetically after the known ones, rather than being hidden.
 const LEVEL_ORDER = ["Foundation", "Diploma", "Bachelors", "Masters", "MBA", "PhD"];
 
-export function UniversityCatalogBrowser({ universities }: { universities: CatalogUniversity[] }) {
+export function UniversityCatalogBrowser({ universities, signedIn, capReached }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [channel, setChannel] = useState<CatalogChannel | "ALL">("ALL");
@@ -191,10 +194,13 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
 
       <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((university) => (
-          <button
+          <div
             key={university.id}
+            role="button"
+            tabIndex={0}
             onClick={() => openUniversity(university)}
-            className="group min-w-0 rounded-2xl border border-hair bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm"
+            onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openUniversity(university); } }}
+            className="group min-w-0 cursor-pointer rounded-2xl border border-hair bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm"
           >
             <div className="flex min-w-0 items-start gap-3">
               <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} />
@@ -209,7 +215,18 @@ export function UniversityCatalogBrowser({ universities }: { universities: Catal
               <div className="min-w-0"><div className="flex items-center gap-1 font-semibold text-ink"><Coins size={11} />Fees</div><div className="mt-1 break-words leading-4 text-mute">{university.feeRange || "Ask Noodles to verify"}</div></div>
               <div className="min-w-0"><div className="flex items-center gap-1 font-semibold text-ink"><CalendarDays size={11} />Intakes</div><div className="mt-1 break-words leading-4 text-mute">{university.intakes.length ? university.intakes.join(" · ") : "Ask Noodles to verify"}</div></div>
             </div>
-          </button>
+            {signedIn ? (
+              <AddToMyCollegesButton
+                universityId={university.id}
+                universityName={university.name}
+                programs={university.programs}
+                initialApplication={university.mySelection}
+                capReached={capReached}
+              />
+            ) : (
+              <a href={`/sign-up?next=${encodeURIComponent("/universities")}`} onClick={(event) => event.stopPropagation()} className="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-hair px-3 py-2.5 text-xs font-semibold text-ink hover:border-navy/30">Sign in to add to My Colleges</a>
+            )}
+          </div>
         ))}
       </section>
 

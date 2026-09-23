@@ -6,8 +6,10 @@ import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 import { ApplicationNetworkPanel } from "@/components/partners/ApplicationNetworkPanel";
 import { UniversityApplyPanel } from "@/components/applications/UniversityApplyPanel";
+import { AddToMyCollegesButton } from "@/components/applications/AddToMyCollegesButton";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/currentUser";
+import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 import { safeHttpUrl } from "@/lib/security/urls";
 import { SourceFreshnessBadge } from "@/components/SourceFreshnessBadge";
 import { summarizeUniversityPrograms } from "@/lib/universities/presentation";
@@ -70,6 +72,19 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
     academicBackgroundSummary: applicantStudentCase?.academicBackgroundSummary || "",
   };
 
+  // Separate from existingApplication above (which UniversityApplyPanel uses
+  // for its own broader "have you applied at all" state): this is scoped to
+  // exactly what the My Colleges cap and button state care about — active
+  // SOUP-managed applications only.
+  const myManagedApplications = current?.user.profile
+    ? await prisma.studentApplication.findMany({
+        where: { profileId: current.user.profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } },
+        select: { id: true, universityId: true, programId: true },
+      })
+    : [];
+  const myCollegeSelection = myManagedApplications.find((a) => a.universityId === university.id) || null;
+  const myCollegesCapReached = myManagedApplications.length >= MY_COLLEGES_CAP;
+
   const website = safeHttpUrl(university.websiteUrl, 1500)
     || safeHttpUrl(university.partner?.websiteUrl, 1500)
     || safeHttpUrl(knownPartnerWebsite(university.name), 1500);
@@ -101,10 +116,22 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                {current ? (
+                  <AddToMyCollegesButton
+                    universityId={university.id}
+                    universityName={university.name}
+                    programs={university.programs.map((p) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake }))}
+                    initialApplication={myCollegeSelection}
+                    capReached={myCollegesCapReached}
+                    variant="primary"
+                  />
+                ) : (
+                  <Link href={`/sign-up?next=${encodeURIComponent(`/universities/${university.id}`)}`} className="rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white">Add to My Colleges</Link>
+                )}
                 <Link
                   href={`/counselor?intent=universities&universityId=${encodeURIComponent(university.id)}&prompt=${encodeURIComponent(`Tell me whether ${university.name} is suitable for me. Verify current fees, intakes, deadlines and the best programs for my profile.`)}`}
-                  className="rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white"
+                  className="rounded-full border border-hair px-4 py-2.5 text-xs font-semibold text-ink"
                 >Ask Noodles about this university</Link>
                 {website ? <a href={website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-hair px-4 py-2.5 text-xs font-semibold text-ink">Official website <ArrowUpRight size={12}/></a> : null}
               </div>
