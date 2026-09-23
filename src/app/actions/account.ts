@@ -27,6 +27,15 @@ export async function updateCustomerProfile(formData: FormData) {
   // in one place, rather than only being fillable through a Noodles chat.
   const academicBackgroundSummary = clean(formData.get("academicBackgroundSummary"), 600);
 
+  // institutionName is only touched when the submitting form actually has
+  // the field (the /account settings form does; UniversityApplyPanel and
+  // ApplicantInfoForm, which also call this same action, do not) — checking
+  // formData.has() rather than the cleaned value's truthiness means those
+  // other callers can never silently blank out an institution name just by
+  // submitting a form that was never asking about it.
+  const institutionNameProvided = formData.has("institutionName");
+  const institutionName = clean(formData.get("institutionName"), 200);
+
   await prisma.$transaction([
     prisma.user.update({
       where: { id: user.id },
@@ -35,6 +44,7 @@ export async function updateCustomerProfile(formData: FormData) {
         nationality: clean(formData.get("nationality"), 80),
         currentCountry: clean(formData.get("currentCountry"), 80),
         ...(dateOfBirth ? { dateOfBirth } : {}),
+        ...(institutionNameProvided && institutionName ? { institutionName } : {}),
       },
     }),
     prisma.profile.update({

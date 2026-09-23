@@ -330,6 +330,12 @@ model User {
   email        String        @unique
   authProvider String        @default("supabase")
   fullName     String
+  // Free-text institution name captured at signup (current school, college,
+  // university, or counselor institution) — deliberately not a dropdown/enum
+  // per the requirement, and never used as an auth secret or match check on
+  // sign-in. Nullable because existing accounts predate this field; they are
+  // prompted once to fill it in rather than being blocked from signing in.
+  institutionName String?
   dateOfBirth  DateTime?
   nationality  String?
   currentCountry String?

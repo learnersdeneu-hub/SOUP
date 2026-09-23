@@ -89,6 +89,58 @@ export async function signIn(formData: FormData) {
   redirect(next);
 }
 
+// Email OTP is now the primary authentication method for both signup and
+// sign-in — the same call either way, unified by Supabase's own
+// shouldCreateUser semantics: a brand-new email creates the account, a
+// known email just signs it in. Called directly from client code (the
+// multi-step sign-up/sign-in UI manages its own step transitions), so
+// unlike signUp/signIn above these throw on failure instead of redirecting
+// — the caller decides what the current step's UI should show.
+//
+// fullName/institutionName are only ever applied by Supabase at account
+// CREATION time (see options.data below) and read back out of
+// user_metadata by ensureUserAndProfile after verifyEmailOtp succeeds —
+// they are never used to gate or re-check anything on a later sign-in.
+export async function startEmailOtp(params: { email: string; fullName?: string; institutionName?: string }) {
+  const email = params.email.trim().toLowerCase();
+  if (!email || !email.includes("@")) throw new Error("Enter a valid email address.");
+  const fullName = params.fullName?.trim().slice(0, 120) || undefined;
+  const institutionName = params.institutionName?.trim().slice(0, 200) || undefined;
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+      ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
+    },
+  });
+  if (error) throw new Error(error.message || "Could not send a verification code. Please try again.");
+}
+
+export async function verifyEmailOtp(params: { email: string; token: string; next?: string; fullName?: string; institutionName?: string }) {
+  const email = params.email.trim().toLowerCase();
+  const token = params.token.trim();
+  if (!email) throw new Error("Missing email address.");
+  if (!token || token.length < 6) throw new Error("Enter the 6-digit code sent to your email.");
+
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+  if (error || !data.user) {
+    const expired = /expired/i.test(error?.message || "");
+    throw new Error(expired ? "That code has expired. Request a new one." : "That code is incorrect. Check it and try again.");
+  }
+
+  try {
+    await ensureUserAndProfile(data.user, params.fullName, params.institutionName);
+  } catch {
+    throw new Error("You're verified, but your SOUP profile could not be prepared. Please try again.");
+  }
+
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  redirect(next);
+}
+
 export async function signInWithGoogle(formData: FormData) {
   const next = safeNext(formData);
   const supabase = createClient();

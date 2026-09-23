@@ -9,6 +9,7 @@ import { syncStudentAlerts } from "@/lib/student/alerts";
 import { DirectApplicationBox } from "@/components/applications/DirectApplicationBox";
 import { DirectDocumentUpload } from "@/components/documents/DirectDocumentUpload";
 import { ApplicationProgressCard } from "@/components/dashboard/ApplicationProgressCard";
+import { InstitutionPromptBanner } from "@/components/dashboard/InstitutionPromptBanner";
 
 function stageLabel(stage?: string | null) {
   if (!stage) return "Exploring";
@@ -76,6 +77,8 @@ export default async function DashboardPage() {
             </div>
           </div>
         </section>
+
+        {!user.institutionName && <InstitutionPromptBanner fullName={user.fullName} />}
 
         <section className="mt-5 rounded-2xl border border-[#C9D8E6] bg-[#F7FAFC] p-5 sm:p-6">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
