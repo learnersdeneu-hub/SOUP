@@ -8,7 +8,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 // /companion/privacy must be readable without a session: Chrome Web Store
 // reviewers and prospective testers need to open it before they have (or
 // without ever creating) a SOUP account.
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/companion/privacy"];
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

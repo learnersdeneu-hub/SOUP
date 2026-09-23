@@ -124,11 +124,23 @@ export async function signIn(formData: FormData) {
 // to work as intended; that template choice lives in the Supabase
 // Dashboard and is outside this app's code.
 //
-// emailRedirectTo points the link at /auth/callback, which exchanges the
-// code for a session and calls ensureUserAndProfile — the same function
-// that reads full_name/institution_name back out of user_metadata, since
-// that metadata is attached to the user row at creation via options.data
-// below.
+// emailRedirectTo points the link at /auth/magic-link, a CLIENT-rendered
+// page, not the PKCE-based /auth/callback route handler. This is a
+// deliberate, confirmed-in-production fix: PKCE (the default flow)
+// requires the browser that opens the emailed link to be the exact same
+// browser/cookie jar that requested it, because it must present a stored
+// code_verifier that matches the code_challenge baked into the link.
+// Real production logs showed this failing with "code challenge does not
+// match previously saved code verifier" whenever the student's mail app
+// opened the link in a different browser context than the one used to
+// submit the sign-up form — an extremely common case on mobile (mail apps
+// frequently use their own in-app browser/WebView), and the opposite of
+// how a normal "click the link in your inbox" flow is expected to work.
+// Using flowType: "implicit" instead puts the session tokens directly in
+// the redirect URL's fragment, so any browser that opens the link can
+// complete sign-in — no stored verifier required. See
+// src/app/auth/magic-link/page.tsx for the client-side handler and
+// completeEmailLinkSignIn below for the provisioning step it calls.
 //
 // This returns a plain { ok, error } result on failure rather than
 // throwing. Confirmed in production (real log, not a guess): when
@@ -148,12 +160,12 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
   const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
 
   try {
-    const supabase = createClient();
+    const supabase = createClient({ flowType: "implicit" });
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${baseUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: `${baseUrl()}/auth/magic-link?next=${encodeURIComponent(next)}`,
         ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
       },
     });
@@ -166,6 +178,33 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
     logAuthError("SOUP_START_EMAIL_OTP_UNEXPECTED", caught);
     return { ok: false, error: "Could not send a verification code. Please try again." };
   }
+}
+
+// Called by src/app/auth/magic-link/page.tsx after it has already called
+// supabase.auth.setSession() client-side with the tokens from the email
+// link's URL fragment — that call is what actually establishes the
+// session cookie; by the time this server action runs, createClient() can
+// read that cookie like any other authenticated request. This only
+// provisions the User/Profile row and redirects, mirroring what
+// /auth/callback does for the PKCE-based flows (OAuth, password
+// signup/reset).
+export async function completeEmailLinkSignIn(params: { next?: string }): Promise<{ ok: false; error: string } | void> {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    return { ok: false, error: "That sign-in link is invalid or expired. Please try again." };
+  }
+
+  try {
+    await ensureUserAndProfile(data.user);
+  } catch (caught) {
+    logAuthError("SOUP_COMPLETE_EMAIL_LINK_SIGNIN_FAILED", caught);
+    return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
+  }
+
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  invalidateAuthenticatedPages();
+  redirect(next);
 }
 
 export async function signInWithGoogle(formData: FormData) {

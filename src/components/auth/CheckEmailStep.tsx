@@ -51,8 +51,8 @@ export function CheckEmailStep({
     <div>
       <h1 className="text-xl font-medium text-ink mb-2 text-center">Check your email</h1>
       <p className="mb-6 text-center text-xs leading-5 text-mute">
-        We sent a sign-in link to <span className="font-semibold text-ink">{email}</span>. Open it on this device
-        and you&apos;ll land straight in your SOUP dashboard.
+        We sent a sign-in link to <span className="font-semibold text-ink">{email}</span>. Open your inbox and tap
+        the link to land straight in your SOUP dashboard.
       </p>
 
       {error && <div className="mb-4 rounded-lg border border-hair bg-[#FBEAEA] text-[#B3261E] text-xs px-3 py-2">{error}</div>}
