@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { completeEmailLinkSignIn } from "@/app/actions/auth";
+import { completeEmailLinkSignIn, completeEmailLinkCode } from "@/app/actions/auth";
 
 // Supabase's implicit-flow email link redirects here with the session
 // tokens in the URL fragment (#access_token=...&refresh_token=...), which
@@ -36,7 +36,18 @@ export function MagicLinkHandler({ next }: { next: string }) {
         if (!cancelled) setError(`Sign-in link error: ${hashError.replace(/\+/g, " ")}`);
         return;
       }
+
+      // Supabase's magic link is meant to arrive as #access_token=... (no
+      // same-browser requirement), but has been observed in production
+      // sometimes arriving as a PKCE ?code= instead. Handle both rather
+      // than assuming one.
       if (!accessToken || !refreshToken) {
+        const code = new URLSearchParams(window.location.search).get("code");
+        if (code) {
+          const result = await completeEmailLinkCode({ code, next });
+          if (!cancelled && result && !result.ok) setError(result.error);
+          return;
+        }
         if (!cancelled) setError(`This link didn't include sign-in information (received: "${rawHash || "nothing"}"). Please request a new one.`);
         return;
       }

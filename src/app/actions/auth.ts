@@ -207,6 +207,42 @@ export async function completeEmailLinkSignIn(params: { next?: string }): Promis
   redirect(next);
 }
 
+// Fallback for /auth/magic-link when the emailed link arrives as a PKCE
+// ?code= (query string) instead of the implicit flow's #access_token=...
+// (hash fragment) that startEmailOtp's flowType: "implicit" override is
+// meant to produce. Confirmed in production that the hash sometimes
+// arrives completely empty — this handles that case using the same
+// exchangeCodeForSession approach /auth/callback uses for OAuth and
+// password flows, so the student can still sign in even if Supabase ends
+// up using PKCE for this link. If PKCE genuinely is unavoidable here, this
+// will still fail with the same code-verifier mismatch when opened in a
+// different browser than the one that requested it — but it will succeed
+// for same-browser clicks and never leaves the page silently broken.
+export async function completeEmailLinkCode(params: { code: string; next?: string }): Promise<{ ok: false; error: string } | void> {
+  const supabase = createClient();
+  const { data, error } = await supabase.auth.exchangeCodeForSession(params.code);
+  if (error || !data.user) {
+    const mismatch = /code verifier|code challenge/i.test(error?.message || "");
+    return {
+      ok: false,
+      error: mismatch
+        ? "This link only works in the same app/browser you used to sign up. Please try again from that same browser, or request a new link."
+        : "That sign-in link is invalid or expired. Please try again.",
+    };
+  }
+
+  try {
+    await ensureUserAndProfile(data.user);
+  } catch (caught) {
+    logAuthError("SOUP_COMPLETE_EMAIL_LINK_CODE_FAILED", caught);
+    return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
+  }
+
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  invalidateAuthenticatedPages();
+  redirect(next);
+}
+
 export async function signInWithGoogle(formData: FormData) {
   const next = safeNext(formData);
   const supabase = createClient();
