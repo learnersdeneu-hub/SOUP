@@ -5,6 +5,16 @@ import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { PREMIUM_COUNSELING_PRICE_USD, PREMIUM_PLUS_PRICE_USD } from "@/lib/payments/config";
 
+// Explicit defense-in-depth against Next.js's client-side Router Cache
+// serving one authenticated user's rendered page to a different user in
+// the same browser tab after a sign-out/sign-in (this app is used on
+// shared/school devices) — see the fix and full explanation in
+// src/app/actions/auth.ts (invalidateAuthenticatedPages). requireProfile()/
+// requireRole() already force dynamic rendering implicitly via cookies(),
+// but that is an implicit guarantee a future refactor could silently
+// break; this makes it explicit and impossible to regress unnoticed.
+export const dynamic = "force-dynamic";
+
 function money(value: unknown, currency = "USD") { const n = Number(value || 0); return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n); }
 
 export default async function PaymentsPage({ searchParams }: { searchParams: { success?: string; cancelled?: string; error?: string; premium?: string } }) {

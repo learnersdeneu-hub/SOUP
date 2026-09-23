@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserAndProfile } from "@/lib/auth/provision";
 
@@ -27,5 +28,12 @@ export async function GET(request: Request) {
     );
   }
 
+  // Defense-in-depth alongside the same fix in actions/auth.ts: this
+  // redirect is a real HTTP Location header (the browser does a full
+  // navigation, unlike a Server Action's soft client-side redirect), so it
+  // is not the primary vector for the router-cache leak — but busting the
+  // cache here too costs nothing and removes any doubt for this landing
+  // point as well (OAuth, email confirmation, password reset).
+  revalidatePath("/", "layout");
   return NextResponse.redirect(`${origin}${safeNext}`);
 }

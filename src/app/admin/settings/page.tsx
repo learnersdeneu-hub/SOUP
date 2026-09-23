@@ -2,6 +2,16 @@ import { Header } from "@/components/Header";
 import { requireRole } from "@/lib/auth/currentUser";
 import { ADMIN_ROLES } from "@/lib/auth/roles";
 
+// Explicit defense-in-depth against Next.js's client-side Router Cache
+// serving one authenticated user's rendered page to a different user in
+// the same browser tab after a sign-out/sign-in (this app is used on
+// shared/school devices) — see the fix and full explanation in
+// src/app/actions/auth.ts (invalidateAuthenticatedPages). requireProfile()/
+// requireRole() already force dynamic rendering implicitly via cookies(),
+// but that is an implicit guarantee a future refactor could silently
+// break; this makes it explicit and impossible to regress unnoticed.
+export const dynamic = "force-dynamic";
+
 function State({ ok, optional = false }: { ok: boolean; optional?: boolean }) {
   const label = ok ? "Configured" : optional ? "Optional" : "Required";
   return <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${ok ? "bg-emerald-50 text-emerald-800" : optional ? "bg-slate-100 text-slate-700" : "bg-amber-50 text-amber-800"}`}>{label}</span>;

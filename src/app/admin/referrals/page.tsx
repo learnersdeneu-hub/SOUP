@@ -7,6 +7,16 @@ import { COMMERCIAL_ROLES } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import type { Prisma, ServiceReferralStatus, ServiceReferralType } from "@prisma/client";
 
+// Explicit defense-in-depth against Next.js's client-side Router Cache
+// serving one authenticated user's rendered page to a different user in
+// the same browser tab after a sign-out/sign-in (this app is used on
+// shared/school devices) — see the fix and full explanation in
+// src/app/actions/auth.ts (invalidateAuthenticatedPages). requireProfile()/
+// requireRole() already force dynamic rendering implicitly via cookies(),
+// but that is an implicit guarantee a future refactor could silently
+// break; this makes it explicit and impossible to regress unnoticed.
+export const dynamic = "force-dynamic";
+
 const REFERRAL_TYPES = ["ACCOMMODATION", "INSURANCE", "STUDENT_FINANCE", "SCHOLARSHIP", "TRAVEL", "ATTESTATION", "OTHER"] as const satisfies readonly ServiceReferralType[];
 const REFERRAL_STATUSES = ["RECOMMENDED", "OPENED", "STARTED", "COMPLETED", "DECLINED", "EXTERNAL_ONLY"] as const satisfies readonly ServiceReferralStatus[];
 

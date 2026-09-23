@@ -10,6 +10,8 @@ const schema = read('prisma/schema.prisma');
 const migration = read('prisma/migrations/20260829190000_soup_student_journey/migration.sql');
 const env = read('.env.example');
 const home = read('src/app/page.tsx');
+const authActions = read('src/app/actions/auth.ts');
+const authCallback = read('src/app/auth/callback/route.ts');
 const header = read('src/components/Header.tsx');
 const prompts = read('src/lib/conversation/prompts.ts');
 const workspace = read('src/components/conversation/ConversationWorkspace.tsx');
@@ -199,6 +201,22 @@ check('AI rate limits are database-backed and guest IPs are pseudonymized', /mod
 check('All expensive Counselor/document research routes use the shared AI limit', /aiRateLimitResponse/.test(planRoute) && /aiRateLimitResponse/.test(checklistRoute) && /aiRateLimitResponse/.test(evidenceRoute) && /aiRateLimitResponse/.test(read('src/app/api/applications/[id]/requirements/route.ts')) && /aiRateLimitResponse/.test(read('src/app/api/admin/applications/[id]/requirements/route.ts')) && /Retry-After/.test(httpRateLimit));
 check('Persisted assistant messages capture provider usage metadata', /aiUsage: (?:event|result)\.usage/.test(stream) && /provider: provider\.name/.test(stream) && /groundedSearch/.test(stream));
 check('Document validity metadata supports expiry warnings without claiming authority approval', /documentIssuedAt/.test(schema) && /validUntil/.test(schema) && /documentIssuedAt/.test(evidenceRoute) && /validUntil/.test(evidenceRoute) && /Expires/.test(documentsPage) && /authority acceptance/.test(documentsPage));
+
+// Regression guard for a confirmed live incident: a brand-new student
+// account saw another, unrelated account's real documents (with real past
+// upload dates) in /documents. Root cause traced to Next.js's client-side
+// Router Cache serving a previously-rendered page from one authenticated
+// user to the next user in the same browser tab after a soft
+// redirect()-based sign-in/sign-up/sign-out — this app is explicitly used
+// on shared/school devices, so that transition happens routinely, not as
+// an edge case. Every server-side Document query was independently traced
+// and confirmed correctly scoped by profileId; the leak was never a query
+// bug. Fix: revalidatePath("/", "layout") before every redirect that
+// follows an auth state change, plus explicit force-dynamic on every
+// per-user page as a second, independent layer of defense. This check
+// fails if either layer is ever quietly removed.
+check('Auth state changes invalidate the client router cache (cross-account leak fix)', /revalidatePath\(\s*"\/",\s*"layout"\s*\)/.test(authActions) && (authActions.match(/invalidateAuthenticatedPages\(\)/g) || []).length >= 4 && /revalidatePath/.test(authCallback));
+check('Per-user pages force dynamic rendering explicitly, not only implicitly via cookies()', /export const dynamic = "force-dynamic"/.test(documentsPage) && /export const dynamic = "force-dynamic"/.test(dashboard));
 check('Dashboard refresh creates bounded deadline and document-validity reminders', /syncStudentAlerts/.test(read('src/app/dashboard/page.tsx')) && /ninetyDays/.test(studentAlerts) && /fourteenDays/.test(studentAlerts) && /recentCutoff/.test(studentAlerts));
 check('Partner referrals preserve Counselor attribution and future revenue fields', /sourceSessionId/.test(schema) && /revenueAmount/.test(schema) && /commissionAmount/.test(schema) && /resolveReferralAttribution/.test(referralStart) && /Partner referrals & attribution/.test(referralAdmin));
 check('Commercial referral reconciliation is role-scoped', /requireRole\(COMMERCIAL_ROLES\)/.test(referralAction) && /ACCOMMODATION/.test(referralAction) && /FINANCE/.test(referralAction) && /convertedAt/.test(referralAction) && /commissionAmount/.test(referralAction));

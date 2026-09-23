@@ -6,6 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { CompanionConnect } from "@/components/companion/CompanionConnect";
 import { revokeCompanionDevice } from "@/app/actions/companion";
 
+// Explicit defense-in-depth against Next.js's client-side Router Cache
+// serving one authenticated user's rendered page to a different user in
+// the same browser tab after a sign-out/sign-in (this app is used on
+// shared/school devices) — see the fix and full explanation in
+// src/app/actions/auth.ts (invalidateAuthenticatedPages). requireProfile()/
+// requireRole() already force dynamic rendering implicitly via cookies(),
+// but that is an implicit guarantee a future refactor could silently
+// break; this makes it explicit and impossible to regress unnoticed.
+export const dynamic = "force-dynamic";
+
 // Served as a static file from public/downloads/ — see desktop/README.md
 // for how to rebuild and replace it. Set back to null to hide/disable the
 // download button again (e.g. while preparing a new release).

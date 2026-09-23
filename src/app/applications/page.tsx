@@ -6,6 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { OpenDocumentButton } from "@/components/documents/OpenDocumentButton";
 import { deadlineUrgency } from "@/lib/applications/lifecycle";
 
+// Explicit defense-in-depth against Next.js's client-side Router Cache
+// serving one authenticated user's rendered page to a different user in
+// the same browser tab after a sign-out/sign-in (this app is used on
+// shared/school devices) — see the fix and full explanation in
+// src/app/actions/auth.ts (invalidateAuthenticatedPages). requireProfile()/
+// requireRole() already force dynamic rendering implicitly via cookies(),
+// but that is an implicit guarantee a future refactor could silently
+// break; this makes it explicit and impossible to regress unnoticed.
+export const dynamic = "force-dynamic";
+
 function nice(value: string) { return value.toLowerCase().split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
 
 export default async function ApplicationsPage() {

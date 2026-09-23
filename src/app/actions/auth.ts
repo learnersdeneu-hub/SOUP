@@ -2,8 +2,27 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserAndProfile } from "@/lib/auth/provision";
+
+// CRITICAL, security-relevant: Next.js's client-side Router Cache stores
+// previously-rendered pages per URL for up to ~30s on dynamic routes (this
+// app's default), with no awareness of which user rendered them. A
+// redirect() inside a Server Action is a soft, client-side navigation, not
+// a hard reload — without this, a student who just signed out (or a
+// completely different student who just signed in, in the same browser
+// tab, which is expressly how this app is used on shared/school devices)
+// could land on a cached /dashboard or /documents payload that was
+// actually rendered for the PREVIOUS account, showing that account's real
+// data under the new session. This is the confirmed root cause of a real
+// cross-account document leak report. Call this before every redirect that
+// follows an auth state change (sign in, sign up, sign out, OTP verify,
+// password change) — never on an error path, since auth state didn't
+// change there.
+function invalidateAuthenticatedPages() {
+  revalidatePath("/", "layout");
+}
 
 function baseUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
@@ -55,6 +74,7 @@ export async function signUp(formData: FormData) {
           encodeURIComponent("Your account was created, but profile setup failed. Please try signing in again.")
       );
     }
+    invalidateAuthenticatedPages();
     redirect(next);
   }
 
@@ -86,6 +106,7 @@ export async function signIn(formData: FormData) {
     );
   }
 
+  invalidateAuthenticatedPages();
   redirect(next);
 }
 
@@ -138,6 +159,7 @@ export async function verifyEmailOtp(params: { email: string; token: string; nex
   }
 
   const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  invalidateAuthenticatedPages();
   redirect(next);
 }
 
@@ -188,11 +210,13 @@ export async function updatePassword(formData: FormData) {
   // Re-authentication proves the new password works and avoids leaving a reset
   // session active in a shared browser.
   await supabase.auth.signOut().catch(() => undefined);
+  invalidateAuthenticatedPages();
   redirect("/sign-in?reset=1");
 }
 
 export async function signOut() {
   const supabase = createClient();
   await supabase.auth.signOut();
+  invalidateAuthenticatedPages();
   redirect("/");
 }
