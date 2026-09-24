@@ -4,6 +4,8 @@ import { ensureStudentCase } from "@/lib/student/case";
 import { applicationKey, MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 import { sendTransactionalEmail, escapeHtml } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
+import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
+import { logServerError } from "@/lib/logging/safe";
 import { requireApiProfile } from "@/lib/auth/apiUser";
 import { parseJsonBody } from "@/lib/validation/http";
 import { startApplicationSchema } from "@/lib/validation/schemas";
@@ -177,11 +179,16 @@ export async function POST(request: Request) {
       })),
     }).catch(() => undefined);
   }
-  if (shouldSendStudentEmail(profile, false)) await sendTransactionalEmail({
-    to: profile.user.email,
-    subject: `Application started — ${university.name}`,
-    html: `<p>Hello ${escapeHtml(profile.user.fullName)},</p><p>Your application to <strong>${escapeHtml(university.name)}</strong>${program?.title ? ` for ${escapeHtml(program.title)}` : ""} has been started${ownership === "SOUP_MANAGED" ? " and is SOUP-managed" : " and is tracked as a self-managed application"}.</p><p>${ownership === "SOUP_MANAGED" ? "Noodles and the SOUP application team will now guide the missing information and documents one step at a time." : "SOUP will not submit this application on your behalf, but you can still track documents and status here."} University application fees, if any, are separate and will appear in My SOUP → Payments.</p>`,
-    idempotencyKey: `application-started-${application.id}`,
-  }).catch(() => undefined);
+  if (shouldSendStudentEmail(profile, false)) {
+    let replyTo: string | undefined;
+    try { replyTo = inboundReplyAddress(await getOrCreateInboundReplyToken(application.id)); } catch (error) { logServerError("APPLICATION_STARTED_REPLY_TOKEN_ERROR", error); }
+    await sendTransactionalEmail({
+      to: profile.user.email,
+      subject: `Application started — ${university.name}`,
+      html: `<p>Hello ${escapeHtml(profile.user.fullName)},</p><p>Your application to <strong>${escapeHtml(university.name)}</strong>${program?.title ? ` for ${escapeHtml(program.title)}` : ""} has been started${ownership === "SOUP_MANAGED" ? " and is SOUP-managed" : " and is tracked as a self-managed application"}.</p><p>${ownership === "SOUP_MANAGED" ? "Noodles and the SOUP application team will now guide the missing information and documents one step at a time." : "SOUP will not submit this application on your behalf, but you can still track documents and status here."} University application fees, if any, are separate and will appear in My SOUP → Payments.</p>${REPLY_NOTICE_HTML}`,
+      idempotencyKey: `application-started-${application.id}`,
+      replyTo,
+    }).catch(() => undefined);
+  }
   return Response.json({ application });
 }

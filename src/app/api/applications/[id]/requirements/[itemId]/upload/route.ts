@@ -7,6 +7,7 @@ import { checklistMetadata } from "@/lib/applications/readiness";
 import { attachDocumentToChecklistItem } from "@/lib/journey/attachDocumentToItem";
 import { escapeHtml, sendTransactionalEmail } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
+import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
 import { requirementUploadFormSchema } from "@/lib/validation/schemas";
 
 export const runtime = "nodejs";
@@ -114,12 +115,22 @@ export async function POST(request: Request, { params }: { params: { id: string;
       })),
     }).catch((error) => logServerError("REQUIREMENT_UPLOAD_STAFF_NOTIFICATION_ERROR", error));
   }
-  if (shouldSendStudentEmail(profile, false)) await sendTransactionalEmail({
-    to: user.email,
-    subject: "Document received",
-    html: `<p>Hello ${escapeHtml(user.fullName)},</p><p>SOUP received <strong>${escapeHtml(file.name)}</strong> for <strong>${escapeHtml(item.title)}</strong> (${escapeHtml(universityName)}). It is saved in your document vault and ready for review.</p>`,
-    idempotencyKey: `document-received-${document.id}`,
-  }).catch((error) => logServerError("REQUIREMENT_UPLOAD_EMAIL_ERROR", error));
+  if (shouldSendStudentEmail(profile, false)) {
+    // Token lookup gets its own try/catch, not folded into the
+    // sendTransactionalEmail(...).catch() below: that .catch() only
+    // attaches once sendTransactionalEmail has already been called, so an
+    // error thrown while still building its arguments (i.e. here) would
+    // otherwise propagate past it and fail the whole upload response.
+    let replyTo: string | undefined;
+    try { replyTo = inboundReplyAddress(await getOrCreateInboundReplyToken(params.id)); } catch (error) { logServerError("REQUIREMENT_UPLOAD_REPLY_TOKEN_ERROR", error); }
+    await sendTransactionalEmail({
+      to: user.email,
+      subject: "Document received",
+      html: `<p>Hello ${escapeHtml(user.fullName)},</p><p>SOUP received <strong>${escapeHtml(file.name)}</strong> for <strong>${escapeHtml(item.title)}</strong> (${escapeHtml(universityName)}). It is saved in your document vault and ready for review.</p>${REPLY_NOTICE_HTML}`,
+      idempotencyKey: `document-received-${document.id}`,
+      replyTo,
+    }).catch((error) => logServerError("REQUIREMENT_UPLOAD_EMAIL_ERROR", error));
+  }
 
   return Response.json({ ok: true, documentId: document.id, ...result });
 }

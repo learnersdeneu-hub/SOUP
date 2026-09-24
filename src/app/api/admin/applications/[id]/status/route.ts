@@ -8,6 +8,8 @@ import { parseJsonBody } from "@/lib/validation/http";
 import { adminApplicationStatusSchema } from "@/lib/validation/schemas";
 import type { Prisma, StudentApplicationStatus } from "@prisma/client";
 import { canTransitionApplication, submissionGuardError } from "@/lib/applications/statusPolicy";
+import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
+import { logServerError } from "@/lib/logging/safe";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const staff = await getApiStaff(APPLICATION_OPERATIONS_ROLES);
@@ -94,11 +96,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
     });
     return changed;
   });
-  if (shouldSendStudentEmail(application.profile, true)) await sendTransactionalEmail({
-    to: application.profile.user.email,
-    subject: `${application.university?.name || "University"} application update`,
-    html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>Your application to <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` for ${escapeHtml(application.program.title)}` : ""} is now <strong>${escapeHtml(status.replaceAll("_", " ").toLowerCase())}</strong>.</p><p>Open My SOUP to see what is happening now and whether anything is waiting on you.</p>`,
-    idempotencyKey: `application-status-${application.id}-${status}-${updated.updatedAt.toISOString()}`,
-  }).catch(() => undefined);
+  if (shouldSendStudentEmail(application.profile, true)) {
+    let replyTo: string | undefined;
+    try { replyTo = inboundReplyAddress(await getOrCreateInboundReplyToken(application.id)); } catch (error) { logServerError("APPLICATION_STATUS_REPLY_TOKEN_ERROR", error); }
+    await sendTransactionalEmail({
+      to: application.profile.user.email,
+      subject: `${application.university?.name || "University"} application update`,
+      html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>Your application to <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` for ${escapeHtml(application.program.title)}` : ""} is now <strong>${escapeHtml(status.replaceAll("_", " ").toLowerCase())}</strong>.</p><p>Open My SOUP to see what is happening now and whether anything is waiting on you.</p>${REPLY_NOTICE_HTML}`,
+      idempotencyKey: `application-status-${application.id}-${status}-${updated.updatedAt.toISOString()}`,
+      replyTo,
+    }).catch(() => undefined);
+  }
   return Response.json({ id: updated.id, status: updated.status });
 }

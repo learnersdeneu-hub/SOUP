@@ -6,6 +6,8 @@ import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { parseJsonBody } from "@/lib/validation/http";
 import { adminApplicationFactsSchema } from "@/lib/validation/schemas";
 import type { Prisma } from "@prisma/client";
+import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
+import { logServerError } from "@/lib/logging/safe";
 
 const FEES = new Set(["UNKNOWN", "NOT_REQUIRED", "REQUIRED", "STUDENT_PAYING", "SOUP_PAYING", "PENDING", "PAID", "WAIVED", "REFUNDED"]);
 const ELIGIBILITY = new Set(["NOT_CHECKED", "LIKELY_ELIGIBLE", "NEEDS_REVIEW", "NOT_ELIGIBLE"]);
@@ -63,7 +65,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
   });
   if (["REQUIRED", "STUDENT_PAYING", "SOUP_PAYING", "PENDING"].includes(updated.applicationFeeStatus)) {
     await prisma.notification.create({ data: { profileId: application.profileId, type: "PAYMENT", title: "University application fee requires attention", body: `${application.university?.name || "Your university"}${updated.applicationFeeAmount ? ` requires ${updated.applicationFeeCurrency || "USD"} ${updated.applicationFeeAmount}` : " has an application fee"}. This fee is separate from SOUP Premium.`, href: "/payments" } }).catch(() => undefined);
-    if (shouldSendStudentEmail(application.profile, true)) await sendTransactionalEmail({ to: application.profile.user.email, subject: `Application fee update — ${application.university?.name || "SOUP"}`, html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>An application fee has been recorded for <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` — ${escapeHtml(application.program.title)}` : ""}.</p><p>${updated.applicationFeeAmount ? `<strong>${escapeHtml(updated.applicationFeeCurrency || "USD")} ${escapeHtml(String(updated.applicationFeeAmount))}</strong>` : "The amount will be communicated through SOUP."}</p><p>This university fee is separate from SOUP Premium. Sign in to My SOUP → Payments to track it.</p>`, idempotencyKey: `application-fee-${application.id}-${updated.updatedAt.toISOString()}` }).catch(() => undefined);
+    if (shouldSendStudentEmail(application.profile, true)) {
+      let replyTo: string | undefined;
+      try { replyTo = inboundReplyAddress(await getOrCreateInboundReplyToken(application.id)); } catch (error) { logServerError("APPLICATION_FEE_REPLY_TOKEN_ERROR", error); }
+      await sendTransactionalEmail({ to: application.profile.user.email, subject: `Application fee update — ${application.university?.name || "SOUP"}`, html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>An application fee has been recorded for <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` — ${escapeHtml(application.program.title)}` : ""}.</p><p>${updated.applicationFeeAmount ? `<strong>${escapeHtml(updated.applicationFeeCurrency || "USD")} ${escapeHtml(String(updated.applicationFeeAmount))}</strong>` : "The amount will be communicated through SOUP."}</p><p>This university fee is separate from SOUP Premium. Sign in to My SOUP → Payments to track it.</p>${REPLY_NOTICE_HTML}`, idempotencyKey: `application-fee-${application.id}-${updated.updatedAt.toISOString()}`, replyTo }).catch(() => undefined);
+    }
   }
   return Response.json({ id: updated.id, applicationFeeStatus: updated.applicationFeeStatus, applicationFeeAmount: updated.applicationFeeAmount, applicationFeeCurrency: updated.applicationFeeCurrency, eligibilityStatus: updated.eligibilityStatus });
 }

@@ -8,6 +8,7 @@ import { logServerError } from "@/lib/logging/safe";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { reconcileDocumentWithJourney } from "@/lib/journey/reconcile";
 import { adminOfferUploadSchema } from "@/lib/validation/schemas";
+import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
 
 export const runtime = "nodejs";
 
@@ -92,12 +93,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
     });
     const appUrl = String(process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
     await reconcileDocumentWithJourney(application.profileId, document.id, "OFFER_LETTER").catch((error) => logServerError("SOUP_OFFER_JOURNEY_RECONCILE_ERROR", error));
-    if (shouldSendStudentEmail(application.profile, true)) await sendTransactionalEmail({
-      to: application.profile.user.email,
-      subject: `${conditional ? "Conditional offer" : "Offer"} received — ${application.university?.name || "SOUP"}`,
-      idempotencyKey: `offer/${application.id}/${document.id}`,
-      html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>Your ${conditional ? "conditional offer" : "offer letter"} from <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` for ${escapeHtml(application.program.title)}` : ""} has been added to your SOUP account.</p><p>${appUrl ? `<a href="${appUrl}/applications">Open My SOUP</a>` : "Sign in to SOUP to review the application and document."}</p><p>Your Noodles can now help you with the next admission, visa, accommodation, insurance and pre-departure steps.</p>`,
-    }).catch((error) => logServerError("SOUP_OFFER_EMAIL_ERROR", error));
+    if (shouldSendStudentEmail(application.profile, true)) {
+      let replyTo: string | undefined;
+      try { replyTo = inboundReplyAddress(await getOrCreateInboundReplyToken(application.id)); } catch (error) { logServerError("SOUP_OFFER_REPLY_TOKEN_ERROR", error); }
+      await sendTransactionalEmail({
+        to: application.profile.user.email,
+        subject: `${conditional ? "Conditional offer" : "Offer"} received — ${application.university?.name || "SOUP"}`,
+        idempotencyKey: `offer/${application.id}/${document.id}`,
+        html: `<p>Hello ${escapeHtml(application.profile.user.fullName)},</p><p>Your ${conditional ? "conditional offer" : "offer letter"} from <strong>${escapeHtml(application.university?.name || "your university")}</strong>${application.program?.title ? ` for ${escapeHtml(application.program.title)}` : ""} has been added to your SOUP account.</p><p>${appUrl ? `<a href="${appUrl}/applications">Open My SOUP</a>` : "Sign in to SOUP to review the application and document."}</p><p>Your Noodles can now help you with the next admission, visa, accommodation, insurance and pre-departure steps.</p>${REPLY_NOTICE_HTML}`,
+        replyTo,
+      }).catch((error) => logServerError("SOUP_OFFER_EMAIL_ERROR", error));
+    }
     return Response.json({ documentId: document.id, status: conditional ? "CONDITIONAL_OFFER" : "OFFER_RECEIVED" });
   } catch (error) {
     await admin.storage.from("documents").remove([storageRef]).catch(() => undefined);

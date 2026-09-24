@@ -7,6 +7,12 @@ export function inboundReplyAddress(token: string) {
   return `app-${token}@${RESEND_INBOUND_DOMAIN}`;
 }
 
+// Appended to application-related transactional emails that set replyTo to
+// this address, so the student knows replying is a real, working option —
+// without printing the address itself, which is an internal routing detail
+// rather than something meant to be read or remembered.
+export const REPLY_NOTICE_HTML = `<p style="color:#667085;font-size:12px;">You can reply directly to this email — SOUP receives it and saves it with this application.</p>`;
+
 // Every application needs its own unguessable inbound reply address so a
 // student's email reply can be attributed back to exactly one application
 // without the address itself ever being (or requiring) the application's
