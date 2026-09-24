@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { logServerError } from "@/lib/logging/safe";
 import { verifyResendWebhookSignature } from "@/lib/resend/inboundSignature";
+import { fetchReceivedEmail } from "@/lib/resend/receivedEmail";
 import { RESEND_INBOUND_DOMAIN } from "@/lib/applications/inboundReply";
 import { resendSignatureHeadersSchema, resendInboundEventSchema } from "@/lib/validation/schemas";
 
@@ -16,10 +17,6 @@ const REPLY_ADDRESS_PATTERN = new RegExp(`^app-([a-z0-9-]+)@${RESEND_INBOUND_DOM
 function asList(value: string | string[] | undefined): string[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
-}
-
-function headerValue(headers: { name: string; value: string }[] | undefined, name: string): string | null {
-  return headers?.find((header) => header.name.toLowerCase() === name.toLowerCase())?.value || null;
 }
 
 // Attachment metadata only, per spec — filename/content-type/size where
@@ -80,18 +77,12 @@ export async function POST(request: Request) {
   // this route was never meant to process.
   if (event.type !== "email.received") return Response.json({ received: true, skipped: true });
 
-  const providerEventId = event.data.email_id || event.data.id;
-  if (!providerEventId) return new Response("Missing email id", { status: 400 });
+  const providerEventId = event.data.email_id;
 
   const toList = asList(event.data.to);
   const ccList = asList(event.data.cc);
   const destination = [...toList, ...ccList].find((address) => REPLY_ADDRESS_PATTERN.test(address));
   const token = destination ? destination.match(REPLY_ADDRESS_PATTERN)?.[1] : undefined;
-
-  const headers = event.data.headers;
-  const messageId = headerValue(headers, "Message-ID");
-  const inReplyTo = headerValue(headers, "In-Reply-To");
-  const referencesHeader = headerValue(headers, "References");
 
   let applicationId: string | undefined;
 
@@ -99,6 +90,18 @@ export async function POST(request: Request) {
     const application = await prisma.studentApplication.findUnique({ where: { inboundReplyToken: token }, select: { id: true } });
     applicationId = application?.id;
   }
+
+  // The webhook payload itself carries metadata only — no body, no
+  // headers (confirmed against Resend's docs after a real test showed an
+  // empty body being saved). The actual text/html and full headers
+  // (In-Reply-To, References) only exist behind this separate call. Always
+  // fetched, regardless of how applicationId was resolved above, since the
+  // body is required either way; a failure here degrades to a
+  // metadata-only saved message rather than failing the whole webhook.
+  const full = await fetchReceivedEmail(providerEventId).catch(() => null);
+  const messageId = full?.message_id || null;
+  const inReplyTo = full?.headers?.["in-reply-to"] || null;
+  const referencesHeader = full?.headers?.["references"] || null;
 
   // Fallback: identify by threading headers if the destination address
   // itself didn't resolve — e.g. the student's mail client only kept the
@@ -138,8 +141,8 @@ export async function POST(request: Request) {
         toAddresses: toList,
         ccAddresses: ccList.length ? ccList : undefined,
         subject: event.data.subject || null,
-        textBody: event.data.text || null,
-        htmlBody: event.data.html || null,
+        textBody: full?.text || null,
+        htmlBody: full?.html || null,
         attachments: attachmentMetadata(event.data.attachments),
         receivedAt: event.data.created_at ? new Date(event.data.created_at) : new Date(),
       },

@@ -346,22 +346,39 @@ export const resendSignatureHeadersSchema = z.object({
 // Deliberately lenient (.passthrough() at every level): this is a
 // third-party webhook payload, and the goal is to safely extract the
 // fields SOUP actually uses without the route breaking if Resend adds or
-// reorders fields we don't read. email_id/id are both optional here
-// because Resend's exact field name for the inbound delivery's own id is
-// asserted at the route level, not enforced by this schema alone.
+// reorders fields we don't read.
+//
+// Confirmed against Resend's own docs (resend.com/docs/webhooks/emails/received)
+// after a real test revealed the mismatch: this event carries metadata
+// only — no body, no headers. text/html/message-id/In-Reply-To/References
+// are NOT here at all; they require a separate authenticated GET to
+// https://api.resend.com/emails/receiving/{email_id}, done by
+// src/lib/resend/receivedEmail.ts. An earlier version of this schema
+// wrongly modeled text/html/headers as present on the webhook payload
+// itself, which is why a real inbound reply saved with an empty body.
 export const resendInboundEventSchema = z.object({
   type: z.string().trim().min(1).max(160),
   data: z.object({
-    email_id: z.string().trim().min(1).max(200).optional(),
-    id: z.string().trim().min(1).max(200).optional(),
+    email_id: z.string().trim().min(1).max(200),
     from: z.string().trim().min(1).max(500),
     to: z.union([z.string(), z.array(z.string())]),
     cc: z.union([z.string(), z.array(z.string())]).optional(),
+    bcc: z.union([z.string(), z.array(z.string())]).optional(),
     subject: z.string().max(998).optional(),
-    text: z.string().optional(),
-    html: z.string().optional(),
-    headers: z.array(z.object({ name: z.string(), value: z.string() })).optional(),
+    message_id: z.string().max(998).optional(),
     attachments: z.array(z.record(z.unknown())).optional(),
     created_at: z.string().optional(),
   }).passthrough(),
+}).passthrough();
+
+// The full received-email record, fetched separately by email_id — see
+// src/lib/resend/receivedEmail.ts. headers is a flat object of raw email
+// headers keyed lowercase-hyphenated (e.g. "in-reply-to", "references"),
+// per Resend's documented example; not every header is guaranteed present.
+export const resendReceivedEmailSchema = z.object({
+  id: z.string(),
+  text: z.string().nullable().optional(),
+  html: z.string().nullable().optional(),
+  message_id: z.string().optional(),
+  headers: z.record(z.string()).optional(),
 }).passthrough();
