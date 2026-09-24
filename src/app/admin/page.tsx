@@ -48,6 +48,7 @@ export default async function AdminDashboardPage() {
   const operations = [
     hasRole(role, CASE_ROLES) && ["/admin/users", "Student & user cases"],
     hasRole(role, APPLICATION_ROLES) && ["/admin/applications", "Applications & offers"],
+    hasRole(role, APPLICATION_ROLES) && ["/admin/messages", "Application messages"],
     hasRole(role, DOCUMENT_ROLES) && ["/admin/documents", "Document operations"],
     ["COUNSELOR", "ADMISSIONS", "FINANCE", "ACCOMMODATION", "ADMIN", "SUPER_ADMIN"].includes(role) && ["/admin/partners", "Partner catalog"],
     hasRole(role, COMMERCIAL_ROLES) && ["/admin/referrals", "Partner referrals & revenue"],

@@ -355,6 +355,7 @@ model User {
   documentReviewsAuthored DocumentReviewEvent[]
   counselorSessionsAsCounselor CounselorSession[] @relation("CounselorSessionCounselor")
   counselorSessionsRequested CounselorSession[] @relation("CounselorSessionRequester")
+  applicationMessagesSent ApplicationMessage[]
 
   @@index([email])
   @@index([role])
@@ -1667,19 +1668,24 @@ model StudentApplication {
 // A single application's email communication history. Currently only
 // populated by the Resend inbound webhook (see
 // src/app/api/resend/inbound/route.ts) when a student replies to a SOUP
-// email — outbound sends are not yet logged here, so every row today is,
-// in effect, an inbound message; a future direction field can be added if
-// outbound logging is added later rather than assuming that need now.
+// email, and OUTBOUND replies staff send from the admin application page
+// (see sendApplicationReply in src/app/actions/adminMessages.ts).
 model ApplicationMessage {
-  id              String             @id @default(uuid())
+  id              String                      @id @default(uuid())
   applicationId   String
-  application     StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  // Resend's email_id for this specific inbound delivery. The hard
-  // uniqueness constraint (not just an application-level check) is what
-  // makes webhook retries safe: Resend/Svix redeliver on anything short of
-  // a fast 2xx, and re-processing the same email_id must never create a
+  application     StudentApplication          @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  direction       ApplicationMessageDirection @default(INBOUND)
+  // Set only for OUTBOUND rows: the staff member who sent the reply.
+  // Nullable because inbound messages have no SOUP-side sender.
+  sentByUserId    String?
+  sentBy          User?                       @relation(fields: [sentByUserId], references: [id], onDelete: SetNull)
+  // Resend's email_id — for INBOUND this is the webhook delivery's id; for
+  // OUTBOUND it's the id Resend's send API returns. The hard uniqueness
+  // constraint (not just an application-level check) is what makes inbound
+  // webhook retries safe: Resend/Svix redeliver on anything short of a
+  // fast 2xx, and re-processing the same email_id must never create a
   // second row.
-  providerEventId String             @unique
+  providerEventId String                      @unique
   messageId       String?
   inReplyTo       String?
   references      String?
@@ -1697,10 +1703,15 @@ model ApplicationMessage {
   // behavior rather than by SOUP's own data.
   attachments     Json?
   receivedAt      DateTime
-  createdAt       DateTime           @default(now())
+  createdAt       DateTime                    @default(now())
 
   @@index([applicationId, receivedAt])
   @@map("application_messages")
+}
+
+enum ApplicationMessageDirection {
+  INBOUND
+  OUTBOUND
 }
 
 model StudentApplicationEvent {

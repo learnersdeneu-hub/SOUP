@@ -12,6 +12,7 @@ import { ApplicationRequirementOperations } from "@/components/admin/Application
 import { ApplicationRequirementsButton } from "@/components/applications/ApplicationRequirementsButton";
 import { ApplicationFactOperations } from "@/components/admin/ApplicationFactOperations";
 import { addOfferCondition, updateOfferConditionStatus } from "@/app/actions/offers";
+import { sendApplicationReply } from "@/app/actions/adminMessages";
 import { getOrCreateInboundReplyToken, inboundReplyAddress } from "@/lib/applications/inboundReply";
 import { CopyReplyAddressButton } from "@/components/admin/CopyReplyAddressButton";
 
@@ -38,7 +39,7 @@ export default async function AdminApplicationDetailPage({ params }: { params: {
       checklists: { where: { kind: "ADMISSION" }, include: { items: { include: { document: true }, orderBy: { position: "asc" } } }, orderBy: { createdAt: "desc" }, take: 10 },
       events: { orderBy: { createdAt: "desc" }, take: 50 },
       offerConditions: { orderBy: [{ status: "asc" }, { dueAt: "asc" }, { createdAt: "asc" }] },
-      messages: { orderBy: { receivedAt: "desc" }, take: 50 },
+      messages: { orderBy: { receivedAt: "desc" }, take: 50, include: { sentBy: true } },
     },
   });
   if (!application) return <div className="min-h-screen bg-paper"><Header signedIn/><main className="mx-auto max-w-5xl px-5 py-10 text-sm text-mute">Application not found.</main></div>;
@@ -81,8 +82,22 @@ export default async function AdminApplicationDetailPage({ params }: { params: {
     {application.documents.length > 0 && <section className="mt-5 rounded-2xl border border-hair bg-white p-5"><h2 className="text-sm font-semibold text-ink">Files bound to this application</h2><div className="mt-3 divide-y divide-hair">{application.documents.map((link) => <div key={link.id} className="flex items-center justify-between gap-3 py-3"><div><div className="text-xs font-semibold text-ink">{link.documentRole}</div><div className="mt-1 text-[10px] text-mute">{link.document.originalFileName || link.document.documentType}</div></div><OpenDocumentButton documentId={link.document.id}/></div>)}</div></section>}
 
     {canOperate && replyAddress && <section className="mt-5 rounded-2xl border border-hair bg-white p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-sm font-semibold text-ink">Email communication</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-mute">Application-related SOUP emails to the student now reply to this address, so a reply lands below automatically. Share it directly only if the student needs to start a new thread rather than replying to an existing SOUP email.</p></div><CopyReplyAddressButton address={replyAddress}/></div>
-      {application.messages.length === 0 ? <div className="mt-4 rounded-xl bg-paper p-4 text-xs text-mute">No email replies received for this application yet.</div> : <div className="mt-4 divide-y divide-hair">{application.messages.map((message) => <div key={message.id} className="py-3"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-xs font-semibold text-ink">{message.subject || "(no subject)"}</div><div className="mt-1 text-[10px] text-mute">From {message.fromAddress}</div></div><div className="text-[10px] text-mute">{message.receivedAt.toLocaleString()}</div></div>{message.textBody && <p className="mt-2 max-w-3xl whitespace-pre-wrap text-[11px] leading-5 text-ink">{message.textBody.slice(0, 2000)}</p>}</div>)}</div>}
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-sm font-semibold text-ink">Email communication</h2><p className="mt-1 max-w-2xl text-xs leading-5 text-mute">Application-related SOUP emails to the student reply to this address, so a reply lands below automatically. Replies sent below also go out from this same address.</p></div><CopyReplyAddressButton address={replyAddress}/></div>
+      {application.messages.length === 0 ? <div className="mt-4 rounded-xl bg-paper p-4 text-xs text-mute">No messages on this application yet.</div> : <div className="mt-4 space-y-3">{application.messages.slice().reverse().map((message) => {
+        const inbound = message.direction === "INBOUND";
+        return <div key={message.id} className={`rounded-xl border p-3 ${inbound ? "border-hair bg-paper" : "border-navy/15 bg-[#EAF0F5]"}`}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[.1em] text-mute">{inbound ? `From ${application.profile.user.fullName}` : `Sent by ${message.sentBy?.fullName || "SOUP"}`}</div>
+            <div className="text-[10px] text-mute">{message.receivedAt.toLocaleString()}</div>
+          </div>
+          <div className="mt-1 text-xs font-semibold text-ink">{message.subject || "(no subject)"}</div>
+          {message.textBody && <p className="mt-2 max-w-3xl whitespace-pre-wrap text-[11px] leading-5 text-ink">{message.textBody.slice(0, 2000)}</p>}
+        </div>;
+      })}</div>}
+      <form action={sendApplicationReply.bind(null, application.id)} className="mt-4 rounded-xl bg-paper p-4">
+        <textarea name="body" required rows={3} placeholder={`Reply to ${application.profile.user.fullName}…`} className="w-full resize-y rounded-lg border border-hair bg-white px-3 py-2 text-xs outline-none"/>
+        <div className="mt-2 flex items-center justify-between"><span className="text-[10px] text-mute">Sent to {application.profile.user.email} · any reply lands back in this thread</span><button className="rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white">Send reply</button></div>
+      </form>
     </section>}
 
     {application.events.length > 0 && <section className="mt-5 rounded-2xl border border-hair bg-white p-5"><h2 className="text-sm font-semibold text-ink">Operational history</h2><p className="mt-1 text-xs text-mute">SOUP-side event ledger for this application. This is operational history, not a substitute for official university correspondence.</p><div className="mt-4 divide-y divide-hair">{application.events.map((event) => <div key={event.id} className="py-3"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="text-xs font-semibold text-ink">{event.message}</div><div className="mt-1 text-[10px] text-mute">{nice(event.eventType)}{event.actorUserId ? ` · staff/user ${event.actorUserId.slice(0, 8)}` : ""}</div>{event.fromStatus && event.toStatus && <div className="mt-1 text-[10px] text-mute">{nice(event.fromStatus)} → {nice(event.toStatus)}</div>}</div><div className="text-[10px] text-mute">{event.createdAt.toLocaleString()}</div></div></div>)}</div></section>}

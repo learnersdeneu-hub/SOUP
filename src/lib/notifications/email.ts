@@ -5,7 +5,13 @@
 // in that application's communication history via the inbound webhook —
 // see src/app/api/resend/inbound/route.ts. Omitted entirely for emails
 // with no application context.
-export type TransactionalEmail = { to: string; subject: string; html: string; idempotencyKey?: string; replyTo?: string };
+// extraHeaders sets raw email headers on the outbound message — currently
+// only used to set In-Reply-To/References when a staff reply continues an
+// existing application thread (see sendApplicationReply in
+// src/app/actions/adminMessages.ts), so the student's own mail client
+// threads it correctly. Not related to replyTo, which controls where a
+// reply from the recipient's mail client goes.
+export type TransactionalEmail = { to: string; subject: string; html: string; idempotencyKey?: string; replyTo?: string; extraHeaders?: Record<string, string> };
 
 export async function sendTransactionalEmail(message: TransactionalEmail) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -18,7 +24,11 @@ export async function sendTransactionalEmail(message: TransactionalEmail) {
       Authorization: `Bearer ${apiKey}`,
       ...(message.idempotencyKey ? { "Idempotency-Key": message.idempotencyKey } : {}),
     },
-    body: JSON.stringify({ from, to: [message.to], subject: message.subject, html: message.html, ...(message.replyTo ? { reply_to: message.replyTo } : {}) }),
+    body: JSON.stringify({
+      from, to: [message.to], subject: message.subject, html: message.html,
+      ...(message.replyTo ? { reply_to: message.replyTo } : {}),
+      ...(message.extraHeaders && Object.keys(message.extraHeaders).length ? { headers: message.extraHeaders } : {}),
+    }),
   });
   if (!response.ok) {
     console.error("SOUP_EMAIL_SEND_FAILED", response.status);
