@@ -14,6 +14,10 @@ const publicRoutes = new Set([
   "report/finalize/route.ts",
   "resume/generate/route.ts",
   "payments/stripe/webhook/route.ts",
+  // Guarded by a Svix signature over the Resend webhook secret instead of a
+  // session, same as the Stripe webhook above — a server-to-server delivery
+  // with no signed-in user to require.
+  "resend/inbound/route.ts",
   // Guarded by a short-lived, single-use pairing code instead of a session —
   // this is the one Companion route an unauthenticated extension can call,
   // analogous to the webhook above being guarded by a signature instead.

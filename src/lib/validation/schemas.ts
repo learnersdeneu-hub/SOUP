@@ -336,3 +336,32 @@ export const stripeWebhookEventSchema = z.object({
   type: z.string().trim().min(1).max(160),
   data: z.object({ object: z.record(z.unknown()) }).passthrough(),
 }).passthrough();
+
+export const resendSignatureHeadersSchema = z.object({
+  id: z.string().trim().min(1).max(200),
+  timestamp: z.string().trim().min(1).max(40),
+  signature: z.string().trim().min(1).max(4096),
+});
+
+// Deliberately lenient (.passthrough() at every level): this is a
+// third-party webhook payload, and the goal is to safely extract the
+// fields SOUP actually uses without the route breaking if Resend adds or
+// reorders fields we don't read. email_id/id are both optional here
+// because Resend's exact field name for the inbound delivery's own id is
+// asserted at the route level, not enforced by this schema alone.
+export const resendInboundEventSchema = z.object({
+  type: z.string().trim().min(1).max(160),
+  data: z.object({
+    email_id: z.string().trim().min(1).max(200).optional(),
+    id: z.string().trim().min(1).max(200).optional(),
+    from: z.string().trim().min(1).max(500),
+    to: z.union([z.string(), z.array(z.string())]),
+    cc: z.union([z.string(), z.array(z.string())]).optional(),
+    subject: z.string().max(998).optional(),
+    text: z.string().optional(),
+    html: z.string().optional(),
+    headers: z.array(z.object({ name: z.string(), value: z.string() })).optional(),
+    attachments: z.array(z.record(z.unknown())).optional(),
+    created_at: z.string().optional(),
+  }).passthrough(),
+}).passthrough();

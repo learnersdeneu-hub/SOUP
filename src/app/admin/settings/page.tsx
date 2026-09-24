@@ -29,6 +29,7 @@ export default async function AdminSettingsPage() {
     ["Gemini API key", Boolean(process.env.GEMINI_API_KEY), false],
     ["AI rate-limit salt", Boolean(process.env.SOUP_RATE_LIMIT_SALT), false],
     ["Transactional email (Resend)", Boolean(process.env.RESEND_API_KEY && process.env.SOUP_EMAIL_FROM), true],
+    ["Resend inbound webhook (/api/resend/inbound)", Boolean(process.env.RESEND_WEBHOOK_SECRET), true],
     ["Stripe checkout", Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET), true],
     ["SOUP support email", Boolean(process.env.SOUP_SUPPORT_EMAIL), false],
     ["WhatsApp support number", Boolean(process.env.NEXT_PUBLIC_SOUP_WHATSAPP), false],

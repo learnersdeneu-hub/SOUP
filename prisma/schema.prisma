@@ -78,6 +78,7 @@ enum NotificationType {
   SUPPORT
   PAYMENT
   SYSTEM
+  MESSAGE
 }
 
 enum PaymentType {
@@ -1616,6 +1617,17 @@ model StudentApplication {
   offerDocument       Document?                @relation("ApplicationOfferDocument", fields: [offerDocumentId], references: [id], onDelete: SetNull)
   notes               String?
   applicationKey      String?                   @unique
+  // Unguessable per-application token embedded in the inbound reply
+  // address the student emails to (app-{inboundReplyToken}@minoihon.resend.app).
+  // Generated lazily by getOrCreateInboundReplyToken() — see
+  // src/lib/applications/inboundReply.ts — rather than backfilled for
+  // every existing row, since nothing surfaced the address before this
+  // feature existed. Deliberately NOT derived from applicationId/other
+  // public identifiers: it is the only thing that authorizes an inbound
+  // email to be attached to this specific application's communication
+  // history, so it must not be guessable from a sequential or otherwise
+  // public value.
+  inboundReplyToken   String?                   @unique
   intake              String?
   startDate           DateTime?
   deadlineAt          DateTime?
@@ -1644,11 +1656,51 @@ model StudentApplication {
   events              StudentApplicationEvent[]
   payments            Payment[]
   offerConditions     OfferCondition[]
+  messages            ApplicationMessage[]
 
   @@index([profileId, status, updatedAt])
   @@index([studentCaseId, status])
   @@index([universityId])
   @@map("student_applications")
+}
+
+// A single application's email communication history. Currently only
+// populated by the Resend inbound webhook (see
+// src/app/api/resend/inbound/route.ts) when a student replies to a SOUP
+// email — outbound sends are not yet logged here, so every row today is,
+// in effect, an inbound message; a future direction field can be added if
+// outbound logging is added later rather than assuming that need now.
+model ApplicationMessage {
+  id              String             @id @default(uuid())
+  applicationId   String
+  application     StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  // Resend's email_id for this specific inbound delivery. The hard
+  // uniqueness constraint (not just an application-level check) is what
+  // makes webhook retries safe: Resend/Svix redeliver on anything short of
+  // a fast 2xx, and re-processing the same email_id must never create a
+  // second row.
+  providerEventId String             @unique
+  messageId       String?
+  inReplyTo       String?
+  references      String?
+  fromAddress     String
+  toAddresses     Json
+  ccAddresses     Json?
+  subject         String?
+  textBody        String?
+  htmlBody        String?
+  // Filename/content-type/size only — never the attachment's raw content.
+  // The webhook payload's own attachment bytes (if Resend ever includes
+  // them) are deliberately stripped before this is written; storing
+  // arbitrary email attachment content in the primary database was never
+  // asked for and would make this table's size unbounded by student
+  // behavior rather than by SOUP's own data.
+  attachments     Json?
+  receivedAt      DateTime
+  createdAt       DateTime           @default(now())
+
+  @@index([applicationId, receivedAt])
+  @@map("application_messages")
 }
 
 model StudentApplicationEvent {

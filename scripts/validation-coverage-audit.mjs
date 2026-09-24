@@ -32,7 +32,9 @@ for (const file of routeFiles) {
     continue;
   }
   if (readsRawBody) {
-    const signedWebhook = rel === "payments/stripe/webhook/route.ts" && source.includes("stripeWebhookEventSchema") && source.includes("stripeSignatureSchema") && source.includes("verifyStripeSignature");
+    const signedWebhook =
+      (rel === "payments/stripe/webhook/route.ts" && source.includes("stripeWebhookEventSchema") && source.includes("stripeSignatureSchema") && source.includes("verifyStripeSignature")) ||
+      (rel === "resend/inbound/route.ts" && source.includes("resendInboundEventSchema") && source.includes("resendSignatureHeadersSchema") && source.includes("verifyResendWebhookSignature"));
     if (!signedWebhook) failures.push(`${rel}: raw request body is not an approved signed-webhook validation path`);
     else categories.rawSignedWebhook++;
     continue;
