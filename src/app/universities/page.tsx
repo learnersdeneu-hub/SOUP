@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/currentUser";
 import { normalizeField, summarizeUniversityPrograms } from "@/lib/universities/presentation";
 import { deriveCatalogChannel, networksFromMetadata } from "@/lib/universities/catalogChannels";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { UniversityCatalogBrowser, type CatalogUniversity } from "@/components/universities/UniversityCatalogBrowser";
 import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
+import type { CatalogChannel } from "@/lib/universities/catalogChannels";
 
 function metadataLogo(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -13,9 +17,12 @@ function metadataLogo(value: unknown) {
   return /^https?:\/\//i.test(url) ? url : null;
 }
 
-export default async function UniversitiesPage() {
+export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string } }) {
   const current = await getCurrentUser();
   const user = current?.authUser || null;
+  const initialChannel = searchParams.channel && ["GOVERNMENT", "DIRECT_SOUP", "AHZ", "GRANDLINK", "SOUP_CATALOGUE"].includes(searchParams.channel)
+    ? (searchParams.channel as CatalogChannel)
+    : undefined;
 
   // Only a light, bounded per-university payload is fetched even though the
   // full catalogue (300+) renders "as one list" to the student: each
@@ -80,6 +87,8 @@ export default async function UniversitiesPage() {
     };
   });
 
+  const governmentPartners = universities.filter((u) => u.channel === "GOVERNMENT");
+
   return (
     <div className="min-h-screen bg-paper">
       <Header signedIn={!!user}/>
@@ -92,9 +101,29 @@ export default async function UniversitiesPage() {
           </div>
         </div>
 
+        {governmentPartners.length > 0 && (
+          <section className="mt-6 rounded-2xl border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-5 sm:p-6">
+            <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-navy">SOUP's first government partnership</div>
+                <h2 className="mt-1 text-lg font-semibold text-ink">{governmentPartners.length} Greek public universities, now open through SOUP</h2>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+              {governmentPartners.slice(0, 12).map((university) => (
+                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-3 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
+                  <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} size={28}/>
+                  <div className="mt-2 truncate text-[11px] font-semibold text-ink">{university.name}</div>
+                  <div className="mt-0.5 text-[9px] text-mute">{university.city || "Greece"}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="min-w-0">
-            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} />
+            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} />
           </div>
           <div className="lg:sticky lg:top-8 lg:self-start">
             <HomeAIEntry compact/>

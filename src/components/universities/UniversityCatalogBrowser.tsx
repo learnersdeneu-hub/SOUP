@@ -31,10 +31,10 @@ const PAGE_SIZE = 30;
 // sorted alphabetically after the known ones, rather than being hidden.
 const LEVEL_ORDER = ["Foundation", "Diploma", "Bachelors", "Masters", "MBA", "PhD"];
 
-export function UniversityCatalogBrowser({ universities, signedIn, capReached }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean }) {
+export function UniversityCatalogBrowser({ universities, signedIn, capReached, initialChannel }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean; initialChannel?: CatalogChannel }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [channel, setChannel] = useState<CatalogChannel | "ALL">("ALL");
+  const [channel, setChannel] = useState<CatalogChannel | "ALL">(initialChannel && initialChannel in CHANNEL_LABELS ? initialChannel : "ALL");
   const [country, setCountry] = useState("ALL");
   const [level, setLevel] = useState("ALL");
   const [field, setField] = useState("ALL");

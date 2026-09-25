@@ -8,6 +8,7 @@ import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 import { prisma } from "@/lib/prisma";
 import { SupportLauncher } from "@/components/support/SupportLauncher";
 import { SOUP_SUPPORT_EMAIL, supportWhatsAppUrl } from "@/lib/support/config";
+import { networksFromMetadata } from "@/lib/universities/catalogChannels";
 
 const WORKFLOWS = [
   { href: "/universities", title: "Universities & Programs", short: "Explore the network or ask SOUP to match you", icon: Search },
@@ -82,7 +83,7 @@ export default async function HomePage() {
   // TTFB. This queries directly for the featured names first (a small,
   // index-friendly IN-list lookup), only falling back to a broader query
   // for the rare case fewer than 8 of the featured names exist yet.
-  const [featuredMatches, dbServicePartners] = await Promise.all([
+  const [featuredMatches, dbServicePartners, governmentPartnerUniversities] = await Promise.all([
     prisma.university.findMany({
       where: { name: { in: [...FEATURED_EUROPE_UNIVERSITIES] }, partner: { type: "UNIVERSITY", status: "ACTIVE" } },
       include: HOMEPAGE_UNIVERSITY_INCLUDE,
@@ -92,7 +93,20 @@ export default async function HomePage() {
       orderBy: [{ internalPriority: "asc" }, { name: "asc" }],
       take: 12,
     }).catch(() => []),
+    // SOUP's first government partnership (Greece's public university
+    // network) — queried separately from the generic featured-universities
+    // list above because it has no Partner row (see catalogChannels.ts:
+    // the GOVERNMENT channel is a publicMetadata.networks tag, not a
+    // partnerId relationship), and because it deserves its own distinct,
+    // clearly-labeled promotional placement rather than being folded
+    // anonymously into the generic partner grid.
+    prisma.university.findMany({
+      where: { country: "Greece" },
+      orderBy: { name: "asc" },
+      include: { programs: { where: { active: true }, select: { id: true } } },
+    }).catch(() => []),
   ]);
+  const governmentPartners = governmentPartnerUniversities.filter((u) => networksFromMetadata(u.publicMetadata).includes("GOVERNMENT"));
 
   const universityPartners: Array<(typeof featuredMatches)[number]> = [];
   for (const featuredName of FEATURED_EUROPE_UNIVERSITIES) {
@@ -174,7 +188,30 @@ export default async function HomePage() {
           })}
         </section>
 
-        <section className="mt-16 border-t border-hair pt-12">
+        {governmentPartners.length > 0 && (
+          <section className="mt-14 rounded-[28px] border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-6 sm:p-8">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div className="max-w-2xl">
+                <div className="text-xs font-semibold uppercase tracking-[.16em] text-navy">SOUP's first government partnership</div>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">Greece's public universities, now open through SOUP.</h2>
+                <p className="mt-3 text-sm leading-6 text-mute">{governmentPartners.length} state-recognized Greek public universities with English-taught Bachelor's and Master's programmes, sourced directly from Greece's official Study in Greece network.</p>
+              </div>
+              <Link href="/universities?channel=GOVERNMENT" className="text-xs font-semibold text-navy">See all {governmentPartners.length} <ArrowRight size={12} className="ml-1 inline"/></Link>
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {governmentPartners.slice(0, 8).map((university) => (
+                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
+                  <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={logoUrl(university.publicMetadata)} size={34}/>
+                  <div className="mt-2 truncate text-xs font-semibold text-ink">{university.name}</div>
+                  <div className="mt-1 text-[10px] text-mute">{[university.city, "Greece"].filter(Boolean).join(", ")}</div>
+                  <div className="mt-2 text-[9px] font-semibold uppercase tracking-[.1em] text-navy">{university.programs.length} program{university.programs.length === 1 ? "" : "s"}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="mt-14 border-t border-hair pt-12">
           <div className="grid gap-9 lg:grid-cols-[.9fr_1.1fr] lg:items-start">
             <div>
               <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">University network</div>
