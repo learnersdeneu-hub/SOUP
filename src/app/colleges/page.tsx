@@ -22,8 +22,17 @@ function nice(value: string) {
 
 export default async function CollegesPage() {
   const { profile } = await requireProfile();
+  // "My Colleges" shows every university the student added here, regardless
+  // of ownership — the "Add to My Colleges" button works the same way for
+  // any university in the catalogue, partner or not, so filtering this page
+  // to SOUP_MANAGED only silently dropped self-managed additions from view
+  // even though they were created successfully (they still showed up in
+  // /applications, which has no ownership filter). Only the 3-slot cap
+  // itself stays SOUP_MANAGED-only, since that limit is about how many
+  // applications SOUP is actively managing, not how many the student is
+  // simply tracking.
   const applications = await prisma.studentApplication.findMany({
-    where: { profileId: profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } },
+    where: { profileId: profile.id, status: { notIn: ["WITHDRAWN", "REJECTED"] } },
     orderBy: [{ deadlineAt: "asc" }, { createdAt: "desc" }],
     include: {
       university: true,
@@ -32,7 +41,7 @@ export default async function CollegesPage() {
     },
   });
 
-  const slotsUsed = applications.length;
+  const slotsUsed = applications.filter((application) => application.ownership === "SOUP_MANAGED").length;
   const slotsRemaining = Math.max(0, MY_COLLEGES_CAP - slotsUsed);
 
   return (
@@ -43,7 +52,7 @@ export default async function CollegesPage() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My SOUP</div>
             <h1 className="mt-1 text-2xl font-semibold text-ink">My Colleges</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Up to {MY_COLLEGES_CAP} universities SOUP manages for you at a time. Your Profile & Details, Funding, Education and Testing sections are reused automatically here — you only see what's genuinely specific to each school.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Every university you've added, up to {MY_COLLEGES_CAP} of them SOUP actively manages at a time — the rest stay self-managed. Your Profile & Details, Funding, Education and Testing sections are reused automatically here — you only see what's genuinely specific to each school.</p>
           </div>
           <div className="shrink-0 rounded-2xl border border-hair bg-white px-4 py-3 text-center">
             <div className="text-lg font-semibold text-ink">{slotsUsed}/{MY_COLLEGES_CAP}</div>
@@ -53,7 +62,7 @@ export default async function CollegesPage() {
 
         {slotsRemaining > 0 && (
           <Link href="/universities" className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-hair bg-white p-4 text-sm font-semibold text-navy hover:border-navy/40">
-            {slotsUsed === 0 ? "Select your first university" : `Select another university (${slotsRemaining} slot${slotsRemaining === 1 ? "" : "s"} left)`}
+            {applications.length === 0 ? "Select your first university" : `Select another university (${slotsRemaining} slot${slotsRemaining === 1 ? "" : "s"} left)`}
             <ArrowRight size={14} />
           </Link>
         )}
@@ -78,7 +87,10 @@ export default async function CollegesPage() {
               <div key={application.id} className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
                   <div className="min-w-0">
-                    <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-teal"><GraduationCap size={12} />{nice(application.status)}</div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.14em] text-teal"><GraduationCap size={12} />{nice(application.status)}</div>
+                      <span className="rounded-full bg-paper px-2 py-0.5 text-[10px] font-semibold text-mute">{application.ownership === "SOUP_MANAGED" ? "SOUP-managed" : application.ownership === "STUDENT_MANAGED_EXTERNAL" ? "External / student-managed" : "Assisted external"}</span>
+                    </div>
                     <h2 className="mt-1 truncate text-lg font-semibold text-ink">{application.university?.name || "University application"}</h2>
                     <div className="mt-1 text-xs text-mute">{application.program ? `${application.program.title} · ${application.program.level}` : "Program not yet set"}{application.intake ? ` · ${application.intake}` : ""}</div>
                   </div>
@@ -104,7 +116,11 @@ export default async function CollegesPage() {
                 )}
 
                 {!checklist ? (
-                  <div className="mt-4 rounded-xl bg-paper p-4 text-xs text-mute">Requirements haven't been prepared for this application yet. <Link href={`/applications/${application.id}`} className="font-semibold text-navy">Open the application</Link> to generate them.</div>
+                  <div className="mt-4 rounded-xl bg-paper p-4 text-xs text-mute">
+                    {application.ownership === "SOUP_MANAGED"
+                      ? <>Requirements haven't been prepared for this application yet. <Link href={`/applications/${application.id}`} className="font-semibold text-navy">Open the application</Link> to generate them.</>
+                      : <>SOUP is not claiming operational control over this external application. <Link href={`/applications/${application.id}`} className="font-semibold text-navy">Open the application</Link> to track it yourself.</>}
+                  </div>
                 ) : (
                   <div className="mt-4 divide-y divide-hair">
                     {items.slice(0, 8).map((item) => {

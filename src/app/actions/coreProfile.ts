@@ -111,6 +111,7 @@ export async function saveEducationHistory(formData: FormData) {
   const { profile } = await requireProfile();
   const data = {
     currentInstitutionName: clean(formData.get("currentInstitutionName"), 200),
+    currentInstitutionCity: clean(formData.get("currentInstitutionCity"), 100),
     currentInstitutionCountry: clean(formData.get("currentInstitutionCountry"), 80),
     educationSystem: clean(formData.get("educationSystem"), 80),
     startDate: clean(formData.get("startDate"), 10),
@@ -129,7 +130,7 @@ export async function saveEducationHistory(formData: FormData) {
   // fundingSummary above — it's what Noodles and every existing "Core
   // application information" display already reads.
   const summaryParts = [
-    data.currentInstitutionName && `${data.intendedDegreeLevel || "Studying"} at ${data.currentInstitutionName}${data.currentInstitutionCountry ? `, ${data.currentInstitutionCountry}` : ""}`,
+    data.currentInstitutionName && `${data.intendedDegreeLevel || "Studying"} at ${data.currentInstitutionName}${[data.currentInstitutionCity, data.currentInstitutionCountry].filter(Boolean).length ? `, ${[data.currentInstitutionCity, data.currentInstitutionCountry].filter(Boolean).join(", ")}` : ""}`,
     data.gpaValue && `GPA/result: ${data.gpaValue}${data.gpaScale ? ` (${data.gpaScale})` : ""}`,
     data.intendedFields.length && `Intended field(s): ${data.intendedFields.join(", ")}`,
   ].filter(Boolean);

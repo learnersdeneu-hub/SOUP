@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { saveFundingDetails } from "@/app/actions/coreProfile";
 import type { FundingDetails } from "@/lib/applications/coreProfile";
+import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const FUNDING_SOURCES = ["Self-funded", "Parents", "Student loan", "Scholarship", "Sponsor / employer", "Government"];
@@ -128,6 +129,7 @@ export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
           {error && <span className="text-[11px] font-medium text-[#9D3127]">{error}</span>}
         </div>
       </div>
+      <ProfileSectionNav current="/profile/funding"/>
     </div>
   );
 }

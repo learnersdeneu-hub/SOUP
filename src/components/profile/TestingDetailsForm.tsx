@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { saveTestingDetails } from "@/app/actions/coreProfile";
 import type { TestingDetails } from "@/lib/applications/coreProfile";
+import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const ENGLISH_TESTS = ["NONE_YET", "IELTS", "TOEFL", "Duolingo", "PTE"];
@@ -118,6 +119,7 @@ export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
           {error && <span className="text-[11px] font-medium text-[#9D3127]">{error}</span>}
         </div>
       </div>
+      <ProfileSectionNav current="/profile/testing"/>
     </div>
   );
 }

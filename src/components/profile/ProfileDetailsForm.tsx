@@ -7,6 +7,10 @@ import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { updateCustomerProfile } from "@/app/actions/account";
 import { saveCoreProfileDetails } from "@/app/actions/coreProfile";
 import type { CoreProfileDetails } from "@/lib/applications/coreProfile";
+import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
+import { COUNTRIES } from "@/lib/constants/countries";
+
+const GENDERS = ["Female", "Male", "Non-binary", "Prefer not to say"];
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -37,9 +41,11 @@ export function ProfileDetailsForm({
   const [name, setName] = useState(fullName);
   const [dob, setDob] = useState(dateOfBirth);
   const [nat, setNat] = useState(nationality);
+  const [customNat, setCustomNat] = useState(() => Boolean(nationality) && !(COUNTRIES as readonly string[]).includes(nationality));
   const [country, setCountry] = useState(currentCountry);
   const [preferredName, setPreferredName] = useState(core.preferredName);
   const [gender, setGender] = useState(core.gender);
+  const [customGender, setCustomGender] = useState(() => Boolean(core.gender) && !GENDERS.includes(core.gender));
   const [citizenships, setCitizenships] = useState<string[]>(core.citizenships);
   const [citizenshipInput, setCitizenshipInput] = useState("");
   const [passportNumber, setPassportNumber] = useState(core.passportNumber);
@@ -131,8 +137,22 @@ export function ProfileDetailsForm({
           <Field label="Legal name (as on passport)"><input value={name} onChange={(e) => setName(e.target.value)} className={inputClass}/></Field>
           <Field label="Preferred name (if different)"><input value={preferredName} onChange={(e) => setPreferredName(e.target.value)} className={inputClass}/></Field>
           <Field label="Date of birth"><input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className={inputClass}/></Field>
-          <Field label="Gender"><input value={gender} onChange={(e) => setGender(e.target.value)} className={inputClass}/></Field>
-          <Field label="Nationality"><input value={nat} onChange={(e) => setNat(e.target.value)} className={inputClass}/></Field>
+          <Field label="Gender">
+            <select value={customGender ? "__other__" : (GENDERS.includes(gender) ? gender : "")} onChange={(e) => { if (e.target.value === "__other__") { setCustomGender(true); setGender(""); } else { setCustomGender(false); setGender(e.target.value); } }} className={inputClass}>
+              <option value="" disabled>Select…</option>
+              {GENDERS.map((option) => <option key={option} value={option}>{option}</option>)}
+              <option value="__other__">Other</option>
+            </select>
+            {customGender && <input value={gender} onChange={(e) => setGender(e.target.value)} placeholder="Enter gender" className={`${inputClass} mt-2`}/>}
+          </Field>
+          <Field label="Nationality">
+            <select value={customNat ? "__other__" : ((COUNTRIES as readonly string[]).includes(nat) ? nat : "")} onChange={(e) => { if (e.target.value === "__other__") { setCustomNat(true); setNat(""); } else { setCustomNat(false); setNat(e.target.value); } }} className={inputClass}>
+              <option value="" disabled>Select…</option>
+              {COUNTRIES.map((option) => <option key={option} value={option}>{option}</option>)}
+              <option value="__other__">Other</option>
+            </select>
+            {customNat && <input value={nat} onChange={(e) => setNat(e.target.value)} placeholder="Enter nationality" className={`${inputClass} mt-2`}/>}
+          </Field>
           <Field label="Country of residence"><input value={country} onChange={(e) => setCountry(e.target.value)} className={inputClass}/></Field>
         </div>
 
@@ -208,6 +228,7 @@ export function ProfileDetailsForm({
           {error && <span className="text-[11px] font-medium text-[#9D3127]">{error}</span>}
         </div>
       </div>
+      <ProfileSectionNav current="/profile/details"/>
     </div>
   );
 }

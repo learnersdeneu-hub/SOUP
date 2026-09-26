@@ -112,11 +112,12 @@ export function normalizeFundingDetails(value: unknown): FundingDetails {
 
 // --- Section 3: Education & Academic Background -------------------------
 
-export type PriorInstitution = { name: string; startDate: string; endDate: string; country: string; credential: string };
+export type PriorInstitution = { name: string; startDate: string; endDate: string; country: string; city: string; credential: string };
 export type AcademicHonor = { title: string; year: string };
 
 export type EducationHistory = {
   currentInstitutionName: string;
+  currentInstitutionCity: string;
   currentInstitutionCountry: string;
   educationSystem: string;
   startDate: string;
@@ -136,7 +137,7 @@ function priorInstitutions(value: unknown): PriorInstitution[] {
   if (!Array.isArray(value)) return [];
   return value.map((item) => {
     const r = record(item);
-    return { name: str(r.name), startDate: str(r.startDate), endDate: str(r.endDate), country: str(r.country), credential: str(r.credential) };
+    return { name: str(r.name), startDate: str(r.startDate), endDate: str(r.endDate), country: str(r.country), city: str(r.city), credential: str(r.credential) };
   }).filter((item) => item.name);
 }
 function honors(value: unknown): AcademicHonor[] {
@@ -151,6 +152,7 @@ export function normalizeEducationHistory(value: unknown): EducationHistory {
   const r = record(value);
   return {
     currentInstitutionName: str(r.currentInstitutionName),
+    currentInstitutionCity: str(r.currentInstitutionCity),
     currentInstitutionCountry: str(r.currentInstitutionCountry),
     educationSystem: str(r.educationSystem),
     startDate: str(r.startDate),

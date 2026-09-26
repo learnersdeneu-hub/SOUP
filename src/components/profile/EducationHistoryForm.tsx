@@ -6,18 +6,23 @@ import Link from "next/link";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { saveEducationHistory } from "@/app/actions/coreProfile";
 import type { AcademicHonor, EducationHistory, PriorInstitution } from "@/lib/applications/coreProfile";
+import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const DEGREE_LEVELS = ["Foundation / Pathway", "Bachelor's", "Master's", "PhD"];
+const EDUCATION_SYSTEMS = ["A-Levels", "International Baccalaureate (IB)", "American High School Diploma", "IGCSE / O-Levels", "National Curriculum / Matriculation", "Advanced Placement (AP)", "Cambridge International"];
+const OTHER_SYSTEM = "__other__";
 
-function emptyInstitution(): PriorInstitution { return { name: "", startDate: "", endDate: "", country: "", credential: "" }; }
+function emptyInstitution(): PriorInstitution { return { name: "", startDate: "", endDate: "", country: "", city: "", credential: "" }; }
 function emptyHonor(): AcademicHonor { return { title: "", year: "" }; }
 
 export function EducationHistoryForm({ education }: { education: EducationHistory }) {
   const router = useRouter();
   const [currentInstitutionName, setCurrentInstitutionName] = useState(education.currentInstitutionName);
+  const [currentInstitutionCity, setCurrentInstitutionCity] = useState(education.currentInstitutionCity);
   const [currentInstitutionCountry, setCurrentInstitutionCountry] = useState(education.currentInstitutionCountry);
   const [educationSystem, setEducationSystem] = useState(education.educationSystem);
+  const [customSystem, setCustomSystem] = useState(() => Boolean(education.educationSystem) && !EDUCATION_SYSTEMS.includes(education.educationSystem));
   const [startDate, setStartDate] = useState(education.startDate);
   const [graduationDate, setGraduationDate] = useState(education.graduationDate);
   const [gpaValue, setGpaValue] = useState(education.gpaValue);
@@ -47,6 +52,7 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
     try {
       const form = new FormData();
       form.set("currentInstitutionName", currentInstitutionName);
+      form.set("currentInstitutionCity", currentInstitutionCity);
       form.set("currentInstitutionCountry", currentInstitutionCountry);
       form.set("educationSystem", educationSystem);
       form.set("startDate", startDate);
@@ -82,8 +88,21 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
       <div className="mt-6 space-y-6 rounded-2xl border border-hair bg-white p-5 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Current / most recent institution</span><input value={currentInstitutionName} onChange={(e) => setCurrentInstitutionName(e.target.value)} className={inputClass}/></label>
+          <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">City</span><input value={currentInstitutionCity} onChange={(e) => setCurrentInstitutionCity(e.target.value)} className={inputClass}/></label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Country</span><input value={currentInstitutionCountry} onChange={(e) => setCurrentInstitutionCountry(e.target.value)} className={inputClass}/></label>
-          <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Education system</span><input value={educationSystem} onChange={(e) => setEducationSystem(e.target.value)} placeholder="e.g. A-Levels, IB, national curriculum" className={inputClass}/></label>
+          <label className="block">
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Education system</span>
+            <select
+              value={customSystem ? OTHER_SYSTEM : (EDUCATION_SYSTEMS.includes(educationSystem) ? educationSystem : "")}
+              onChange={(e) => { if (e.target.value === OTHER_SYSTEM) { setCustomSystem(true); setEducationSystem(""); } else { setCustomSystem(false); setEducationSystem(e.target.value); } }}
+              className={inputClass}
+            >
+              <option value="" disabled>Select…</option>
+              {EDUCATION_SYSTEMS.map((system) => <option key={system} value={system}>{system}</option>)}
+              <option value={OTHER_SYSTEM}>Other</option>
+            </select>
+            {customSystem && <input value={educationSystem} onChange={(e) => setEducationSystem(e.target.value)} placeholder="Name your education system" className={`${inputClass} mt-2`}/>}
+          </label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Class rank (if available)</span><input value={classRank} onChange={(e) => setClassRank(e.target.value)} className={inputClass}/></label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Start date</span><input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputClass}/></label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Graduation date (actual or expected)</span><input type="date" value={graduationDate} onChange={(e) => setGraduationDate(e.target.value)} className={inputClass}/></label>
@@ -97,12 +116,15 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
             <button type="button" onClick={() => setPriorInstitutions([...priorInstitutions, emptyInstitution()])} className="inline-flex items-center gap-1 text-[11px] font-semibold text-navy"><Plus size={12}/>Add institution</button>
           </div>
           {priorInstitutions.map((item, index) => (
-            <div key={index} className="mt-3 grid gap-2 rounded-xl bg-paper p-3 sm:grid-cols-[1fr_1fr_auto_auto_auto]">
-              <input value={item.name} onChange={(e) => updateInstitution(index, { name: e.target.value })} placeholder="Institution name" className={inputClass}/>
-              <input value={item.country} onChange={(e) => updateInstitution(index, { country: e.target.value })} placeholder="Country" className={inputClass}/>
-              <input type="date" value={item.startDate} onChange={(e) => updateInstitution(index, { startDate: e.target.value })} className={inputClass}/>
-              <input type="date" value={item.endDate} onChange={(e) => updateInstitution(index, { endDate: e.target.value })} className={inputClass}/>
-              <div className="flex gap-2">
+            <div key={index} className="mt-3 space-y-2 rounded-xl bg-paper p-3">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <input value={item.name} onChange={(e) => updateInstitution(index, { name: e.target.value })} placeholder="Institution name" className={inputClass}/>
+                <input value={item.city} onChange={(e) => updateInstitution(index, { city: e.target.value })} placeholder="City" className={inputClass}/>
+                <input value={item.country} onChange={(e) => updateInstitution(index, { country: e.target.value })} placeholder="Country" className={inputClass}/>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
+                <input type="date" value={item.startDate} onChange={(e) => updateInstitution(index, { startDate: e.target.value })} className={inputClass}/>
+                <input type="date" value={item.endDate} onChange={(e) => updateInstitution(index, { endDate: e.target.value })} className={inputClass}/>
                 <input value={item.credential} onChange={(e) => updateInstitution(index, { credential: e.target.value })} placeholder="Credential" className={inputClass}/>
                 <button type="button" onClick={() => setPriorInstitutions(priorInstitutions.filter((_, i) => i !== index))} aria-label="Remove" className="shrink-0 text-mute hover:text-ink"><X size={14}/></button>
               </div>
@@ -146,6 +168,7 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
           {error && <span className="text-[11px] font-medium text-[#9D3127]">{error}</span>}
         </div>
       </div>
+      <ProfileSectionNav current="/profile/education"/>
     </div>
   );
 }
