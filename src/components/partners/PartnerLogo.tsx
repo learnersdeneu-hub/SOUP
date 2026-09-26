@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 function initials(name: string) {
@@ -17,15 +17,33 @@ function safeLogoUrl(value?: string | null) {
   }
 }
 
+// A logo that hotlink-blocks or is simply unreachable never fires the
+// <img>'s onError in every browser (it can just sit at complete=false
+// forever), which used to leave a permanently blank box instead of ever
+// reaching the favicon/initials fallback below. This timeout treats "still
+// not loaded after 4s" the same as an explicit error.
+const LOAD_TIMEOUT_MS = 4000;
+
 export function PartnerLogo({ name, websiteUrl, logoUrl, size = 38 }: { name: string; websiteUrl?: string | null; logoUrl?: string | null; size?: number }) {
-  const [failed, setFailed] = useState(false);
   const site = safeLogoUrl(websiteUrl) || knownPartnerWebsite(name) || null;
-  const resolved = useMemo(() => {
-    const explicit = safeLogoUrl(logoUrl);
-    if (explicit) return explicit;
-    return site ? `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(site)}` : null;
-  }, [logoUrl, site]);
-  const favicon = failed ? null : resolved;
+  const explicit = safeLogoUrl(logoUrl);
+  const favicon = site ? `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(site)}` : null;
+
+  // stage 0 = try the explicit logo (if any), 1 = try the favicon (if any
+  // and different from the explicit URL), 2 = give up, show initials.
+  const initialStage = explicit ? 0 : favicon ? 1 : 2;
+  const [stage, setStage] = useState(initialStage);
+  useEffect(() => setStage(initialStage), [explicit, favicon, initialStage]);
+
+  const src = stage === 0 ? explicit : stage === 1 ? favicon : null;
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => setLoaded(false), [src]);
+
+  useEffect(() => {
+    if (!src || loaded) return;
+    const timer = setTimeout(() => setStage((current) => (current === stage ? stage + 1 : current)), LOAD_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [src, stage, loaded]);
 
   return (
     <div
@@ -34,15 +52,16 @@ export function PartnerLogo({ name, websiteUrl, logoUrl, size = 38 }: { name: st
       aria-label={`${name} logo`}
       title={name}
     >
-      {favicon ? (
+      {src ? (
         <img
-          src={favicon}
+          key={src}
+          src={src}
           alt=""
           width={Math.max(24, size - 10)}
           height={Math.max(24, size - 10)}
-          loading="lazy"
           referrerPolicy="no-referrer"
-          onError={() => setFailed(true)}
+          onLoad={() => setLoaded(true)}
+          onError={() => setStage((current) => current + 1)}
           className="max-h-[76%] max-w-[76%] object-contain"
         />
       ) : (
@@ -51,4 +70,3 @@ export function PartnerLogo({ name, websiteUrl, logoUrl, size = 38 }: { name: st
     </div>
   );
 }
-
