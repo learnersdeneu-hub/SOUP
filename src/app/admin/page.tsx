@@ -57,6 +57,7 @@ export default async function AdminDashboardPage() {
     hasRole(role, CASE_ROLES) && ["/admin/concierge", "SOUP Concierge queue"],
     hasRole(role, CASE_ROLES) && ["/admin/sessions", "Counselor sessions"],
     hasRole(role, ADMIN_ROLES) && ["/admin/analytics", "Funnel analytics"],
+    hasRole(role, ADMIN_ROLES) && ["/admin/access-requests", "Access requests"],
     ["/notifications", "Staff notifications"],
     hasRole(role, ADMIN_ROLES) && ["/admin/settings", "Runtime settings"],
   ].filter(Boolean) as string[][];

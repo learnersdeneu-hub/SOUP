@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
-import { ensureUserAndProfile } from "@/lib/auth/provision";
+import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provision";
 import type { AppRole } from "@prisma/client";
 
 export async function getCurrentUser() {
@@ -21,7 +21,21 @@ export async function getCurrentUser() {
   // the Prisma provisioning flow completed. This keeps Auth and Core identity
   // aligned without sending customers to a dead setup route.
   if (!user || !user.profile) {
-    await ensureUserAndProfile(authUser);
+    try {
+      await ensureUserAndProfile(authUser);
+    } catch (caught) {
+      // A Supabase auth session exists (e.g. a stale/orphaned session from
+      // before self-registration was removed, or a not-yet-approved access
+      // request) but there's no approved request to back a first-time
+      // profile. Sign the dead session out and treat this request as
+      // signed-out, rather than letting the error crash every page that
+      // calls requireCurrentUser/requireProfile/requireRole.
+      if (caught instanceof AccessNotApprovedError) {
+        await supabase.auth.signOut().catch(() => undefined);
+        return null;
+      }
+      throw caught;
+    }
     user = await prisma.user.findUnique({
       where: { id: authUser.id },
       include: { profile: true },

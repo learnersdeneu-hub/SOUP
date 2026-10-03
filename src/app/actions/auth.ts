@@ -4,8 +4,19 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { ensureUserAndProfile } from "@/lib/auth/provision";
+import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provision";
 import { logServerError as logAuthError } from "@/lib/logging/safe";
+
+const ACCESS_NOT_APPROVED_MESSAGE = "This email hasn't been approved for SOUP access yet. Request access first, or wait for your approval email if you already requested it.";
+
+// Shared by every entry point that calls ensureUserAndProfile for a
+// possibly brand-new identity: a thrown AccessNotApprovedError means
+// Supabase already created/authenticated an auth session for this email,
+// but SOUP has no approved AccessRequest for it. Signing that session back
+// out immediately prevents an orphaned, profile-less "logged in" state.
+async function handleAccessNotApproved(supabase: ReturnType<typeof createClient>) {
+  await supabase.auth.signOut().catch(() => undefined);
+}
 
 // CRITICAL, security-relevant: Next.js's client-side Router Cache stores
 // previously-rendered pages per URL for up to ~30s on dynamic routes (this
@@ -39,49 +50,6 @@ function safeNext(formData: FormData, fallback = "/dashboard") {
   return next.startsWith("/") && !next.startsWith("//") ? next : fallback;
 }
 
-export async function signUp(formData: FormData) {
-  const email = String(formData.get("email") || "").trim().toLowerCase();
-  const password = String(formData.get("password") || "");
-  const fullName = String(formData.get("fullName") || "").trim();
-  const next = safeNext(formData);
-
-  if (!email || !password || !fullName) {
-    redirect("/sign-up?error=" + encodeURIComponent("All fields are required."));
-  }
-
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { full_name: fullName },
-      emailRedirectTo: `${baseUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
-    },
-  });
-
-  if (error || !data.user) {
-    redirect("/sign-up?error=" + encodeURIComponent("We could not create that account. Check the details or try signing in if you already have an account."));
-  }
-
-  // Some Supabase projects issue a session immediately; others require email
-  // confirmation. Provision only when we have a confirmed session. The auth
-  // callback provisions the same User/Profile idempotently after confirmation.
-  if (data.session) {
-    try {
-      await ensureUserAndProfile(data.user, fullName);
-    } catch {
-      redirect(
-        "/sign-up?error=" +
-          encodeURIComponent("Your account was created, but profile setup failed. Please try signing in again.")
-      );
-    }
-    invalidateAuthenticatedPages();
-    redirect(next);
-  }
-
-  redirect(`/check-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`);
-}
-
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
@@ -100,7 +68,11 @@ export async function signIn(formData: FormData) {
 
   try {
     await ensureUserAndProfile(data.user);
-  } catch {
+  } catch (caught) {
+    if (caught instanceof AccessNotApprovedError) {
+      await handleAccessNotApproved(supabase);
+      redirect("/sign-in?error=" + encodeURIComponent(ACCESS_NOT_APPROVED_MESSAGE));
+    }
     redirect(
       "/sign-in?error=" +
         encodeURIComponent("You signed in successfully, but your SOUP profile could not be prepared. Please try again.")
@@ -198,6 +170,10 @@ export async function completeEmailLinkSignIn(params: { next?: string }): Promis
   try {
     await ensureUserAndProfile(data.user);
   } catch (caught) {
+    if (caught instanceof AccessNotApprovedError) {
+      await handleAccessNotApproved(supabase);
+      return { ok: false, error: ACCESS_NOT_APPROVED_MESSAGE };
+    }
     logAuthError("SOUP_COMPLETE_EMAIL_LINK_SIGNIN_FAILED", caught);
     return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
   }
@@ -234,6 +210,10 @@ export async function completeEmailLinkCode(params: { code: string; next?: strin
   try {
     await ensureUserAndProfile(data.user);
   } catch (caught) {
+    if (caught instanceof AccessNotApprovedError) {
+      await handleAccessNotApproved(supabase);
+      return { ok: false, error: ACCESS_NOT_APPROVED_MESSAGE };
+    }
     logAuthError("SOUP_COMPLETE_EMAIL_LINK_CODE_FAILED", caught);
     return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
   }

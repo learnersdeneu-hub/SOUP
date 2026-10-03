@@ -101,7 +101,7 @@ export function SignInCard({ next, errorMessage, resetNotice }: { next: string; 
       )}
       <div className="mt-2 text-center"><Link href="/forgot-password" className="text-xs font-medium text-mute">Forgot password?</Link></div>
 
-      <p className="text-xs text-mute text-center mt-4">Don&apos;t have an account? <Link href={`/sign-up?next=${encodeURIComponent(next)}`} className="text-navy font-medium">Sign up for free</Link></p>
+      <p className="text-xs text-mute text-center mt-4">Don&apos;t have an account? <Link href={`/sign-up?next=${encodeURIComponent(next)}`} className="text-navy font-medium">Request access</Link></p>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export function Header({ signedIn }: { signedIn: boolean }) {
           <>
             <Link href="/sign-in?next=/support" aria-label="Support" title="Support" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink hover:bg-white"><LifeBuoy size={15}/></Link>
             <Link href="/sign-in" className="rounded-full px-2.5 py-1.5 text-sm text-ink hover:bg-white sm:px-4">Sign In</Link>
-            <Link href="/sign-up" className="hidden rounded-full border border-hair px-4 py-1.5 text-sm text-ink sm:inline-flex">Sign Up for Free</Link>
+            <Link href="/sign-up" className="hidden rounded-full border border-hair px-4 py-1.5 text-sm text-ink sm:inline-flex">Request Access</Link>
           </>
         )}
       </nav>

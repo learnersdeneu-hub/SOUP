@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { ensureUserAndProfile } from "@/lib/auth/provision";
+import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provision";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -22,7 +22,13 @@ export async function GET(request: Request) {
 
   try {
     await ensureUserAndProfile(data.user);
-  } catch {
+  } catch (caught) {
+    if (caught instanceof AccessNotApprovedError) {
+      await supabase.auth.signOut().catch(() => undefined);
+      return NextResponse.redirect(
+        `${origin}/sign-in?error=${encodeURIComponent("This email hasn't been approved for SOUP access yet. Request access first, or wait for your approval email if you already requested it.")}`
+      );
+    }
     return NextResponse.redirect(
       `${origin}/sign-in?error=${encodeURIComponent("Your email was confirmed, but your SOUP profile could not be prepared. Please sign in again.")}`
     );

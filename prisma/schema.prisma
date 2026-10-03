@@ -356,10 +356,41 @@ model User {
   counselorSessionsAsCounselor CounselorSession[] @relation("CounselorSessionCounselor")
   counselorSessionsRequested CounselorSession[] @relation("CounselorSessionRequester")
   applicationMessagesSent ApplicationMessage[]
+  accessRequestsReviewed AccessRequest[]
 
   @@index([email])
   @@index([role])
   @@map("users")
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+// Students can no longer self-register (see ensureUserAndProfile's approval
+// gate in src/lib/auth/provision.ts) — this is the one record created by the
+// public "request access" form, reviewed by staff in /admin/access-requests.
+// Approving one doesn't create the account directly; it flips status to
+// APPROVED and emails the student a sign-in link, which then passes
+// ensureUserAndProfile's gate on first click.
+model AccessRequest {
+  id               String              @id @default(uuid())
+  fullName         String
+  email            String
+  institutionName  String
+  status           AccessRequestStatus @default(PENDING)
+  reviewedByUserId String?
+  reviewedBy       User?               @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  reviewedAt       DateTime?
+  reviewNote       String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@map("access_requests")
 }
 
 model Profile {

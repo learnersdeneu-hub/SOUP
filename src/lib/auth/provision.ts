@@ -27,6 +27,19 @@ function configuredBootstrapRole(email: string) {
   return null;
 }
 
+// Thrown by ensureUserAndProfile when a brand-new identity (no existing
+// users row) has no approved AccessRequest. Callers (signIn,
+// completeEmailLinkSignIn, completeEmailLinkCode, /auth/callback) must catch
+// this specifically, sign out whatever Supabase auth session was just
+// created, and show a clear "request access first" message rather than the
+// generic "profile could not be prepared" error.
+export class AccessNotApprovedError extends Error {
+  constructor() {
+    super("No approved access request found for this email.");
+    this.name = "AccessNotApprovedError";
+  }
+}
+
 // institutionName intentionally has different create-vs-update semantics
 // from fullName: it is set from signup metadata (or an explicit override) on
 // creation, but is never blindly re-applied from Supabase user_metadata on
@@ -42,6 +55,19 @@ export async function ensureUserAndProfile(authUser: SupabaseUser, fullName?: st
 
   return prisma.$transaction(async (tx) => {
     const existing = await tx.user.findUnique({ where: { id: authUser.id }, select: { institutionName: true } });
+
+    // Students can no longer self-register. A brand-new identity (no
+    // existing users row yet, by this Supabase auth id) is only allowed to
+    // provision a SOUP account if either it's a configured staff bootstrap
+    // email, or there's an approved AccessRequest for this exact email —
+    // created by an admin clicking "Approve" in /admin/access-requests.
+    // Existing accounts (an existing row already found) are never blocked
+    // here; this only gates first-time creation.
+    if (!existing && !bootstrapRole) {
+      const approved = await tx.accessRequest.findFirst({ where: { email: authUser.email!, status: "APPROVED" } });
+      if (!approved) throw new AccessNotApprovedError();
+    }
+
     const institutionUpdate = !existing?.institutionName && institutionFromSignup ? { institutionName: institutionFromSignup } : {};
 
     const user = await tx.user.upsert({
