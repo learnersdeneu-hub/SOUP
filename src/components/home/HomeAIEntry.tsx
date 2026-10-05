@@ -19,7 +19,7 @@ export function HomeAIEntry({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <form onSubmit={submit} className={`w-full rounded-[28px] border border-hair bg-white shadow-[0_14px_45px_rgba(20,32,48,0.08)] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
+    <form onSubmit={submit} className={`w-full rounded-[28px] border border-teal bg-white shadow-[0_14px_45px_rgba(20,32,48,0.08)] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EAF0F5] text-navy"><NoodlesLoader size={17} active={false}/></div>
         <div className="min-w-0">
@@ -28,7 +28,7 @@ export function HomeAIEntry({ compact = false }: { compact?: boolean }) {
           {compact && <p className="mt-1 text-xs leading-5 text-mute">Not sure which university fits? Ask here.</p>}
         </div>
       </div>
-      <div className={`flex items-end gap-2 rounded-2xl border border-hair bg-paper p-2 ${compact ? "mt-3" : "mt-5"}`}>
+      <div className={`flex items-end gap-2 rounded-2xl border border-teal bg-paper p-2 ${compact ? "mt-3" : "mt-5"}`}>
         <textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}

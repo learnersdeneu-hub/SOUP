@@ -216,7 +216,7 @@ export default async function HomePage() {
                 ? mergedServices.filter((partner) => partner.type === "INSURANCE").slice(0, 2)
                 : [];
             return (
-              <Link key={wf.href} href={wf.href} className="rounded-xl border border-hair bg-white px-4 py-3.5 flex min-h-[118px] items-start gap-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm">
+              <Link key={wf.href} href={wf.href} className="rounded-xl border border-teal bg-white px-4 py-3.5 flex min-h-[118px] items-start gap-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm">
                 <div className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#EAF0F5]"><Icon size={14} className="text-navy" /></div>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold mb-0.5 text-ink">{wf.title}</div>
