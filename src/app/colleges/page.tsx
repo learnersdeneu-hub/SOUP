@@ -4,7 +4,9 @@ import { Header } from "@/components/Header";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { isSupersededChecklist } from "@/lib/journey/checklists";
-import { deadlineUrgency, MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
+import { deadlineUrgency } from "@/lib/applications/lifecycle";
+import { effectiveCollegesCap } from "@/lib/applications/capacity";
+import { CAPACITY_UPGRADE_PRICE_USD, CAPACITY_UPGRADE_CAP } from "@/lib/payments/config";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -42,7 +44,9 @@ export default async function CollegesPage() {
   });
 
   const slotsUsed = applications.filter((application) => application.ownership === "SOUP_MANAGED").length;
-  const slotsRemaining = Math.max(0, MY_COLLEGES_CAP - slotsUsed);
+  const cap = await effectiveCollegesCap(profile.id);
+  const slotsRemaining = Math.max(0, cap - slotsUsed);
+  const capacityUpgraded = cap === CAPACITY_UPGRADE_CAP;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -52,10 +56,10 @@ export default async function CollegesPage() {
           <div>
             <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My SOUP</div>
             <h1 className="mt-1 text-2xl font-semibold text-ink">My Colleges</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Every university you've added, up to {MY_COLLEGES_CAP} of them SOUP actively manages at a time — the rest stay self-managed. Your Profile & Details, Funding, Education and Testing sections are reused automatically here — you only see what's genuinely specific to each school.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-mute">Every university you've added, up to {cap} of them SOUP actively manages at a time — the rest stay self-managed. Your Profile & Details, Funding, Education and Testing sections are reused automatically here — you only see what's genuinely specific to each school.</p>
           </div>
           <div className="shrink-0 rounded-2xl border border-hair bg-white px-4 py-3 text-center">
-            <div className="text-lg font-semibold text-ink">{slotsUsed}/{MY_COLLEGES_CAP}</div>
+            <div className="text-lg font-semibold text-ink">{slotsUsed}/{cap}</div>
             <div className="text-[10px] uppercase tracking-[.1em] text-mute">selected</div>
           </div>
         </div>
@@ -67,7 +71,14 @@ export default async function CollegesPage() {
           </Link>
         )}
         {slotsRemaining === 0 && (
-          <div className="mt-4 rounded-2xl border border-hair bg-[#FFFDF7] p-4 text-xs leading-5 text-[#80651A]">You're tracking {MY_COLLEGES_CAP} universities, the current limit for SOUP-managed applications. Withdraw one from an application page to free up a slot before adding another.</div>
+          <div className="mt-4 rounded-2xl border border-hair bg-[#FFFDF7] p-4 text-xs leading-5 text-[#80651A]">
+            <p>You're tracking {cap} universities, the current limit for SOUP-managed applications. Withdraw one from an application page to free up a slot before adding another.</p>
+            {!capacityUpgraded && (
+              <form action="/api/payments/capacity/checkout" method="post" className="mt-3">
+                <button className="rounded-lg border border-[#E6D9A8] bg-white px-3 py-2 text-xs font-semibold text-[#80651A] hover:bg-[#FFFBF0]">Need to track more? Unlock up to {CAPACITY_UPGRADE_CAP} for €{CAPACITY_UPGRADE_PRICE_USD}</button>
+              </form>
+            )}
+          </div>
         )}
 
         <div className="mt-6 space-y-4">
@@ -151,7 +162,7 @@ export default async function CollegesPage() {
             <div className="rounded-2xl border border-hair bg-white p-8 text-center">
               <GraduationCap size={22} className="mx-auto text-mute" />
               <div className="mt-3 text-sm font-semibold text-ink">No universities selected yet</div>
-              <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-mute">Browse your matches or the full catalogue and select up to {MY_COLLEGES_CAP} — SOUP will build each one's requirements checklist and reuse your saved profile automatically.</p>
+              <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-mute">Browse your matches or the full catalogue and select up to {cap} — SOUP will build each one's requirements checklist and reuse your saved profile automatically.</p>
               <Link href="/universities" className="mt-4 inline-flex rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white">Browse universities</Link>
             </div>
           )}

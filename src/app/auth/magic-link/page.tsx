@@ -1,8 +1,11 @@
 import { BrandLogo } from "@/components/BrandLogo";
 import { MagicLinkHandler } from "@/components/auth/MagicLinkHandler";
 
+// Empty (not "/dashboard") when no explicit next was baked into the emailed
+// link — completeEmailLinkSignIn/completeEmailLinkCode treat that as "apply
+// determinePostLoginLanding()" rather than always landing on the dashboard.
 function safeNext(next?: string) {
-  return next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return next?.startsWith("/") && !next.startsWith("//") ? next : undefined;
 }
 
 export const dynamic = "force-dynamic";

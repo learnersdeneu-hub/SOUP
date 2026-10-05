@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LayoutDashboard, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { HomeAIEntry } from "@/components/home/HomeAIEntry";
@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { SupportLauncher } from "@/components/support/SupportLauncher";
 import { SOUP_SUPPORT_EMAIL, supportWhatsAppUrl } from "@/lib/support/config";
 import { networksFromMetadata } from "@/lib/universities/catalogChannels";
+import { PREMIUM_COUNSELING_PRICE_USD, PREMIUM_COUNSELING_TITLE, PREMIUM_PLUS_PRICE_USD } from "@/lib/payments/config";
 
 const WORKFLOWS = [
   { href: "/universities", title: "Universities & Programs", short: "Explore the network or ask SOUP to match you", icon: Search },
@@ -183,6 +184,26 @@ export default async function HomePage() {
           <div className="mt-7 text-left"><HomeAIEntry/></div>
         </section>
 
+        {/* Signed-in students land here by default now (see
+            determinePostLoginLanding) rather than straight on /dashboard —
+            this card is the obvious, hard-to-miss way back to it, since the
+            existing header icon (top-right "My SOUP") is easy to miss,
+            especially on mobile where it collapses to a small icon. */}
+        {user && (
+          <section className="mx-auto mt-5 max-w-3xl">
+            <Link href="/dashboard" className="group flex items-center justify-between gap-4 rounded-2xl border border-navy/15 bg-gradient-to-r from-[#EAF0F5] to-white px-5 py-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy text-white"><LayoutDashboard size={18}/></div>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-ink">Open My Dashboard</div>
+                  <div className="mt-0.5 truncate text-xs text-mute">Your applications, documents, payments and what happens next — all in one place.</div>
+                </div>
+              </div>
+              <ArrowRight size={16} className="shrink-0 text-navy transition group-hover:translate-x-0.5"/>
+            </Link>
+          </section>
+        )}
+
         <section className="mx-auto mt-5 grid max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2">
           {WORKFLOWS.map((wf) => {
             const Icon = wf.icon;
@@ -296,7 +317,7 @@ export default async function HomePage() {
         <section className="mt-14 rounded-[28px] border border-[#C9D8E6] bg-[#F7FAFC] p-6 sm:p-8">
           <div className="max-w-2xl"><div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">Choose your support</div><h2 className="mt-2 text-2xl font-semibold text-ink">Noodles for everyone. Human counseling when you want more.</h2><p className="mt-3 text-sm leading-6 text-mute">Start free, add real-time counselor support, or choose our high-touch SOUP Concierge service.</p></div>
           <div className="mt-6 grid gap-3 lg:grid-cols-3">
-            {[{name:"Free",price:"$0",text:"Noodles, university discovery, public-university research and journey tracking.",cta:"Start with Noodles"},{name:"SOUP Plus",price:"$54",text:"Real-time human counselors plus managed support for eligible SOUP-network applications.",cta:"View SOUP Plus"},{name:"SOUP Concierge",price:"$500",text:"Weekly video sessions, senior counselor oversight, private accommodation search and high-touch end-to-end case management.",cta:"View Concierge"}].map((plan)=><div key={plan.name} className="rounded-2xl border border-hair bg-white p-5"><div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">{plan.name}</div><div className="mt-2 text-2xl font-semibold text-ink">{plan.price}</div><div className="mt-0.5 text-[10px] text-mute">USD {plan.price!=="$0"?"· one-time":""}</div><p className="mt-3 text-xs leading-5 text-mute">{plan.text}</p><Link href={plan.name==="Free"?"/counselor":"/premium"} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-navy">{plan.cta} <ArrowRight size={12}/></Link></div>)}
+            {[{name:"Free",price:"€0",text:"Noodles, university discovery, public-university research, talking to the counselor agent and uploading your documents — exploring SOUP is free.",cta:"Start with Noodles"},{name:PREMIUM_COUNSELING_TITLE,price:`€${PREMIUM_COUNSELING_PRICE_USD}`,text:"Real-time human counselors plus managed support for eligible SOUP-network applications.",cta:`View ${PREMIUM_COUNSELING_TITLE}`},{name:"SOUP Concierge",price:`€${PREMIUM_PLUS_PRICE_USD}`,text:"Weekly video sessions, senior counselor oversight, private accommodation search and high-touch end-to-end case management.",cta:"View Concierge"}].map((plan)=><div key={plan.name} className="rounded-2xl border border-hair bg-white p-5"><div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">{plan.name}</div><div className="mt-2 text-2xl font-semibold text-ink">{plan.price}</div><div className="mt-0.5 text-[10px] text-mute">EUR {plan.price!=="€0"?"· one-time":""}</div><p className="mt-3 text-xs leading-5 text-mute">{plan.text}</p><Link href={plan.name==="Free"?"/counselor":"/premium"} className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-navy">{plan.cta} <ArrowRight size={12}/></Link></div>)}
           </div>
           <p className="mt-4 text-[11px] leading-5 text-mute">University application fees and other university/third-party charges are separate and are shown in My SOUP → Payments when recorded.</p>
         </section>

@@ -10,6 +10,7 @@ import { AddToMyCollegesButton } from "@/components/applications/AddToMyColleges
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/currentUser";
 import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
+import { effectiveCollegesCap } from "@/lib/applications/capacity";
 import { safeHttpUrl } from "@/lib/security/urls";
 import { SourceFreshnessBadge } from "@/components/SourceFreshnessBadge";
 import { summarizeUniversityPrograms } from "@/lib/universities/presentation";
@@ -83,7 +84,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
       })
     : [];
   const myCollegeSelection = myManagedApplications.find((a) => a.universityId === university.id) || null;
-  const myCollegesCapReached = myManagedApplications.length >= MY_COLLEGES_CAP;
+  const myCollegesCapReached = current?.user.profile ? myManagedApplications.length >= (await effectiveCollegesCap(current.user.profile.id)) : myManagedApplications.length >= MY_COLLEGES_CAP;
 
   const website = safeHttpUrl(university.websiteUrl, 1500)
     || safeHttpUrl(university.partner?.websiteUrl, 1500)

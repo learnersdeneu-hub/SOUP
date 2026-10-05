@@ -10,6 +10,7 @@ import { DirectApplicationBox } from "@/components/applications/DirectApplicatio
 import { DirectDocumentUpload } from "@/components/documents/DirectDocumentUpload";
 import { ApplicationProgressCard } from "@/components/dashboard/ApplicationProgressCard";
 import { InstitutionPromptBanner } from "@/components/dashboard/InstitutionPromptBanner";
+import { PREMIUM_COUNSELING_TITLE } from "@/lib/payments/config";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -155,7 +156,7 @@ export default async function DashboardPage() {
                 <div className="flex items-center justify-between"><span className="text-mute">Profile readiness</span><span className="font-semibold text-ink">{data.completeness}%</span></div>
                 <div className="flex items-center justify-between"><span className="text-mute">Verified documents</span><span className="font-semibold text-ink">{data.approvedDocuments.length}</span></div>
                 <div className="flex items-center justify-between"><span className="text-mute">Open applications</span><span className="font-semibold text-ink">{data.activeApplications.length}</span></div>
-                <div className="flex items-center justify-between"><span className="text-mute">Support plan</span><span className="font-semibold text-ink">{data.conciergeActive ? "SOUP Concierge" : data.plusActive ? "SOUP Plus" : "SOUP"}</span></div>
+                <div className="flex items-center justify-between"><span className="text-mute">Support plan</span><span className="font-semibold text-ink">{data.conciergeActive ? "SOUP Concierge" : data.plusActive ? PREMIUM_COUNSELING_TITLE : "SOUP"}</span></div>
               </div>
               {data.assignedCounselor ? <div className="mt-4 rounded-xl bg-[#F7FAFC] p-3"><div className="text-[10px] uppercase tracking-[.12em] text-mute">Assigned counselor</div><div className="mt-1 text-xs font-semibold text-ink">{data.assignedCounselor.fullName}</div></div> : null}
             </div>

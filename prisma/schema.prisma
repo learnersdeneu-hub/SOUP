@@ -84,6 +84,7 @@ enum NotificationType {
 enum PaymentType {
   PREMIUM_COUNSELING
   UNIVERSITY_APPLICATION_FEE
+  CAPACITY_UPGRADE
   OTHER
 }
 

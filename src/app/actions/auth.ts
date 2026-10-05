@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provision";
+import { determinePostLoginLanding } from "@/lib/auth/postLoginLanding";
 import { logServerError as logAuthError } from "@/lib/logging/safe";
 
 const ACCESS_NOT_APPROVED_MESSAGE = "This email hasn't been approved for SOUP access yet. Request access first, or wait for your approval email if you already requested it.";
@@ -45,15 +46,20 @@ function baseUrl() {
   return host ? `${proto}://${host}` : "http://localhost:3001";
 }
 
-function safeNext(formData: FormData, fallback = "/dashboard") {
+// Returns the explicit ?next= the student (or a redirect-to-sign-in flow)
+// actually asked for — null when none was given, which callers resolve via
+// determinePostLoginLanding() rather than always falling back to
+// "/dashboard". A still-exploring student's default landing is the home
+// page, not the dashboard — see postLoginLanding.ts.
+function explicitNext(formData: FormData): string | null {
   const next = String(formData.get("next") || "").trim();
-  return next.startsWith("/") && !next.startsWith("//") ? next : fallback;
+  return next.startsWith("/") && !next.startsWith("//") ? next : null;
 }
 
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
-  const next = safeNext(formData);
+  const explicit = explicitNext(formData);
 
   if (!email || !password) {
     redirect("/sign-in?error=" + encodeURIComponent("Email and password are required."));
@@ -66,8 +72,10 @@ export async function signIn(formData: FormData) {
     redirect("/sign-in?error=" + encodeURIComponent("The email or password is incorrect, or the account still needs email confirmation."));
   }
 
+  let profileId: string;
   try {
-    await ensureUserAndProfile(data.user);
+    const provisioned = await ensureUserAndProfile(data.user);
+    profileId = provisioned.profile.id;
   } catch (caught) {
     if (caught instanceof AccessNotApprovedError) {
       await handleAccessNotApproved(supabase);
@@ -80,7 +88,7 @@ export async function signIn(formData: FormData) {
   }
 
   invalidateAuthenticatedPages();
-  redirect(next);
+  redirect(explicit ?? (await determinePostLoginLanding(profileId)));
 }
 
 // Email + sign-in link is the only authentication method for both signup
@@ -129,7 +137,12 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
   if (!email || !email.includes("@")) return { ok: false, error: "Enter a valid email address." };
   const fullName = params.fullName?.trim().slice(0, 120) || undefined;
   const institutionName = params.institutionName?.trim().slice(0, 200) || undefined;
-  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  // Empty string (not "/dashboard") when no explicit next was requested —
+  // this gets baked into the emailed link's URL, so completeEmailLinkSignIn/
+  // completeEmailLinkCode need to see "nothing was asked for" as distinct
+  // from "the dashboard was asked for" in order to apply
+  // determinePostLoginLanding() correctly later.
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "";
 
   try {
     const supabase = createClient({ flowType: "implicit" });
@@ -167,8 +180,10 @@ export async function completeEmailLinkSignIn(params: { next?: string }): Promis
     return { ok: false, error: "That sign-in link is invalid or expired. Please try again." };
   }
 
+  let profileId: string;
   try {
-    await ensureUserAndProfile(data.user);
+    const provisioned = await ensureUserAndProfile(data.user);
+    profileId = provisioned.profile.id;
   } catch (caught) {
     if (caught instanceof AccessNotApprovedError) {
       await handleAccessNotApproved(supabase);
@@ -178,9 +193,9 @@ export async function completeEmailLinkSignIn(params: { next?: string }): Promis
     return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
   }
 
-  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  const explicit = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : null;
   invalidateAuthenticatedPages();
-  redirect(next);
+  redirect(explicit ?? (await determinePostLoginLanding(profileId)));
 }
 
 // Fallback for /auth/magic-link when the emailed link arrives as a PKCE
@@ -207,8 +222,10 @@ export async function completeEmailLinkCode(params: { code: string; next?: strin
     };
   }
 
+  let profileId: string;
   try {
-    await ensureUserAndProfile(data.user);
+    const provisioned = await ensureUserAndProfile(data.user);
+    profileId = provisioned.profile.id;
   } catch (caught) {
     if (caught instanceof AccessNotApprovedError) {
       await handleAccessNotApproved(supabase);
@@ -218,17 +235,17 @@ export async function completeEmailLinkCode(params: { code: string; next?: strin
     return { ok: false, error: "You're signed in, but your SOUP profile could not be prepared. Please try again." };
   }
 
-  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/dashboard";
+  const explicit = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : null;
   invalidateAuthenticatedPages();
-  redirect(next);
+  redirect(explicit ?? (await determinePostLoginLanding(profileId)));
 }
 
 export async function signInWithGoogle(formData: FormData) {
-  const next = safeNext(formData);
+  const explicit = explicitNext(formData);
   const supabase = createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${baseUrl()}/auth/callback?next=${encodeURIComponent(next)}` },
+    options: { redirectTo: `${baseUrl()}/auth/callback${explicit ? `?next=${encodeURIComponent(explicit)}` : ""}` },
   });
   if (error || !data.url) redirect(`/sign-in?error=${encodeURIComponent("Google sign-in could not be started. Please try again or use email and password.")}`);
   redirect(data.url);

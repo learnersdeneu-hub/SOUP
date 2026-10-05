@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { UniversityCatalogBrowser, type CatalogUniversity } from "@/components/universities/UniversityCatalogBrowser";
+import { effectiveCollegesCap } from "@/lib/applications/capacity";
 import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 import type { CatalogChannel } from "@/lib/universities/catalogChannels";
 
@@ -61,7 +62,7 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
       })
     : [];
   const mySelectionsByUniversity = new Map(myApplications.filter((a) => a.universityId).map((a) => [a.universityId as string, { id: a.id, programId: a.programId }]));
-  const capReached = myApplications.length >= MY_COLLEGES_CAP;
+  const capReached = current?.user.profile ? myApplications.length >= (await effectiveCollegesCap(current.user.profile.id)) : myApplications.length >= MY_COLLEGES_CAP;
 
   const universities: CatalogUniversity[] = universityCatalog.map((university) => {
     const summary = summarizeUniversityPrograms(university.programs);

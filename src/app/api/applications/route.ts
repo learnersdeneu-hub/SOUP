@@ -1,7 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureStudentCase } from "@/lib/student/case";
-import { applicationKey, MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
+import { applicationKey } from "@/lib/applications/lifecycle";
+import { effectiveCollegesCap } from "@/lib/applications/capacity";
 import { sendTransactionalEmail, escapeHtml } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
@@ -106,11 +107,12 @@ export async function POST(request: Request) {
   // tracking a school they're applying to entirely on their own. Withdrawn
   // or rejected applications free up a slot.
   if (ownership === "SOUP_MANAGED") {
-    const activeManagedCount = await prisma.studentApplication.count({
-      where: { profileId: profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } },
-    });
-    if (activeManagedCount >= MY_COLLEGES_CAP) {
-      return Response.json({ error: `You can track up to ${MY_COLLEGES_CAP} universities at a time. Remove one to add another.` }, { status: 409 });
+    const [activeManagedCount, cap] = await Promise.all([
+      prisma.studentApplication.count({ where: { profileId: profile.id, ownership: "SOUP_MANAGED", status: { notIn: ["WITHDRAWN", "REJECTED"] } } }),
+      effectiveCollegesCap(profile.id),
+    ]);
+    if (activeManagedCount >= cap) {
+      return Response.json({ error: `You can track up to ${cap} universities at a time. Remove one to add another.` }, { status: 409 });
     }
   }
 

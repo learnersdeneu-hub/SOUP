@@ -14,7 +14,7 @@ import { completeEmailLinkSignIn, completeEmailLinkCode } from "@/app/actions/au
 // PKCE-based /auth/callback route: PKCE requires the link to be opened in
 // the exact browser that requested it, which real mail apps routinely
 // violate.
-export function MagicLinkHandler({ next }: { next: string }) {
+export function MagicLinkHandler({ next }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

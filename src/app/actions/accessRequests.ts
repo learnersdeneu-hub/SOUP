@@ -58,12 +58,16 @@ export async function approveAccessRequest(id: string) {
     data: { status: "APPROVED", reviewedByUserId: user.id, reviewedAt: new Date(), reviewNote: null },
   });
 
+  // No ?next= baked in here on purpose: a freshly approved student has
+  // never used SOUP yet, so determinePostLoginLanding will correctly land
+  // them on the home page on this first click, same as any other
+  // first-time sign-in — not forced onto an empty dashboard.
   const supabase = createClient({ flowType: "implicit" });
   await supabase.auth.signInWithOtp({
     email: request.email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: `${siteUrl()}/auth/magic-link?next=${encodeURIComponent("/dashboard")}`,
+      emailRedirectTo: `${siteUrl()}/auth/magic-link`,
       data: { full_name: request.fullName, institution_name: request.institutionName },
     },
   }).catch(() => undefined); // Approval is recorded either way; the student (or staff) can resend from the admin list if this email send fails.
@@ -93,7 +97,7 @@ export async function resendAccessInvite(id: string) {
     email: request.email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: `${siteUrl()}/auth/magic-link?next=${encodeURIComponent("/dashboard")}`,
+      emailRedirectTo: `${siteUrl()}/auth/magic-link`,
       data: { full_name: request.fullName, institution_name: request.institutionName },
     },
   }).catch(() => undefined);

@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provision";
+import { determinePostLoginLanding } from "@/lib/auth/postLoginLanding";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") || "/dashboard";
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  const next = searchParams.get("next") || "";
+  const explicit = next.startsWith("/") && !next.startsWith("//") ? next : null;
 
   if (!code) {
     return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent("The confirmation link is invalid or expired.")}`);
@@ -20,8 +21,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent("That sign-in or confirmation link is invalid or expired. Please try again.")}`);
   }
 
+  let profileId: string;
   try {
-    await ensureUserAndProfile(data.user);
+    const provisioned = await ensureUserAndProfile(data.user);
+    profileId = provisioned.profile.id;
   } catch (caught) {
     if (caught instanceof AccessNotApprovedError) {
       await supabase.auth.signOut().catch(() => undefined);
@@ -41,5 +44,6 @@ export async function GET(request: Request) {
   // cache here too costs nothing and removes any doubt for this landing
   // point as well (OAuth, email confirmation, password reset).
   revalidatePath("/", "layout");
-  return NextResponse.redirect(`${origin}${safeNext}`);
+  const landing = explicit ?? (await determinePostLoginLanding(profileId));
+  return NextResponse.redirect(`${origin}${landing}`);
 }
