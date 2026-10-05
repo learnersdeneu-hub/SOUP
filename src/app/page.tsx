@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, BriefcaseBusiness, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { HomeAIEntry } from "@/components/home/HomeAIEntry";
@@ -74,6 +74,21 @@ function serviceHref(type: string, name: string) {
 
 const HOMEPAGE_UNIVERSITY_INCLUDE = { partner: true, programs: { where: { active: true }, select: { id: true } } } as const;
 
+// SOUP's vocational pathway partnership: COTHM (College Of Tourism & Hotel
+// Management) sends diploma graduates on; the hospitality/tourism programs
+// below (tagged UniversityProgram.publicMetadata.networks: ["HOSPITALITY_PATHWAY"],
+// see catalogChannels.ts for the matching University-level convention this
+// mirrors one level down) are the Bachelor's/Master's top-ups SOUP has
+// verified for that handoff. COTHM itself has no University/program rows of
+// its own here — SOUP doesn't manage applications to it, only out of it — so
+// its facts are a plain constant rather than a DB-backed partner.
+const COTHM_PARTNER = {
+  name: "COTHM",
+  fullName: "College Of Tourism & Hotel Management",
+  websiteUrl: "https://cothm.edu.pk/",
+  description: "Pakistan's leading hospitality & culinary training network — 23+ campuses nationwide, training students in hospitality management, culinary arts and tourism since 2002.",
+};
+
 export default async function HomePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -107,6 +122,21 @@ export default async function HomePage() {
     }).catch(() => []),
   ]);
   const governmentPartners = governmentPartnerUniversities.filter((u) => networksFromMetadata(u.publicMetadata).includes("GOVERNMENT"));
+
+  // Hospitality/tourism Bachelor's & Master's top-up programs curated for the
+  // COTHM pathway. publicMetadata is per-program (not per-university, unlike
+  // GOVERNMENT above) since a university can carry this tag on one program
+  // while offering dozens of unrelated ones. Scoped to the four countries
+  // these were actually sourced from (rather than every active program in
+  // the whole catalogue) and filtered in JS, the same pattern governmentPartners
+  // above uses — Prisma's JSON array_contains filtering is DB-version-finicky
+  // enough that this codebase consistently avoids relying on it at the query level.
+  const hospitalityProgramRows = await prisma.universityProgram.findMany({
+    where: { active: true, university: { country: { in: ["Greece", "Portugal", "Germany", "Italy"] } } },
+    include: { university: true },
+    orderBy: [{ level: "asc" }],
+  }).catch(() => []);
+  const hospitalityPrograms = hospitalityProgramRows.filter((p) => networksFromMetadata(p.publicMetadata).includes("HOSPITALITY_PATHWAY"));
 
   const universityPartners: Array<(typeof featuredMatches)[number]> = [];
   for (const featuredName of FEATURED_EUROPE_UNIVERSITIES) {
@@ -205,6 +235,33 @@ export default async function HomePage() {
                   <div className="mt-2 truncate text-xs font-semibold text-ink">{university.name}</div>
                   <div className="mt-1 text-[10px] text-mute">{[university.city, "Greece"].filter(Boolean).join(", ")}</div>
                   <div className="mt-2 text-[9px] font-semibold uppercase tracking-[.1em] text-navy">{university.programs.length} program{university.programs.length === 1 ? "" : "s"}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {hospitalityPrograms.length > 0 && (
+          <section className="mt-14 rounded-[28px] border border-[#E6D9C3] bg-gradient-to-br from-[#FBF4E8] to-white p-6 sm:p-8">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[.16em] text-[#8A6A1E]"><ChefHat size={13}/>Vocational pathway partnership</div>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">Finished your diploma at COTHM? Continue into a European degree.</h2>
+                <p className="mt-3 text-sm leading-6 text-mute">SOUP now partners with <strong className="font-semibold text-ink">COTHM</strong> ({COTHM_PARTNER.fullName}) — {COTHM_PARTNER.description} Below are {hospitalityPrograms.length} verified English-taught hospitality, culinary and tourism Bachelor's and Master's top-ups at public universities, ready for diploma graduates.</p>
+              </div>
+              <Link href="/universities" className="text-xs font-semibold text-navy">Browse hospitality & culinary programs <ArrowRight size={12} className="ml-1 inline"/></Link>
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {hospitalityPrograms.slice(0, 9).map((program) => (
+                <Link key={program.id} href={`/universities/${program.university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8A6A1E]/30 hover:shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <PartnerLogo name={program.university.name} websiteUrl={program.university.websiteUrl} logoUrl={logoUrl(program.university.publicMetadata)} size={30}/>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[9px] font-semibold uppercase tracking-[.1em] text-[#8A6A1E]">{program.level} · {program.university.country}</div>
+                      <div className="mt-1 truncate text-xs font-semibold text-ink">{program.title}</div>
+                      <div className="mt-1 truncate text-[10px] text-mute">{program.university.name}</div>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>

@@ -1572,6 +1572,12 @@ model UniversityProgram {
   sourceUrl           String?
   sourceCheckedAt     DateTime?
   requirements        Json?
+  // Program-level curated-banner tagging, mirroring University.publicMetadata's
+  // { networks: [...] } convention one level down — a University can carry
+  // dozens of unrelated programs, so a homepage banner that needs just its
+  // hospitality/culinary program(s) tags the specific UniversityProgram row,
+  // not the whole institution. See src/lib/universities/catalogChannels.ts.
+  publicMetadata      Json?
   active              Boolean   @default(true)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
