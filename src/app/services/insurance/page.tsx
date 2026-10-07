@@ -34,7 +34,7 @@ export default async function InsuranceServicePage({ searchParams }: { searchPar
           {policies.length > 0 && (
             <div className="mt-6">
               <div className="text-xs font-semibold uppercase tracking-[.14em] text-teal">Available through insuremart</div>
-              <h2 className="mt-1 text-sm font-semibold text-ink">Pick the cover that fits your trip</h2>
+              <h2 className="mt-1 text-sm font-semibold text-ink">Pick the cover that fits your education journey</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {policies.map((policy, index) => (
                   <div key={index} className="rounded-2xl border border-hair bg-white p-4">
