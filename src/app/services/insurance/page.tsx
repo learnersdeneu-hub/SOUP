@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Check, ShieldCheck } from "lucide-react";
-import { Header } from "@/components/Header";
+import { CircleAlert, ShieldCheck } from "lucide-react";
+import { StudyHeader } from "@/components/layout/StudyHeader";
 import { InsurancePartnerButton } from "@/components/services/InsurancePartnerButton";
-import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { saveStudentServiceNeeds } from "@/app/actions/referrals";
@@ -14,50 +13,92 @@ function policiesFromMetadata(value: unknown): InsurancePolicy[] {
   return Array.isArray(raw) ? raw as InsurancePolicy[] : [];
 }
 
+function initials(name: string) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 3).map((part) => part[0]?.toUpperCase()).join("");
+}
+
 export default async function InsuranceServicePage({ searchParams }: { searchParams: { source?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } }) : null;
   const partner = await prisma.partner.findFirst({ where: { type: "INSURANCE", status: "ACTIVE", slug: "hellenic-sun-insuremart" }, orderBy: { internalPriority: "asc" } });
   const url = partner?.transactionUrl || "https://insuremart.pk/";
   const policies = policiesFromMetadata(partner?.publicMetadata);
+  const source = searchParams.source === "counselor" ? "COUNSELOR" : "INSURANCE_PAGE";
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn={Boolean(user)} />
-      <main className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
-        <Link href="/counselor?intent=insurance" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/> Back to Counselor</Link>
-        <section className="mt-5 rounded-3xl border border-hair bg-white p-6 sm:p-8">
-          <div className="flex items-center gap-3"><PartnerLogo name={partner?.name || "Hellenic Sun Insurance Brokers / insuremart"} websiteUrl={partner?.websiteUrl || url} size={48}/><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F0F7F5] text-teal"><ShieldCheck size={18}/></div></div>
-          <div className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-teal">SOUP insurance purchase channel</div>
-          <h1 className="mt-2 text-2xl font-semibold text-ink">Continue with insuremart</h1>
-          <p className="mt-3 text-sm leading-6 text-mute">Noodles can discuss insurance options across the wider market. When you choose to purchase insurance through SOUP, the transaction continues through our active insurance marketplace partner channel operated by Hellenic Sun Insurance Brokers.</p>
-          {policies.length > 0 && (
-            <div className="mt-6">
-              <div className="text-xs font-semibold uppercase tracking-[.14em] text-teal">Available through insuremart</div>
-              <h2 className="mt-1 text-sm font-semibold text-ink">Pick the cover that fits your education journey</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {policies.map((policy, index) => (
-                  <div key={index} className="rounded-2xl border border-hair bg-white p-4">
-                    <div className="flex items-start gap-2"><div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F0F7F5] text-teal"><Check size={13}/></div><div className="min-w-0"><div className="text-sm font-semibold text-ink">{String(policy.name || "Insurance policy")}</div>{policy.description ? <p className="mt-1 text-xs leading-5 text-mute">{String(policy.description)}</p> : null}</div></div>
-                    <div className="mt-3 flex items-center justify-between gap-2">
-                      {policy.price ? <span className="text-xs font-semibold text-navy">{String(policy.price)}</span> : <span className="text-xs text-mute">Price shown on insuremart</span>}
-                      {policy.url ? <a href={String(policy.url)} target="_blank" rel="noreferrer" className="text-xs font-semibold text-navy hover:underline">View policy →</a> : null}
-                    </div>
+      <StudyHeader signedIn={Boolean(user)} fullName={profile?.user.fullName}/>
+      <main className="mx-auto max-w-[1200px] px-5 pb-28 pt-6 sm:px-6">
+        <nav aria-label="Breadcrumb" className="flex gap-2 text-sm text-mute">
+          <Link href="/" className="text-mute no-underline">Home</Link><span aria-hidden="true">/</span>
+          <span>Student insurance</span><span aria-hidden="true">/</span>
+          <span className="font-bold text-ink">Travel quotes</span>
+        </nav>
+
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="m-0 text-[32px] font-extrabold tracking-tight text-ink sm:text-[34px]">Travel insurance for your visa</h1>
+            <p className="m-0 text-[15px] text-mute">Schengen-approved plans, reviewed by our insurance partner before your policy is issued.</p>
+          </div>
+          <span className="flex items-center gap-2 rounded-xl border border-hair bg-white px-3 py-2 text-[13px] font-semibold text-mute"><ShieldCheck size={15} className="text-teal"/>Quotes powered by <strong className="text-ink">insuremart</strong></span>
+        </div>
+
+        {user && (
+          <section aria-label="Your trip" className="mt-5 rounded-[20px] border border-hair bg-white p-5">
+            <form action={saveStudentServiceNeeds.bind(null, "INSURANCE")} className="flex flex-wrap items-end gap-6">
+              <label className="flex flex-col gap-1"><span className="text-xs font-bold text-mute">Destination</span><input name="destination" placeholder="Schengen area" className="h-10 rounded-lg border border-hair px-2.5 text-sm font-bold text-ink outline-none focus:border-navy/40"/></label>
+              <label className="flex flex-col gap-1"><span className="text-xs font-bold text-mute">Visa / study purpose</span><input name="visaType" placeholder="e.g. Student visa" className="h-10 rounded-lg border border-hair px-2.5 text-sm font-bold text-ink outline-none focus:border-navy/40"/></label>
+              <label className="flex flex-col gap-1"><span className="text-xs font-bold text-mute">Departure</span><input type="date" name="coverageStart" className="h-10 rounded-lg border border-hair px-2.5 text-sm font-bold text-ink outline-none focus:border-navy/40"/></label>
+              <label className="flex flex-col gap-1"><span className="text-xs font-bold text-mute">Return</span><input type="date" name="coverageEnd" className="h-10 rounded-lg border border-hair px-2.5 text-sm font-bold text-ink outline-none focus:border-navy/40"/></label>
+              <span className="flex flex-col gap-1"><span className="text-xs font-bold text-mute">Traveller</span><span className="text-sm font-bold text-ink">{profile?.user.fullName} · from your SOUP profile</span></span>
+              <button type="submit" className="ml-auto h-11 rounded-xl border-[1.5px] border-hair px-4 text-sm font-bold text-ink">Save trip details</button>
+            </form>
+          </section>
+        )}
+
+        <div role="note" className="mt-5 flex items-start gap-3 rounded-2xl border border-[#F1E2A8] bg-[#FFF8E1] p-[18px]">
+          <CircleAlert size={22} className="mt-0.5 shrink-0 text-[#8A6A00]"/>
+          <div className="flex flex-col gap-1 text-sm leading-relaxed">
+            <strong>Before you buy</strong>
+            <span className="text-[#4A3A00]">Pre-existing conditions (anything treated in the last 24 months, such as heart disease, diabetes or kidney disease) are not covered. Buy on or before your departure date — policies bought after you arrive are not valid. Read the policy wording first.</span>
+          </div>
+        </div>
+
+        <p className="mt-5 text-sm text-mute">{policies.length} plan{policies.length === 1 ? "" : "s"} available through insuremart.</p>
+
+        {policies.length > 0 ? (
+          <div className="mt-4 grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+            {policies.map((policy, index) => {
+              const name = String(policy.name || "Insurance policy");
+              return (
+                <article key={index} className="flex flex-col gap-3.5 rounded-[20px] border border-hair bg-white p-[22px]">
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px] bg-[#F1F2EE] text-sm font-extrabold text-ink">{initials(name)}</span>
+                    <div className="min-w-0 flex-1"><span className="block text-base font-extrabold leading-snug">{name}</span></div>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {user ? <form action={saveStudentServiceNeeds.bind(null,"INSURANCE")} className="mt-6 rounded-2xl border border-hair p-5"><div className="text-sm font-semibold text-ink">Save your insurance brief</div><p className="mt-1 text-xs leading-5 text-mute">SOUP will reuse these details when Noodles or a human counselor helps compare cover.</p><div className="mt-4 grid gap-2 sm:grid-cols-2"><input name="destination" placeholder="Destination country" className="rounded-xl border border-hair px-3 py-2.5 text-xs"/><input name="visaType" placeholder="Visa / study purpose" className="rounded-xl border border-hair px-3 py-2.5 text-xs"/><input type="date" name="coverageStart" className="rounded-xl border border-hair px-3 py-2.5 text-xs"/><input type="date" name="coverageEnd" className="rounded-xl border border-hair px-3 py-2.5 text-xs"/><input name="notes" placeholder="Coverage needs / concerns" className="rounded-xl border border-hair px-3 py-2.5 text-xs sm:col-span-2"/></div><button className="mt-3 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white">Save insurance brief</button></form> : null}
-          <div className="mt-6 rounded-2xl bg-[#F7F8FA] p-5">
-            <div className="text-sm font-semibold text-ink">Before you continue</div>
-            <p className="mt-2 text-xs leading-5 text-mute">Policy availability, pricing, eligibility, underwriting and final policy terms are controlled by the insurer/marketplace. Review the policy wording before purchase. SOUP does not issue the insurance policy itself.</p>
+                  {policy.description ? <p className="m-0 text-sm leading-relaxed text-mute">{String(policy.description)}</p> : null}
+                  <div className="flex items-baseline gap-2.5 border-t border-[#EEF0EC] pt-3.5">
+                    {policy.price ? <span className="text-xl font-extrabold text-ink">{String(policy.price)}</span> : <span className="text-sm text-mute">Price shown on insuremart</span>}
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    {policy.url ? <a href={String(policy.url)} target="_blank" rel="noreferrer" className="ml-auto text-sm font-bold text-navy no-underline">Details</a> : <span className="ml-auto"/>}
+                    <InsurancePartnerButton fallbackUrl={url} source={source} label="Buy now" className="flex h-[46px] items-center gap-1.5 rounded-xl bg-teal px-5 text-sm font-bold text-white disabled:opacity-60"/>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <InsurancePartnerButton fallbackUrl={url} source={searchParams.source === "counselor" ? "COUNSELOR" : "INSURANCE_PAGE"}/>
-            <Link href="/counselor?intent=insurance" className="rounded-full border border-hair px-4 py-2.5 text-xs font-semibold text-ink">Keep comparing with Noodles</Link>
-          </div>
-        </section>
+        ) : (
+          <div className="mt-4 rounded-2xl border border-hair bg-white p-6 text-sm leading-relaxed text-mute">insuremart&rsquo;s plan catalogue isn&rsquo;t loaded in this environment yet — use the button below to continue directly to insuremart for live quotes.</div>
+        )}
+
+        <p className="mt-6 text-[13px] leading-relaxed text-mute">Prices shown are from InsureMart&rsquo;s live catalogue. Policy availability, pricing, eligibility, underwriting and final policy terms are controlled by the insurer/marketplace — review the policy wording before purchase. SOUP does not issue the insurance policy itself.</p>
+
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <InsurancePartnerButton fallbackUrl={url} source={source}/>
+          <Link href="/counselor?intent=insurance" className="rounded-full border border-hair px-4 py-2.5 text-xs font-semibold text-ink no-underline">Keep comparing with Noodles</Link>
+        </div>
       </main>
     </div>
   );

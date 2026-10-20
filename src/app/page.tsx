@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LayoutDashboard, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Header } from "@/components/Header";
-import { HomeAIEntry } from "@/components/home/HomeAIEntry";
+import { StudyHeader } from "@/components/layout/StudyHeader";
+import { ChatWithNoodlesFab } from "@/components/home/ChatWithNoodlesFab";
+import { HomeHero } from "@/components/home/HomeHero";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 import { prisma } from "@/lib/prisma";
@@ -10,14 +11,21 @@ import { SupportLauncher } from "@/components/support/SupportLauncher";
 import { SOUP_SUPPORT_EMAIL, supportWhatsAppUrl } from "@/lib/support/config";
 import { networksFromMetadata } from "@/lib/universities/catalogChannels";
 import { PREMIUM_COUNSELING_PRICE_USD, PREMIUM_COUNSELING_TITLE, PREMIUM_PLUS_PRICE_USD } from "@/lib/payments/config";
+import { getCustomerDashboardData } from "@/lib/queries/dashboard";
 
 const WORKFLOWS = [
-  { href: "/universities", title: "Universities & Programs", short: "Explore the network or ask SOUP to match you", icon: Search },
-  { href: "/services/accommodation", title: "Accommodation", short: "See SOUP housing partners directly, then ask AI if you need help", icon: BedDouble },
-  { href: "/services/insurance", title: "Student Insurance", short: "See the insurance partner directly, with AI guidance when needed", icon: ShieldCheck },
-  { href: "/services/finance", title: "Student Finance", short: "See banking/finance partners directly, then plan proof of funds", icon: BriefcaseBusiness },
-  { href: "/resume", title: "Resume & Cover Letter", short: "Build application-ready documents", icon: FileText },
+  { href: "/universities", title: "Find a university", short: "Browse programs or get matched in minutes", icon: Search, bg: "#E9EEFB", fg: "#1F3FA8" },
+  { href: "/services/accommodation", title: "Find a place to live", short: "Verified student housing near campus", icon: BedDouble, bg: "#FFF4CC", fg: "#8A6A00" },
+  { href: "/services/finance", title: "Plan my money", short: "Costs, proof of funds and blocked accounts", icon: BriefcaseBusiness, bg: "#E3F2E5", fg: "#2E7D32" },
+  { href: "/services/insurance", title: "Get insured", short: "Visa-ready health cover in minutes", icon: ShieldCheck, bg: "#F1E9FA", fg: "#6A3FA0" },
+  { href: "/resume", title: "Write my CV & letter", short: "AI help for application-ready documents", icon: FileText, bg: "#FDE8DE", fg: "#B23C0B" },
 ];
+
+const PICK_BAND_COLORS = ["#1F3FA8", "#0B6B50", "#6A3FA0", "#B23C0B"];
+
+function firstNameOf(fullName: string) {
+  return fullName.split(" ")[0] || fullName;
+}
 
 const CONFIRMED_SERVICE_PARTNERS = [
   { name: "LearnersDen.eu", type: "OTHER", role: "Counselling & Application Management", country: "International", websiteUrl: "https://learnersden.eu/" },
@@ -93,6 +101,7 @@ const COTHM_PARTNER = {
 export default async function HomePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const dashboardData = user ? await getCustomerDashboardData(user.id) : null;
   // The homepage only ever displays 8 universities. The previous version
   // fetched up to 240 rows (each with a nested partner + programs include)
   // just to pick 8 by name — measured as a real contributor to homepage
@@ -174,37 +183,20 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen w-full bg-paper">
-      <Header signedIn={!!user} />
+      <StudyHeader current="home" signedIn={!!user} fullName={dashboardData?.profile.user.fullName}/>
       <SupportLauncher signedIn={!!user} />
-      <main className="mx-auto w-full max-w-5xl px-5 pb-16 pt-10 sm:px-8 sm:pt-14">
-        <section className="mx-auto max-w-3xl text-center">
-          <div className="text-xs font-semibold uppercase tracking-[.18em] text-teal">Students Online University Portal</div>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">How can SOUP help you today?</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-mute">One intelligent student journey from discovery to applications, documents, visa preparation and arrival.</p>
-          <div className="mt-7 text-left"><HomeAIEntry/></div>
-        </section>
+      <main className="mx-auto w-full max-w-[1200px] px-5 pb-16 pt-6 sm:px-6">
+        <HomeHero
+          signedIn={!!user}
+          firstName={dashboardData ? firstNameOf(dashboardData.profile.user.fullName) : null}
+          progress={dashboardData?.applicationProgress || null}
+          nextTask={dashboardData?.studentActionItems[0] || null}
+          journeyStage={dashboardData?.studentCase?.stage || null}
+        />
 
-        {/* Signed-in students land here by default now (see
-            determinePostLoginLanding) rather than straight on /dashboard —
-            this card is the obvious, hard-to-miss way back to it, since the
-            existing header icon (top-right "My SOUP") is easy to miss,
-            especially on mobile where it collapses to a small icon. */}
-        {user && (
-          <section className="mx-auto mt-5 max-w-3xl">
-            <Link href="/dashboard" className="group flex items-center justify-between gap-4 rounded-2xl border border-navy/15 bg-gradient-to-r from-[#EAF0F5] to-white px-5 py-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy text-white"><LayoutDashboard size={18}/></div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-ink">Open My Dashboard</div>
-                  <div className="mt-0.5 truncate text-xs text-mute">Your applications, documents, payments and what happens next — all in one place.</div>
-                </div>
-              </div>
-              <ArrowRight size={16} className="shrink-0 text-navy transition group-hover:translate-x-0.5"/>
-            </Link>
-          </section>
-        )}
-
-        <section className="mx-auto mt-5 grid max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <section aria-labelledby="iwant" className="mt-7 flex flex-col gap-4">
+          <h2 id="iwant" className="m-0 text-[22px] font-extrabold text-ink">I want to…</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {WORKFLOWS.map((wf) => {
             const Icon = wf.icon;
             const universityPromo = wf.href === "/universities"
@@ -216,15 +208,14 @@ export default async function HomePage() {
                 ? mergedServices.filter((partner) => partner.type === "INSURANCE").slice(0, 2)
                 : [];
             return (
-              <Link key={wf.href} href={wf.href} className="rounded-xl border border-teal bg-white px-4 py-3.5 flex min-h-[118px] items-start gap-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm">
-                <div className="mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#EAF0F5]"><Icon size={14} className="text-navy" /></div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold mb-0.5 text-ink">{wf.title}</div>
-                  <div className="text-xs leading-snug text-mute">{wf.short}</div>
+              <Link key={wf.href} href={wf.href} className="flex min-h-[150px] flex-col gap-2.5 rounded-[20px] p-[22px] no-underline text-ink transition hover:-translate-y-0.5" style={{ background: wf.bg }}>
+                <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-white"><Icon size={22} style={{ color: wf.fg }} /></span>
+                <span className="text-lg font-extrabold">{wf.title}</span>
+                <span className="text-sm leading-snug text-mute">{wf.short}</span>
                   {universityPromo && universityPromo.length > 0 && (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="mt-1 grid grid-cols-2 gap-2">
                       {universityPromo.map((university) => (
-                        <div key={university.id} className="min-w-0 rounded-lg border border-[#D9E7E3] bg-[#F4FAF8] p-2">
+                        <div key={university.id} className="min-w-0 rounded-lg bg-white/70 p-2">
                           <div className="flex items-center gap-1.5"><PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} size={20}/><span className="truncate text-[10px] font-semibold text-ink">{university.name}</span></div>
                           <div className="mt-1 text-[9px] font-medium uppercase tracking-[.08em] text-teal">{university.country}</div>
                           <div className="mt-1 inline-flex items-center rounded-full bg-teal/10 px-1.5 py-0.5 text-[8px] font-semibold text-teal">{UNIVERSITY_PROMO_TAG}</div>
@@ -232,11 +223,11 @@ export default async function HomePage() {
                       ))}
                     </div>
                   )}
-                  {partnerPreview.length > 0 && <div className="mt-3 flex flex-wrap items-center gap-2">{partnerPreview.map((partner) => <div key={partner.id} className="flex min-w-0 items-center gap-1.5 rounded-full border border-hair bg-paper/70 py-1 pl-1 pr-2"><PartnerLogo name={partner.name} websiteUrl={partner.websiteUrl} logoUrl={partner.logoUrl} size={22}/><span className="max-w-[120px] truncate text-[9px] font-semibold text-ink">{partner.name}</span></div>)}</div>}
-                </div>
+                  {partnerPreview.length > 0 && <div className="mt-1 flex flex-wrap items-center gap-2">{partnerPreview.map((partner) => <div key={partner.id} className="flex min-w-0 items-center gap-1.5 rounded-full bg-white/70 py-1 pl-1 pr-2"><PartnerLogo name={partner.name} websiteUrl={partner.websiteUrl} logoUrl={partner.logoUrl} size={22}/><span className="max-w-[120px] truncate text-[9px] font-semibold text-ink">{partner.name}</span></div>)}</div>}
               </Link>
             );
           })}
+          </div>
         </section>
 
         {governmentPartners.length > 0 && (
@@ -289,21 +280,34 @@ export default async function HomePage() {
           </section>
         )}
 
-        <section className="mt-14 border-t border-hair pt-12">
-          <div className="grid gap-9 lg:grid-cols-[.9fr_1.1fr] lg:items-start">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">University network</div>
-              <h2 className="mt-2 text-2xl font-semibold text-ink">Explore Europe first, then let SOUP guide the fit.</h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-mute">The homepage leads with strong European options from SOUP’s direct and network access — including Hungary, France, Germany, Ireland and the UK. SOUP still considers suitability first and broadens beyond Europe whenever the student asks for something different.</p>
-              <Link href="/universities" className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-navy">Explore universities <ArrowRight size={13}/></Link>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {universityPartners.length ? universityPartners.map((university) => (
-                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
-                  <div className="flex items-start gap-3"><PartnerLogo name={university.name} websiteUrl={university.websiteUrl || university.partner?.websiteUrl} logoUrl={logoUrl(university.publicMetadata) || logoUrl(university.partner?.publicMetadata)}/><div className="min-w-0 flex-1"><div className="text-xs font-semibold text-ink">{university.name}</div><div className="mt-1 text-[11px] text-mute">{[university.city, university.country].filter(Boolean).join(", ")}</div><div className="mt-2 text-[9px] font-semibold uppercase tracking-[.12em] text-teal">{university.programs.length} program{university.programs.length === 1 ? "" : "s"}</div></div><ArrowRight size={13} className="mt-1 text-mute transition group-hover:translate-x-0.5 group-hover:text-navy"/></div>
-                </Link>
-              )) : <div className="sm:col-span-2 rounded-xl border border-hair bg-white p-5 text-xs leading-5 text-mute">University partner catalog is connected through the SOUP database and appears here when seeded in this environment.</div>}
-            </div>
+        <section aria-labelledby="picks" className="mt-10 flex flex-col gap-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="picks" className="m-0 text-[22px] font-extrabold text-ink">Picked for you</h2>
+            <Link href="/universities" className="text-[15px] font-bold text-navy no-underline">See all universities</Link>
+          </div>
+          <p className="m-0 max-w-xl text-sm leading-6 text-mute">Strong European options from SOUP's direct and network access — including Hungary, France, Germany, Ireland and the UK. SOUP broadens beyond Europe whenever you ask for something different.</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {universityPartners.length ? universityPartners.slice(0, 5).map((university, index) => (
+              <article key={university.id} className="flex flex-col overflow-hidden rounded-[20px] border border-hair bg-white">
+                <div className="flex h-[120px] items-end p-3.5" style={{ background: PICK_BAND_COLORS[index % PICK_BAND_COLORS.length] }}>
+                  <PartnerLogo name={university.name} websiteUrl={university.websiteUrl || university.partner?.websiteUrl} logoUrl={logoUrl(university.publicMetadata) || logoUrl(university.partner?.publicMetadata)} size={40}/>
+                </div>
+                <div className="flex flex-col gap-2 p-[18px]">
+                  <span className="text-[13px] font-bold text-mute">{[university.city, university.country].filter(Boolean).join(" · ")}</span>
+                  <span className="text-[17px] font-extrabold leading-snug text-ink">{university.name}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {university.partner && <span className="rounded-[7px] bg-[#E8F4EF] px-[9px] py-[5px] text-xs font-bold text-teal">{UNIVERSITY_PROMO_TAG}</span>}
+                    <span className="rounded-[7px] bg-[#F1F2EE] px-[9px] py-[5px] text-xs font-semibold text-mute">{university.programs.length} program{university.programs.length === 1 ? "" : "s"}</span>
+                  </div>
+                  <Link href={`/universities/${university.id}`} className="mt-1.5 flex h-11 items-center justify-center rounded-xl border-[1.5px] border-navy text-center text-sm font-bold text-navy no-underline">View programs</Link>
+                </div>
+              </article>
+            )) : <div className="sm:col-span-2 lg:col-span-3 rounded-xl border border-hair bg-white p-5 text-xs leading-5 text-mute">University partner catalog is connected through the SOUP database and appears here when seeded in this environment.</div>}
+            <article className="flex min-h-[150px] flex-col justify-center gap-3 rounded-[20px] border border-dashed border-[#B9C0B4] bg-white p-[22px]">
+              <span className="text-[17px] font-extrabold text-ink">Not sure yet?</span>
+              <span className="text-sm leading-relaxed text-mute">Answer a few quick questions about your budget, grades and goals. Noodles will shortlist programs that fit.</span>
+              <Link href="/counselor?prompt=Help%20me%20find%20universities%20that%20fit%20my%20budget%2C%20grades%20and%20goals" className="flex h-11 items-center justify-center rounded-xl bg-teal text-sm font-bold text-white no-underline">Ask Noodles</Link>
+            </article>
           </div>
         </section>
 
@@ -341,6 +345,7 @@ export default async function HomePage() {
 
         {!user && <p className="mt-8 text-center text-xs text-mute">Start with Noodles as a guest. SOUP asks you to create an account when private documents, saved plans or managed applications are needed.</p>}
       </main>
+      <ChatWithNoodlesFab/>
     </div>
   );
 }

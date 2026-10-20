@@ -1,12 +1,14 @@
-import { Header } from "@/components/Header";
+import { StudyHeader } from "@/components/layout/StudyHeader";
 import { CounselorConversation } from "@/components/counselor/CounselorConversation";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 const ALLOWED_INTENTS = new Set(["universities", "accommodation", "insurance", "scholarships", "finance"]);
 
 export default async function CounselorPage({ searchParams }: { searchParams?: { intent?: string; requestItem?: string; requestLabel?: string; applicationId?: string; prompt?: string; universityId?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } }) : null;
   const rawIntent = String(searchParams?.intent || "").toLowerCase();
   const intent = ALLOWED_INTENTS.has(rawIntent) ? rawIntent : undefined;
   const requestedItemId = String(searchParams?.requestItem || "").trim() || undefined;
@@ -28,5 +30,5 @@ export default async function CounselorPage({ searchParams }: { searchParams?: {
   // old instance (and its state) rather than silently keep appending new,
   // correctly-scoped server responses onto a thread that still shows a
   // previous account's messages.
-  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><Header signedIn={!!user}/><CounselorConversation key={user?.id || "guest"} signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
+  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><StudyHeader current="noodles" signedIn={!!user} fullName={profile?.user.fullName}/><CounselorConversation key={user?.id || "guest"} signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
 }

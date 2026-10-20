@@ -258,9 +258,9 @@ export function CounselorConversation({ signedIn, intent, requestedItemId, reque
         } catch (caught) { setNotice(caught instanceof Error ? caught.message : "Could not process document."); }
         finally { setProcessing(false); }
       }}/>
-      <ApplicationJourneyPanel signedIn={signedIn} refreshKey={journeyRefresh + messages.length} onStatus={handleJourneyStatus}/>
       <ConversationWorkspace
         workflow="COUNSELOR"
+        rightPanel={<ApplicationJourneyPanel signedIn={signedIn} refreshKey={journeyRefresh + messages.length} onStatus={handleJourneyStatus}/>}
         signedIn={signedIn}
         title={documentLabel ? "Application document" : copy.title}
         subtitle={documentLabel ? `Your application needs ${documentLabel}. Upload it here when you are ready; SOUP will read it, save it to your vault and bind it to the correct application requirement.` : signedIn ? "One conversation layer across universities, applications, documents, visa, accommodation, insurance, finance and scholarships." : "Start as a guest. SOUP asks you to create an account only when private documents or saved case data are needed."}

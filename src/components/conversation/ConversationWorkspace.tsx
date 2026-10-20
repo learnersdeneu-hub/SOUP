@@ -85,7 +85,7 @@ function messageSources(message: ConversationMessage) {
     .slice(0, 12);
 }
 
-export function ConversationWorkspace({ workflow, signedIn, title, subtitle, intro, starters, entryIntent, entryUniversityId, onAttach, attachLabel = "Attach document", bottomAction, onMessagesChange, onSessionChange, onReset, onBeforeSend, initialPrompt }: {
+export function ConversationWorkspace({ workflow, signedIn, title, subtitle, intro, starters, entryIntent, entryUniversityId, onAttach, attachLabel = "Attach document", bottomAction, rightPanel, onMessagesChange, onSessionChange, onReset, onBeforeSend, initialPrompt }: {
   workflow: SoupWorkflow;
   signedIn: boolean;
   title: string;
@@ -97,6 +97,7 @@ export function ConversationWorkspace({ workflow, signedIn, title, subtitle, int
   onAttach?: () => void;
   attachLabel?: string;
   bottomAction?: React.ReactNode;
+  rightPanel?: React.ReactNode;
   onMessagesChange?: (messages: ConversationMessage[]) => void;
   onSessionChange?: (sessionId: string | null) => void;
   onReset?: () => void;
@@ -391,11 +392,11 @@ export function ConversationWorkspace({ workflow, signedIn, title, subtitle, int
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-1 py-7 sm:px-8">
           <div className="mx-auto max-w-2xl space-y-6">
             {messages.map((message) => message.role === "user" ? (
-              <div key={message.id} className="flex justify-end"><div className="max-w-[88%] break-words rounded-3xl rounded-br-lg bg-[#EEF1F4] px-4 py-3 text-sm leading-6 text-ink sm:max-w-[82%]">{visibleContent(message.content)}</div></div>
+              <div key={message.id} className="flex justify-end"><div className="max-w-[88%] break-words rounded-3xl rounded-br-lg bg-navy px-4 py-3 text-sm leading-6 text-white sm:max-w-[82%]">{visibleContent(message.content)}</div></div>
             ) : (
               <div key={message.id} className="flex gap-3">
-                <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-navy text-white"><NoodlesLoader size={15} active={false}/></div>
-                <div className="max-w-[88%] min-w-0">
+                <div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#FFF4CC] text-[#8A6A00]"><NoodlesLoader size={18} active={false}/></div>
+                <div className="max-w-[88%] min-w-0 rounded-[4px_18px_18px_18px] border border-hair bg-white px-4 py-3.5">
                   {assistantAttribution(message) && <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-teal">{assistantAttribution(message)}</div>}
                   <AssistantMarkdown content={visibleContent(message.content)} className="break-words text-sm leading-6 text-ink"/>
                   {messageSources(message).length > 0 && (
@@ -410,26 +411,27 @@ export function ConversationWorkspace({ workflow, signedIn, title, subtitle, int
                 </div>
               </div>
             ))}
-            {streaming && <div className="flex gap-3"><div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-navy text-white"><NoodlesLoader size={15} active={!visibleContent(streamText)}/></div>{visibleContent(streamText) && <AssistantMarkdown content={visibleContent(streamText)} className="max-w-[88%] break-words text-sm leading-6 text-ink"/>}</div>}
+            {streaming && <div className="flex gap-3"><div className="mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#FFF4CC] text-[#8A6A00]"><NoodlesLoader size={18} active={!visibleContent(streamText)}/></div>{visibleContent(streamText) && <AssistantMarkdown content={visibleContent(streamText)} className="max-w-[88%] break-words rounded-[4px_18px_18px_18px] border border-hair bg-white px-4 py-3.5 text-sm leading-6 text-ink"/>}</div>}
             {messages.length === 1 && initialStarters.length ? <div className="ml-10 flex flex-wrap gap-2">{initialStarters.map((starter) => <button key={starter} onClick={() => send(starter)} className="rounded-full border border-hair bg-white px-3 py-2 text-xs text-ink hover:border-navy">{starter}</button>)}</div> : null}
             {error && <div className="ml-10 rounded-xl border border-[#F0D5D1] bg-[#FFF8F7] px-4 py-3 text-xs text-[#9D3127]">{error}</div>}
           </div>
         </div>
         {bottomAction ? <div className="px-1 pt-2 sm:px-8"><div className="mx-auto max-w-2xl">{bottomAction}</div></div> : null}
         <div className="px-1 pb-4 pt-2 sm:px-8 sm:pb-6">
-          <div className="mx-auto max-w-2xl rounded-[28px] border border-hair bg-white p-2.5 shadow-[0_8px_30px_rgba(20,32,48,0.07)]">
+          <div className="mx-auto max-w-2xl rounded-[28px] border-[1.5px] border-navy bg-white p-2.5 shadow-[0_8px_30px_rgba(20,32,48,0.07)]">
             <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} rows={1} placeholder="Message SOUP..." className="max-h-36 min-h-[44px] w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 text-ink outline-none"/>
             <div className="flex items-center justify-between gap-2 px-1 pb-0.5 pt-1.5">
               <div className="flex min-w-0 items-center gap-2">
                 {onAttach && <button onClick={onAttach} aria-label={attachLabel} title={attachLabel} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-hair text-mute hover:border-navy hover:text-navy"><Paperclip size={15}/></button>}
                 <span className="truncate text-[10px] text-mute">{signedIn ? "Saved SOUP account" : "Guest conversation — kept on this device"}</span>
               </div>
-              <button onClick={() => void send()} disabled={!input.trim() || streaming} aria-label="Send" className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-navy text-white transition-colors hover:bg-[#16314F] disabled:bg-[#D8DDE2]"><ArrowUp size={17}/></button>
+              <button onClick={() => void send()} disabled={!input.trim() || streaming} aria-label="Send" className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-teal text-white transition-colors hover:bg-[#084D3A] disabled:bg-[#D8DDE2]"><ArrowUp size={17}/></button>
             </div>
           </div>
           <p className="mx-auto mt-2 max-w-2xl text-center text-[10px] text-mute">SOUP can make mistakes. Check important admissions, visa, financial and service information against the cited official source before acting.</p>
         </div>
       </section>
+      {rightPanel && <aside className="hidden w-80 flex-shrink-0 overflow-y-auto border-l border-hair bg-white lg:block">{rightPanel}</aside>}
     </div>
   );
 }

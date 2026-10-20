@@ -5,12 +5,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#1C1D1F",
-        mute: "#6B6E73",
-        paper: "#FAFAFA",
-        navy: "#1E3A5F",
-        teal: "#0F7B6C",
-        hair: "#E5E5E5",
+        ink: "#14213D",
+        mute: "#3D4A63",
+        paper: "#F6F7F4",
+        navy: "#14213D",
+        teal: "#0B6B50",
+        hair: "#E4E7E1",
+      },
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
       },
     },
   },

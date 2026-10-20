@@ -41,7 +41,7 @@ export function ConversationSidebar({ signedIn, workflow, sessions, activeSessio
   const body = (
     <div className="flex h-full flex-col">
       <div className="border-b border-hair p-3">
-        <button onClick={onNew} className="flex w-full items-center gap-2 rounded-xl border border-hair bg-white px-3 py-2.5 text-sm font-semibold text-ink hover:bg-paper">
+        <button onClick={onNew} className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal px-3 py-2.5 text-sm font-semibold text-white hover:bg-[#084D3A]">
           <MessageSquarePlus size={15} /> New conversation
         </button>
         <div className="mt-3 space-y-1">

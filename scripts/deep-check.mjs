@@ -87,7 +87,12 @@ const disabledLegacyApis = ['src/app/api/report/finalize/route.ts','src/app/api/
 
 check('Package is a separate SOUP application', pkg.name === 'soup-app' && /SOUP/.test(header) && !/GCI\.ai/.test(home));
 check('GCI visual shell is retained as chat-first product', /ConversationSidebar/.test(workspace) && /rounded-\[28px\]/.test(workspace) && /bg-navy/.test(workspace) && /Message SOUP/.test(workspace));
-check('Home exposes Ask SOUP plus agreed service entry points', ['Ask Noodles','Universities & Programs','Accommodation','Student Insurance','Student Finance','Resume & Cover Letter','University network'].every((label) => (home + homeAiEntry).includes(label)));
+// Checks functional reachability (href) rather than exact card copy: the
+// redesigned home hero (see the "SOUP Homepage Redesign" design canvas)
+// renamed these cards ("Find a university", "Get insured", etc.) and moved
+// "Ask Noodles" into HomeHero.tsx — hrefs are the durable part of this
+// invariant, not wording that's expected to keep evolving.
+check('Home exposes Ask SOUP plus agreed service entry points', /Ask Noodles/.test(home + homeAiEntry) && ['/universities"', '/services/accommodation"', '/services/insurance"', '/services/finance"', '/resume"'].every((href) => home.includes(href)));
 check('Counselor is a first-class workflow', /COUNSELOR/.test(schema) && /workflow="COUNSELOR"/.test(counselor) && /COUNSELOR/.test(stream));
 check('Counselor establishes geography before serious university search', /preferred region\/country scope/.test(prompts) && /worldwide/.test(prompts) && /narrow/.test(prompts));
 check('Saved university plans enforce the server-owned geography scope', /inferSearchCountries\(studentCase\)/.test(planRoute) && /countryMatchesScope/.test(planRoute) && /studentCase\.searchScope \|\| clean\(result\.regionScope/.test(planRoute) && /COUNTRY_EQUIVALENTS/.test(partnerRelevance));
@@ -163,7 +168,12 @@ check('Offer and enrolment states require an offer document', /OFFER_RECEIVED", 
 check('Offer event creates notification and optional email', /notification\.create/.test(offerRoute) && /sendTransactionalEmail/.test(offerRoute));
 check('Application operations preserve a chronological event ledger', /model StudentApplicationEvent/.test(schema) && /student_application_events/.test(read('prisma/migrations/20260829203500_soup_application_events/migration.sql')) && /studentApplicationEvent\.create/.test(applicationRoute) && /studentApplicationEvent\.create/.test(applicationStatus) && /studentApplicationEvent\.create/.test(offerRoute));
 check('Student application documents and admissions reviews enter the event ledger', /DOCUMENT_SUPPLIED/.test(attachDocumentHelper) && /REQUIREMENT_REVIEWED/.test(applicationStaffStatus) && /Application history/.test(applicationDetailPage) && /Operational history/.test(adminApplicationDetail));
-check('Customer dashboard is a persistent student journey workspace', /Current journey stage/.test(dashboard) && /Applications/.test(dashboard) && /Documents/.test(dashboard) && /Application Plans/.test(dashboard));
+// "Current journey stage" was the literal label on the old dashboard hero's
+// stage badge; the redesigned hero (see the "SOUP Homepage Redesign" design
+// canvas) shows the same stage indicator as "Stage: <label>" instead, plus
+// a dedicated "Your journey" stepper section — both accepted here so this
+// keeps testing "a stage indicator exists", not one exact wording of it.
+check('Customer dashboard is a persistent student journey workspace', (/Current journey stage/.test(dashboard) || (/Stage:/.test(dashboard) && /Your journey/.test(dashboard))) && /Applications/.test(dashboard) && /Documents/.test(dashboard) && /Application Plans/.test(dashboard));
 check('Admin customer view acts as case-level CRM', /Applications/.test(adminUser) && /Documents/.test(adminUser) && /Journey/.test(adminUser) && /Conversation/.test(adminUser));
 check('Conversation history supports create/open/rename/delete', /method: "POST"/.test(workspace) && /method: "PATCH"/.test(workspace) && /method: "DELETE"/.test(workspace) && /updatedAt: "desc"/.test(sessionsRoute));
 check('Guest conversation can migrate into authenticated history', /normalizeIncoming/.test(historyRoute) && /createMany/.test(historyRoute) && /metadata/.test(historyRoute));
