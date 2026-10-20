@@ -306,6 +306,30 @@ export const requirementUploadFormSchema = z.object({
   file: z.unknown(),
 }).strict();
 
+// The recommender's own letter-file upload — token-authenticated, not
+// session-authenticated (see src/app/api/recommend/[token]/upload and
+// src/app/recommend/[token]/page.tsx), so this has no other fields to
+// validate beyond the file itself; the token in the URL is what's checked.
+export const recommendUploadFormSchema = z.object({
+  file: z.unknown(),
+}).strict();
+
+export const categoryUploadFormSchema = z.object({
+  file: z.unknown(),
+  category: shortTextSchema(60),
+  // Only set for the two writing boxes' "upload instead" alternative, to
+  // save the upload directly onto a per-university override rather than
+  // (only) the shared profile-level vault — see UploadBox's
+  // extraFormFields and /api/documents/category-upload.
+  applicationId: optionalIdSchema,
+  boxType: optionalShortTextSchema(40),
+  // Set when the student clicked "Replace" on a specific existing
+  // single-file box (see UploadBox) — the new Document records
+  // replacementForId and the old one gets a REPLACED review event, rather
+  // than silently accumulating unrelated documents under the same category.
+  replaceDocumentId: optionalIdSchema,
+}).strict();
+
 export const premiumCheckoutFormSchema = z.object({
   plan: z.enum(["premium", "premium_plus"]).optional().default("premium"),
 }).strict();

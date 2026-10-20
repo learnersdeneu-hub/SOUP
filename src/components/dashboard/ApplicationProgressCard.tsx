@@ -33,7 +33,7 @@ export function ApplicationProgressCard({ progress }: { progress: ApplicationPro
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {sections.map((section) => (
           <Link
             key={section.key}

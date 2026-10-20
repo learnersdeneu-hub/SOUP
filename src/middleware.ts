@@ -8,7 +8,11 @@ import { updateSession } from "@/lib/supabase/middleware";
 // /companion/privacy must be readable without a session: Chrome Web Store
 // reviewers and prospective testers need to open it before they have (or
 // without ever creating) a SOUP account.
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy"];
+// /recommend/[token] is the recommender's own letter-submission link — the
+// recommender has no SOUP account at all; that page authenticates the
+// visitor against the token in the URL itself, not a session (see
+// src/app/recommend/[token]/page.tsx).
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

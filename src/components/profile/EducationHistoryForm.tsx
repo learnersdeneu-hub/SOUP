@@ -7,6 +7,11 @@ import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { saveEducationHistory } from "@/app/actions/coreProfile";
 import type { AcademicHonor, EducationHistory, PriorInstitution } from "@/lib/applications/coreProfile";
 import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
+import { UploadBox } from "@/components/documents/UploadBox";
+import { LegacyDocumentReassignPrompt } from "@/components/profile/LegacyDocumentReassignPrompt";
+import { CATEGORY_CONFIG, type DocumentCategory } from "@/lib/documents/categories";
+import { requiredEducationCategories } from "@/lib/applications/educationUploads";
+import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const DEGREE_LEVELS = ["Foundation / Pathway", "Bachelor's", "Master's", "PhD"];
@@ -16,7 +21,17 @@ const OTHER_SYSTEM = "__other__";
 function emptyInstitution(): PriorInstitution { return { name: "", startDate: "", endDate: "", country: "", city: "", credential: "" }; }
 function emptyHonor(): AcademicHonor { return { title: "", year: "" }; }
 
-export function EducationHistoryForm({ education }: { education: EducationHistory }) {
+type LegacyDocument = CategoryDocument & { legacyType: "ACADEMIC_TRANSCRIPT" | "DEGREE_CERTIFICATE" };
+
+export function EducationHistoryForm({
+  education,
+  educationDocuments,
+  legacyDocuments,
+}: {
+  education: EducationHistory;
+  educationDocuments: Record<string, CategoryDocument[]>;
+  legacyDocuments: LegacyDocument[];
+}) {
   const router = useRouter();
   const [currentInstitutionName, setCurrentInstitutionName] = useState(education.currentInstitutionName);
   const [currentInstitutionCity, setCurrentInstitutionCity] = useState(education.currentInstitutionCity);
@@ -30,6 +45,7 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
   const [classRank, setClassRank] = useState(education.classRank);
   const [priorInstitutions, setPriorInstitutions] = useState<PriorInstitution[]>(education.priorInstitutions);
   const [intendedDegreeLevel, setIntendedDegreeLevel] = useState(education.intendedDegreeLevel);
+  const requiredCategories = requiredEducationCategories(intendedDegreeLevel);
   const [intendedFieldsText, setIntendedFieldsText] = useState(education.intendedFields.join(", "));
   const [honors, setHonors] = useState<AcademicHonor[]>(education.honors);
   const [counselorName, setCounselorName] = useState(education.counselorName);
@@ -80,13 +96,26 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
     <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-8">
       <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>Dashboard</Link>
       <div className="mt-4">
-        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 3</div>
-        <h1 className="mt-2 text-2xl font-semibold text-ink">Education & Academic Background</h1>
+        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 2</div>
+        <h1 className="mt-2 text-2xl font-semibold text-ink">Education Background</h1>
         <p className="mt-2 text-sm leading-6 text-mute">Fill this in once — it's reused across every university application you start.</p>
       </div>
 
       <div className="mt-6 space-y-6 rounded-2xl border border-hair bg-white p-5 sm:p-6">
+        <div>
+          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Are you applying for a Bachelor's, Master's or PhD?</span>
+          <div className="flex flex-wrap gap-2">{DEGREE_LEVELS.map((level) => <button key={level} type="button" onClick={() => setIntendedDegreeLevel(level)} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${intendedDegreeLevel === level ? "border-navy bg-navy text-white" : "border-hair text-ink"}`}>{level}</button>)}</div>
+        </div>
+
+        {legacyDocuments.length > 0 && <LegacyDocumentReassignPrompt documents={legacyDocuments} candidateCategories={requiredCategories}/>}
+
         <div className="grid gap-3 sm:grid-cols-2">
+          {requiredCategories.map((category) => (
+            <UploadBox key={category} category={category} label={CATEGORY_CONFIG[category].label} required multiple existing={educationDocuments[category] || []}/>
+          ))}
+        </div>
+
+        <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-2">
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Current / most recent institution</span><input value={currentInstitutionName} onChange={(e) => setCurrentInstitutionName(e.target.value)} className={inputClass}/></label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">City</span><input value={currentInstitutionCity} onChange={(e) => setCurrentInstitutionCity(e.target.value)} className={inputClass}/></label>
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Country</span><input value={currentInstitutionCountry} onChange={(e) => setCurrentInstitutionCountry(e.target.value)} className={inputClass}/></label>
@@ -132,11 +161,7 @@ export function EducationHistoryForm({ education }: { education: EducationHistor
           ))}
         </div>
 
-        <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Intended degree level</span>
-            <div className="flex flex-wrap gap-2">{DEGREE_LEVELS.map((level) => <button key={level} type="button" onClick={() => setIntendedDegreeLevel(level)} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${intendedDegreeLevel === level ? "border-navy bg-navy text-white" : "border-hair text-ink"}`}>{level}</button>)}</div>
-          </label>
+        <div className="border-t border-hair pt-4">
           <label className="block"><span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Intended field(s) of study</span><input value={intendedFieldsText} onChange={(e) => setIntendedFieldsText(e.target.value)} placeholder="Comma-separated, e.g. Computer Science, Data Science" className={inputClass}/></label>
         </div>
 

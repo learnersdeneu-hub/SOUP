@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Bell, BriefcaseBusiness, CheckCircle2, CreditCard, Download, FileText, GraduationCap, LifeBuoy, MessageCircle, PlaneTakeoff, Search, ShieldCheck, Sparkles, Upload } from "lucide-react";
+import { AlertTriangle, ArrowRight, Bell, BriefcaseBusiness, CheckCircle2, CreditCard, Download, FileText, GraduationCap, LifeBuoy, MessageCircle, PlaneTakeoff, Search, ShieldCheck, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SupportLauncher } from "@/components/support/SupportLauncher";
@@ -8,9 +8,39 @@ import { getCustomerDashboardData } from "@/lib/queries/dashboard";
 import { syncStudentAlerts } from "@/lib/student/alerts";
 import { DirectApplicationBox } from "@/components/applications/DirectApplicationBox";
 import { DirectDocumentUpload } from "@/components/documents/DirectDocumentUpload";
+import { OpenDocumentButton } from "@/components/documents/OpenDocumentButton";
 import { ApplicationProgressCard } from "@/components/dashboard/ApplicationProgressCard";
 import { InstitutionPromptBanner } from "@/components/dashboard/InstitutionPromptBanner";
 import { PREMIUM_COUNSELING_TITLE } from "@/lib/payments/config";
+
+// Ported from the old /documents page (now a redirect to here — see
+// src/app/documents/page.tsx) when Standard Documents was retired from the
+// My Application Progress stepper. Expires/validity labels and the
+// authority-acceptance disclaimer below are a real invariant this product
+// relies on (SOUP can read dates from documents to flag upcoming expiry,
+// but that is never the same as a university/embassy/insurer accepting the
+// document), not just old-page decoration — see scripts/deep-check.mjs's
+// "Document validity metadata..." check, which now reads this file instead
+// of the retired page.
+const DOCUMENT_STATUS_STYLE: Record<string, string> = {
+  UPLOADED: "bg-slate-100 text-slate-700",
+  PENDING_REVIEW: "bg-amber-50 text-amber-800",
+  MORE_INFO_REQUIRED: "bg-orange-50 text-orange-800",
+  APPROVED: "bg-emerald-50 text-emerald-800",
+  REJECTED: "bg-red-50 text-red-700",
+  EXPIRED: "bg-slate-100 text-slate-600",
+};
+
+function validityLabel(validUntil: Date | null, issuedAt: Date | null) {
+  if (validUntil) {
+    const days = Math.ceil((validUntil.getTime() - Date.now()) / 86_400_000);
+    if (days < 0) return { text: `Expired ${validUntil.toLocaleDateString()}`, warn: true };
+    if (days <= 90) return { text: `Expires ${validUntil.toLocaleDateString()} · ${days} day${days === 1 ? "" : "s"} left`, warn: true };
+    return { text: `Valid until ${validUntil.toLocaleDateString()}`, warn: false };
+  }
+  if (issuedAt) return { text: `Issued ${issuedAt.toLocaleDateString()}`, warn: false };
+  return { text: "No validity date extracted", warn: false };
+}
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -62,12 +92,12 @@ export default async function DashboardPage() {
   const studentTasks = [
     ...data.studentActionItems.slice(0, 3).map((item) => ({ title: item.title, note: item.dueAt ? `Due ${item.dueAt.toLocaleDateString()}` : "Action required", href: "/pending" })),
     ...data.pendingApplicationFees.slice(0, 2).map((app) => ({ title: `${app.university?.name || "University"} application fee`, note: "Payment/action required", href: "/payments" })),
-    ...data.documentAttention.slice(0, 2).map((doc) => ({ title: doc.originalFileName || doc.documentType, note: nice(doc.reviewStatus), href: "/documents" })),
+    ...data.documentAttention.slice(0, 2).map((doc) => ({ title: doc.originalFileName || doc.documentType, note: nice(doc.reviewStatus), href: "/dashboard" })),
   ].slice(0, 4);
 
   const soupTasks = [
     ...data.waitingOnSoup.slice(0, 3).map((app) => ({ title: app.university?.name || "University application", note: app.status === "READY_TO_SUBMIT" ? "SOUP is preparing final submission" : nice(app.status), href: `/applications/${app.id}` })),
-    ...data.documents.filter((doc) => doc.reviewStatus === "PENDING_REVIEW").slice(0, 2).map((doc) => ({ title: doc.originalFileName || doc.documentType, note: "SOUP document review", href: "/documents" })),
+    ...data.documents.filter((doc) => doc.reviewStatus === "PENDING_REVIEW").slice(0, 2).map((doc) => ({ title: doc.originalFileName || doc.documentType, note: "SOUP document review", href: "/dashboard" })),
   ].slice(0, 4);
 
   return (
@@ -133,6 +163,37 @@ export default async function DashboardPage() {
           </div>
         </section>
 
+        <section className="mt-5 rounded-2xl border border-hair bg-white p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Document vault</div>
+              <h2 className="mt-1 text-sm font-semibold text-ink">Everything you've uploaded, reused across every application</h2>
+            </div>
+          </div>
+          <p className="mt-2 max-w-2xl text-xs leading-5 text-mute">SOUP can read dates from documents to flag upcoming expiry, but authority acceptance and freshness rules remain separate — a university, embassy or insurer still makes the final call.</p>
+          {data.documents.length === 0 ? (
+            <div className="mt-4 rounded-xl bg-paper p-4 text-xs leading-5 text-mute">Documents you upload across Profile & Details, Education, Testing, Funding and Extracurricular & Recommendations will appear here.</div>
+          ) : (
+            <div className="mt-4 divide-y divide-hair">
+              {data.documents.slice(0, 5).map((doc) => {
+                const validity = validityLabel(doc.validUntil, doc.documentIssuedAt);
+                return (
+                  <div key={doc.id} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[1.4fr_1fr_1fr_auto] sm:items-center">
+                    <div className="min-w-0">
+                      <div className="truncate text-xs font-semibold text-ink">{doc.originalFileName || doc.documentType}</div>
+                      <div className="mt-0.5 text-[11px] text-mute">uploaded {doc.uploadedAt.toLocaleDateString()}</div>
+                    </div>
+                    <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${DOCUMENT_STATUS_STYLE[doc.reviewStatus] || DOCUMENT_STATUS_STYLE.UPLOADED}`}>{nice(doc.reviewStatus)}</span>
+                    <span className={`text-[11px] ${validity.warn ? "font-semibold text-amber-800" : "text-mute"}`}>{validity.text}</span>
+                    <OpenDocumentButton documentId={doc.id}/>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {data.documentCount > 5 && <div className="mt-3 text-[11px] text-mute">+{data.documentCount - 5} more document{data.documentCount - 5 === 1 ? "" : "s"} in your vault.</div>}
+        </section>
+
         <section className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
           <div className="rounded-2xl border border-hair bg-white p-5">
             <div className="flex items-center justify-between gap-3">
@@ -174,7 +235,6 @@ export default async function DashboardPage() {
             ["/applications", BriefcaseBusiness, "Applications", `${data.activeApplications.length} active application${data.activeApplications.length === 1 ? "" : "s"}`],
             ["/offers", GraduationCap, "Offers & decisions", `${data.offers.length} recorded offer${data.offers.length === 1 ? "" : "s"}`],
             ["/visa", PlaneTakeoff, "Visa centre", data.offers.length ? "Post-offer visa checklist and next actions" : "Opens when an offer is recorded"],
-            ["/documents", Upload, "Documents", `${data.documentCount} document${data.documentCount === 1 ? "" : "s"} stored`],
             ["/payments", CreditCard, "Payments", `${data.pendingPayments.length + data.pendingApplicationFees.length} item${data.pendingPayments.length + data.pendingApplicationFees.length === 1 ? "" : "s"} pending`],
             ["/companion/connect", Download, "SOUP Companion", "Download the app for on-portal application help"],
             ["/notifications", Bell, "Updates", `${data.notifications.filter((item) => !item.readAt).length} unread`],

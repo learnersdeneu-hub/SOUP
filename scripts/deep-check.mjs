@@ -48,7 +48,6 @@ const serviceHistory = read('src/app/services/history/page.tsx');
 const referralHelper = read('src/lib/services/referrals.ts');
 const offerRoute = read('src/app/api/admin/applications/[id]/offer/route.ts');
 const adminUser = read('src/app/admin/users/[profileId]/page.tsx');
-const documentsPage = read('src/app/documents/page.tsx');
 const referralAdmin = read('src/app/admin/referrals/page.tsx');
 const referralAction = read('src/app/actions/referrals.ts');
 const handoffAction = read('src/app/actions/handoff.ts');
@@ -200,7 +199,13 @@ check('Legacy GCI conversation workflows cannot be invoked through SOUP APIs', /
 check('AI rate limits are database-backed and guest IPs are pseudonymized', /model AiRateLimitCounter/.test(schema) && /ON CONFLICT \("subject"\)/.test(rateLimiter) && /createHash\("sha256"\)/.test(rateLimiter) && /SOUP_RATE_LIMIT_SALT/.test(env));
 check('All expensive Counselor/document research routes use the shared AI limit', /aiRateLimitResponse/.test(planRoute) && /aiRateLimitResponse/.test(checklistRoute) && /aiRateLimitResponse/.test(evidenceRoute) && /aiRateLimitResponse/.test(read('src/app/api/applications/[id]/requirements/route.ts')) && /aiRateLimitResponse/.test(read('src/app/api/admin/applications/[id]/requirements/route.ts')) && /Retry-After/.test(httpRateLimit));
 check('Persisted assistant messages capture provider usage metadata', /aiUsage: (?:event|result)\.usage/.test(stream) && /provider: provider\.name/.test(stream) && /groundedSearch/.test(stream));
-check('Document validity metadata supports expiry warnings without claiming authority approval', /documentIssuedAt/.test(schema) && /validUntil/.test(schema) && /documentIssuedAt/.test(evidenceRoute) && /validUntil/.test(evidenceRoute) && /Expires/.test(documentsPage) && /authority acceptance/.test(documentsPage));
+// The standalone /documents page was retired in favor of category-specific
+// uploads embedded in each profile section (see UploadBox.tsx) plus a
+// "Document vault" section on /dashboard — src/app/documents/page.tsx is
+// now a bare redirect() with no document content of its own, so this check
+// (and the dynamic-rendering one below) now reads the dashboard page,
+// where the expiry-warning/authority-disclaimer content actually lives.
+check('Document validity metadata supports expiry warnings without claiming authority approval', /documentIssuedAt/.test(schema) && /validUntil/.test(schema) && /documentIssuedAt/.test(evidenceRoute) && /validUntil/.test(evidenceRoute) && /Expires/.test(dashboard) && /authority acceptance/.test(dashboard));
 
 // Regression guard for a confirmed live incident: a brand-new student
 // account saw another, unrelated account's real documents (with real past
@@ -216,7 +221,13 @@ check('Document validity metadata supports expiry warnings without claiming auth
 // per-user page as a second, independent layer of defense. This check
 // fails if either layer is ever quietly removed.
 check('Auth state changes invalidate the client router cache (cross-account leak fix)', /revalidatePath\(\s*"\/",\s*"layout"\s*\)/.test(authActions) && (authActions.match(/invalidateAuthenticatedPages\(\)/g) || []).length >= 4 && /revalidatePath/.test(authCallback));
-check('Per-user pages force dynamic rendering explicitly, not only implicitly via cookies()', /export const dynamic = "force-dynamic"/.test(documentsPage) && /export const dynamic = "force-dynamic"/.test(dashboard));
+// documentsPage dropped from this check: /documents is now a stateless
+// redirect() with no per-user data to cache (redirect() forces dynamic
+// behavior on its own), not a rendered page showing another user's
+// documents — the leak class this check guards against no longer applies
+// to it. dashboard still renders real per-user data and still needs the
+// explicit flag.
+check('Per-user pages force dynamic rendering explicitly, not only implicitly via cookies()', /export const dynamic = "force-dynamic"/.test(dashboard));
 check('Dashboard refresh creates bounded deadline and document-validity reminders', /syncStudentAlerts/.test(read('src/app/dashboard/page.tsx')) && /ninetyDays/.test(studentAlerts) && /fourteenDays/.test(studentAlerts) && /recentCutoff/.test(studentAlerts));
 check('Partner referrals preserve Counselor attribution and future revenue fields', /sourceSessionId/.test(schema) && /revenueAmount/.test(schema) && /commissionAmount/.test(schema) && /resolveReferralAttribution/.test(referralStart) && /Partner referrals & attribution/.test(referralAdmin));
 check('Commercial referral reconciliation is role-scoped', /requireRole\(COMMERCIAL_ROLES\)/.test(referralAction) && /ACCOMMODATION/.test(referralAction) && /FINANCE/.test(referralAction) && /convertedAt/.test(referralAction) && /commissionAmount/.test(referralAction));

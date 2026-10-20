@@ -20,6 +20,11 @@ const publicAllowlist = new Set([
   // Guarded by a short-lived, single-use pairing code instead of a session —
   // analogous to the webhook above being guarded by a signature instead.
   "companion/pair/route.ts",
+  // Guarded by the single-use, expiring invite token in the URL itself —
+  // the recommender submitting a letter has no SOUP account at all (see
+  // src/app/recommend/[token]/page.tsx), the same pattern as the
+  // pairing-code and webhook routes above.
+  "recommend/[token]/upload/route.ts",
 ]);
 
 const authMarkers = [

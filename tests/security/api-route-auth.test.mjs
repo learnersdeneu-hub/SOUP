@@ -22,6 +22,12 @@ const publicRoutes = new Set([
   // this is the one Companion route an unauthenticated extension can call,
   // analogous to the webhook above being guarded by a signature instead.
   "companion/pair/route.ts",
+  // Guarded by the single-use, expiring invite token in the URL itself
+  // instead of a session — the recommender submitting a letter has no SOUP
+  // account at all (see src/app/recommend/[token]/page.tsx and
+  // src/lib/journey/reconcileRecommender.ts), the same pattern as the
+  // pairing-code and webhook routes above.
+  "recommend/[token]/upload/route.ts",
 ]);
 const markers = ["auth.getUser", "requireApiUser", "requireApiProfile", "getApiStaff", "requireCurrentUser", "requireProfile", "requireCompanionAuth"];
 function walk(dir) { return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]); }

@@ -3,6 +3,7 @@ import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { normalizeCoreProfileDetails } from "@/lib/applications/coreProfile";
 import { ProfileDetailsForm } from "@/components/profile/ProfileDetailsForm";
+import { getCategoryDocuments } from "@/lib/documents/categoryQuery";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -16,7 +17,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfileDetailsPage() {
   const { user, profile } = await requireProfile();
-  const studentCase = await prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { coreProfileDetails: true } });
+  const [studentCase, passportDocuments] = await Promise.all([
+    prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { coreProfileDetails: true } }),
+    getCategoryDocuments(profile.id, "PASSPORT"),
+  ]);
   return (
     <div className="min-h-screen bg-paper">
       <Header signedIn/>
@@ -26,6 +30,7 @@ export default async function ProfileDetailsPage() {
         dateOfBirth={user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : ""}
         nationality={user.nationality || ""}
         currentCountry={user.currentCountry || ""}
+        passportDocuments={passportDocuments}
       />
     </div>
   );

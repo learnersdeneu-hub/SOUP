@@ -11,36 +11,76 @@ export type ApplicationProgressInput = {
   nationality?: string | null;
   dateOfBirth?: unknown;
   currentCountry?: string | null;
+  // True once a PASSPORT-category document exists in the vault — see
+  // src/lib/documents/categoryQuery.ts. Added alongside the existing
+  // identity fields rather than replacing them: the upload is additional
+  // evidence, not a substitute for the self-reported fields.
+  passportUploaded?: boolean;
   fundingSummary?: string | null;
+  // True once a BANK_STATEMENT-category document exists. Replaces the old
+  // self-reported proofOfFundsStatus chip as the real signal — see
+  // FundingDetailsForm.tsx.
+  bankStatementUploaded?: boolean;
   academicBackgroundSummary?: string | null;
+  // True once every transcript/certificate box required for the student's
+  // selected degree level (EducationHistory.intendedDegreeLevel) has at
+  // least one document — computed by the caller (getCustomerDashboardData)
+  // since it depends on which boxes apply for that level.
+  requiredEducationUploadsComplete?: boolean;
   englishProficiencySummary?: string | null;
-  documentCount?: number | null;
-  applicationCount?: number | null;
+  // Single precomputed boolean for the whole Extracurricular &
+  // Recommendations section — see the compound rule in
+  // getCustomerDashboardData: at least one activity (or "none to add"
+  // confirmed), resume uploaded, at least one recommender invited (or "not
+  // required" confirmed), and every writing box required by the student's
+  // selected universities has text or an uploaded file.
+  extracurricularComplete?: boolean;
 };
 
 function filled(value: string | null | undefined) {
   return Boolean(String(value || "").trim());
 }
 
-// Every section here is backed by a real, existing SOUP field — nothing
-// invented to fill out a six-item checklist. SOUP does not track literal
-// family details anywhere in its schema (User/Profile/StudentCase), so the
-// closest genuine analog — funding/sponsorship background, which for an
-// international student is typically family-provided — stands in for that
-// slot rather than fabricating a field or a completion signal that isn't
-// real. Order matches the milestone display order.
+// Five sections, each backed by a real, existing (or newly added) SOUP
+// field — nothing invented to pad out the list. Standard Documents and
+// Selected Universities were removed from this stepper: Selected
+// Universities is already fully served by My Colleges (/colleges), and
+// Standard Documents' generic AI-classified upload has been replaced by
+// explicit, category-specific uploads embedded directly in the sections
+// below instead of a separate catch-all page. Order matches the milestone
+// display order.
 export function computeApplicationProgress(input: ApplicationProgressInput): ApplicationProgressSummary {
   const sections: ApplicationProgressSection[] = [
-    // Documents and Selected Universities route to the existing /documents
-    // and /applications pages rather than new dedicated pages — SOUP
-    // already has a full, working experience for each of those; building a
-    // second one under /profile would duplicate it rather than reuse it.
-    { key: "profile", label: "Profile & Details", complete: filled(input.fullName) && filled(input.nationality) && Boolean(input.dateOfBirth) && filled(input.currentCountry), href: "/profile/details" },
-    { key: "funding", label: "Funding & Sponsorship", complete: filled(input.fundingSummary), href: "/profile/funding" },
-    { key: "academic", label: "Education & Academic Background", complete: filled(input.academicBackgroundSummary), href: "/profile/education" },
-    { key: "documents", label: "Standard Documents", complete: (input.documentCount ?? 0) > 0, href: "/documents" },
-    { key: "testing", label: "Testing & Requirements", complete: filled(input.englishProficiencySummary), href: "/profile/testing" },
-    { key: "applications", label: "Selected Universities", complete: (input.applicationCount ?? 0) > 0, href: "/colleges" },
+    {
+      key: "profile",
+      label: "Profile & Details",
+      complete: filled(input.fullName) && filled(input.nationality) && Boolean(input.dateOfBirth) && filled(input.currentCountry) && Boolean(input.passportUploaded),
+      href: "/profile/details",
+    },
+    {
+      key: "academic",
+      label: "Education Background",
+      complete: filled(input.academicBackgroundSummary) && Boolean(input.requiredEducationUploadsComplete),
+      href: "/profile/education",
+    },
+    {
+      key: "extracurricular",
+      label: "Extracurricular & Recommendations",
+      complete: Boolean(input.extracurricularComplete),
+      href: "/profile/extracurricular",
+    },
+    {
+      key: "testing",
+      label: "Testing & Requirements",
+      complete: filled(input.englishProficiencySummary),
+      href: "/profile/testing",
+    },
+    {
+      key: "funding",
+      label: "Funding & Sponsorship",
+      complete: filled(input.fundingSummary) && Boolean(input.bankStatementUploaded),
+      href: "/profile/funding",
+    },
   ];
   const completedCount = sections.filter((section) => section.complete).length;
   const totalCount = sections.length;

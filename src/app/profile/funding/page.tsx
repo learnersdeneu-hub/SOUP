@@ -3,6 +3,7 @@ import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { normalizeFundingDetails } from "@/lib/applications/coreProfile";
 import { FundingDetailsForm } from "@/components/profile/FundingDetailsForm";
+import { getCategoryDocuments } from "@/lib/documents/categoryQuery";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -16,11 +17,14 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfileFundingPage() {
   const { profile } = await requireProfile();
-  const studentCase = await prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { fundingDetails: true } });
+  const [studentCase, bankStatementDocuments] = await Promise.all([
+    prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { fundingDetails: true } }),
+    getCategoryDocuments(profile.id, "BANK_STATEMENT"),
+  ]);
   return (
     <div className="min-h-screen bg-paper">
       <Header signedIn/>
-      <FundingDetailsForm funding={normalizeFundingDetails(studentCase?.fundingDetails)}/>
+      <FundingDetailsForm funding={normalizeFundingDetails(studentCase?.fundingDetails)} bankStatementDocuments={bankStatementDocuments}/>
     </div>
   );
 }

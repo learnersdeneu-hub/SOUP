@@ -9,6 +9,8 @@ import { saveCoreProfileDetails } from "@/app/actions/coreProfile";
 import type { CoreProfileDetails } from "@/lib/applications/coreProfile";
 import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
 import { COUNTRIES } from "@/lib/constants/countries";
+import { UploadBox } from "@/components/documents/UploadBox";
+import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
 const GENDERS = ["Female", "Male", "Non-binary", "Prefer not to say"];
 
@@ -30,12 +32,14 @@ export function ProfileDetailsForm({
   dateOfBirth,
   nationality,
   currentCountry,
+  passportDocuments,
 }: {
   core: CoreProfileDetails;
   fullName: string;
   dateOfBirth: string;
   nationality: string;
   currentCountry: string;
+  passportDocuments: CategoryDocument[];
 }) {
   const router = useRouter();
   const [name, setName] = useState(fullName);
@@ -169,6 +173,10 @@ export function ProfileDetailsForm({
         <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-2">
           <Field label="Passport number"><input value={passportNumber} onChange={(e) => setPassportNumber(e.target.value)} className={inputClass}/></Field>
           <Field label="Passport expiry"><input type="date" value={passportExpiry} onChange={(e) => setPassportExpiry(e.target.value)} className={inputClass}/></Field>
+        </div>
+
+        <div className="border-t border-hair pt-4">
+          <UploadBox category="PASSPORT" required multiple={false} existing={passportDocuments}/>
         </div>
 
         <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-3">

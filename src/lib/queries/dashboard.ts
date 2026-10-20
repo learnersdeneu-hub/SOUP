@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { isSupersededChecklist } from "@/lib/journey/checklists";
 import { computeApplicationProgress } from "@/lib/applications/progress";
+import { normalizeEducationHistory, normalizeWritingDetails, normalizeExtracurricularMeta } from "@/lib/applications/coreProfile";
+import { requiredEducationCategories } from "@/lib/applications/educationUploads";
+import { computeWritingRequirement } from "@/lib/applications/writingRequirement";
+import { CATEGORY_DOCUMENT_TYPE } from "@/lib/documents/categories";
 
 export async function getCustomerDashboardData(userId: string) {
   const profile = await prisma.profile.findUnique({ where: { userId }, include: { user: true } });
   if (!profile) return null;
 
-  const [documents, documentCount, sessions, notifications, tickets, resumes, studentCase, applications, shortlists, checklists, referrals, payments, counselorSessions] = await Promise.all([
+  const [documents, documentCount, sessions, notifications, tickets, resumes, studentCase, applications, shortlists, checklists, referrals, payments, counselorSessions, documentTypeRows, activityCount, invitedRecommenderCount] = await Promise.all([
     prisma.document.findMany({ where: { profileId: profile.id }, orderBy: { uploadedAt: "desc" }, take: 8 }),
     prisma.document.count({ where: { profileId: profile.id } }),
     prisma.chatSession.findMany({ where: { profileId: profile.id }, orderBy: { updatedAt: "desc" }, take: 8 }),
@@ -33,6 +37,13 @@ export async function getCustomerDashboardData(userId: string) {
     prisma.serviceReferral.findMany({ where: { profileId: profile.id }, orderBy: { updatedAt: "desc" }, include: { partner: true }, take: 8 }),
     prisma.payment.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: "desc" }, take: 20 }),
     prisma.counselorSession.findMany({ where: { profileId: profile.id, status: { in: ["REQUESTED", "SCHEDULED"] } }, include: { counselor: true }, orderBy: [{ scheduledFor: "asc" }, { createdAt: "desc" }], take: 5 }),
+    // Every category-typed document this profile has, for the new
+    // Profile/Education/Funding upload-completion booleans below — a
+    // single distinct-documentType query covers all of them at once
+    // rather than one count() per category.
+    prisma.document.findMany({ where: { profileId: profile.id }, distinct: ["documentType"], select: { documentType: true } }),
+    prisma.studentActivity.count({ where: { profileId: profile.id } }),
+    prisma.recommender.count({ where: { profileId: profile.id, status: { not: "NOT_INVITED" } } }),
   ]);
 
   const activeChecklists = checklists.filter((checklist) => !isSupersededChecklist(checklist.sourceSnapshot)).slice(0, 6);
@@ -57,8 +68,29 @@ export async function getCustomerDashboardData(userId: string) {
     ? await prisma.user.findUnique({ where: { id: studentCase.assignedStaffUserId }, select: { id: true, fullName: true, email: true, role: true } })
     : null;
 
+  const uploadedDocumentTypes = new Set(documentTypeRows.map((row) => row.documentType));
+  const hasDocumentType = (category: keyof typeof CATEGORY_DOCUMENT_TYPE) => uploadedDocumentTypes.has(CATEGORY_DOCUMENT_TYPE[category]);
+
+  const educationHistory = normalizeEducationHistory(studentCase?.educationHistory);
+  const requiredEducationUploadsComplete = requiredEducationCategories(educationHistory.intendedDegreeLevel).every((category) => hasDocumentType(category));
+
+  const resumeUploaded = hasDocumentType("RESUME_CV") || resumes.some((resume) => resume.status === "READY");
+
+  const writingDetails = normalizeWritingDetails(studentCase?.writingDetails);
+  const writingRequirement = computeWritingRequirement(applications.map((application) => ({ university: application.university })));
+  const requiredWritingBoxesFilled =
+    (!writingRequirement.motivationLetterRequired || Boolean(writingDetails.motivationLetter.text.trim() || writingDetails.motivationLetter.documentId))
+    && (!writingRequirement.personalStatementRequired || Boolean(writingDetails.personalStatement.text.trim() || writingDetails.personalStatement.documentId));
+
+  const extracurricularMeta = normalizeExtracurricularMeta(studentCase?.extracurricularMeta);
+  const extracurricularComplete =
+    (activityCount > 0 || extracurricularMeta.noActivitiesConfirmed)
+    && resumeUploaded
+    && (invitedRecommenderCount > 0 || extracurricularMeta.recommendersNotRequiredConfirmed)
+    && requiredWritingBoxesFilled;
+
   // Single source of truth for "how complete is this student's application"
-  // on the dashboard: the same six sections shown in the My Application
+  // on the dashboard: the same five sections shown in the My Application
   // Progress card below, not a separately-tuned formula that could disagree
   // with what the detailed breakdown actually shows.
   const applicationProgress = computeApplicationProgress({
@@ -66,11 +98,13 @@ export async function getCustomerDashboardData(userId: string) {
     nationality: profile.user.nationality,
     dateOfBirth: profile.user.dateOfBirth,
     currentCountry: profile.user.currentCountry,
+    passportUploaded: hasDocumentType("PASSPORT"),
     fundingSummary: studentCase?.fundingSummary,
+    bankStatementUploaded: hasDocumentType("BANK_STATEMENT"),
     academicBackgroundSummary: studentCase?.academicBackgroundSummary,
+    requiredEducationUploadsComplete,
     englishProficiencySummary: studentCase?.englishProficiencySummary,
-    documentCount,
-    applicationCount: applications.length,
+    extracurricularComplete,
   });
 
   return {

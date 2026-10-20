@@ -205,3 +205,46 @@ export function normalizeTestingDetails(value: unknown): TestingDetails {
     registrationStatus: str(r.registrationStatus) || "NOT_REGISTERED",
   };
 }
+
+// --- Extracurricular & Recommendations: writing base drafts --------------
+// Motivation Letter / Personal Statement base drafts — see
+// src/lib/applications/writingRequirement.ts for the required/optional
+// rule and word-range constants. A per-university editable copy lives
+// separately in ApplicationWritingOverride and is never written here.
+
+export type WritingBoxDraft = { text: string; wordCount: number; lastSavedAt: string; documentId: string | null };
+export type WritingDetails = { motivationLetter: WritingBoxDraft; personalStatement: WritingBoxDraft };
+
+function writingBoxDraft(value: unknown): WritingBoxDraft {
+  const r = record(value);
+  return {
+    text: str(r.text),
+    wordCount: typeof r.wordCount === "number" ? r.wordCount : 0,
+    lastSavedAt: str(r.lastSavedAt),
+    documentId: typeof r.documentId === "string" ? r.documentId : null,
+  };
+}
+
+export function normalizeWritingDetails(value: unknown): WritingDetails {
+  const r = record(value);
+  return {
+    motivationLetter: writingBoxDraft(r.motivationLetter),
+    personalStatement: writingBoxDraft(r.personalStatement),
+  };
+}
+
+// --- Extracurricular & Recommendations: "not applicable to me" flags -----
+// Lets a student explicitly confirm they have no activities to add, or that
+// none of their selected universities require a recommender, rather than
+// an empty list being indistinguishable from "hasn't gotten to this yet"
+// for section-completion purposes — see computeApplicationProgress.
+
+export type ExtracurricularMeta = { noActivitiesConfirmed: boolean; recommendersNotRequiredConfirmed: boolean };
+
+export function normalizeExtracurricularMeta(value: unknown): ExtracurricularMeta {
+  const r = record(value);
+  return {
+    noActivitiesConfirmed: r.noActivitiesConfirmed === true,
+    recommendersNotRequiredConfirmed: r.recommendersNotRequiredConfirmed === true,
+  };
+}

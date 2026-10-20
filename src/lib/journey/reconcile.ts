@@ -14,8 +14,22 @@ const CLASS_ALIASES: Record<string, string[]> = {
   INSURANCE_CERTIFICATE: ["insurance", "insurance certificate", "health insurance", "travel insurance"],
   VISA_FORM: ["visa form", "visa application form", "application form"],
   ATTESTATION: ["attestation", "legalization", "legalisation", "apostille", "mofa"],
-  MOTIVATION_LETTER: ["motivation letter", "statement of purpose", "personal statement", "sop"],
+  MOTIVATION_LETTER: ["motivation letter", "statement of purpose", "sop"],
   REFERENCE_LETTER: ["reference letter", "recommendation letter", "letter of recommendation", "academic reference", "professional reference"],
+  // Added for the Extracurricular & Recommendations / per-section document
+  // uploads (src/app/profile/education, /testing, /extracurricular). Kept
+  // degree-level-specific rather than reusing ACADEMIC_TRANSCRIPT /
+  // DEGREE_CERTIFICATE so a bachelor's-level document can never silently
+  // satisfy a master's-level requirement or vice versa.
+  HS_DIPLOMA: ["high school diploma", "secondary school diploma", "o level certificate", "a level certificate"],
+  BACHELORS_TRANSCRIPT: ["bachelor transcript", "bachelors transcript", "undergraduate transcript"],
+  BACHELORS_DEGREE_CERTIFICATE: ["bachelor degree certificate", "bachelors degree certificate", "undergraduate degree certificate", "bachelor diploma"],
+  MASTERS_TRANSCRIPT: ["master transcript", "masters transcript", "graduate transcript"],
+  MASTERS_DEGREE_CERTIFICATE: ["master degree certificate", "masters degree certificate", "graduate degree certificate", "master diploma"],
+  SAT_ACT_SCORE_REPORT: ["sat score report", "act score report", "sat report", "act report"],
+  GRADUATE_TEST_SCORE_REPORT: ["gre score report", "gmat score report", "gre report", "gmat report"],
+  RESUME_CV: ["resume", "cv", "curriculum vitae"],
+  PERSONAL_STATEMENT: ["personal statement"],
 };
 
 
@@ -26,6 +40,15 @@ const AUTO_REUSABLE_CLASSES = new Set([
   "DEGREE_CERTIFICATE",
   "ACADEMIC_TRANSCRIPT",
   "ENGLISH_TEST",
+  "HS_DIPLOMA",
+  "BACHELORS_TRANSCRIPT",
+  "BACHELORS_DEGREE_CERTIFICATE",
+  "MASTERS_TRANSCRIPT",
+  "MASTERS_DEGREE_CERTIFICATE",
+  "SAT_ACT_SCORE_REPORT",
+  "GRADUATE_TEST_SCORE_REPORT",
+  "RESUME_CV",
+  "PERSONAL_STATEMENT",
 ]);
 
 function normalize(value: unknown) {

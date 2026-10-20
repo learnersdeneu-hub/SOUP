@@ -437,6 +437,8 @@ model Profile {
   companionPairingCodes CompanionPairingCode[]
   companionDevices      CompanionDevice[]
   companionFillEvents   CompanionFillEvent[]
+  studentActivities     StudentActivity[]
+  recommenders          Recommender[]
 
   @@index([identityAnchorId])
   @@map("profiles")
@@ -585,6 +587,8 @@ model Document {
   applicationLinks StudentApplicationDocument[]
   checklistItems   JourneyChecklistItem[]
   offerForApplication StudentApplication? @relation("ApplicationOfferDocument")
+  recommendationLetterFor RecommendationLetter? @relation("RecommendationLetterDocument")
+  writingOverridesUsing   ApplicationWritingOverride[] @relation("WritingOverrideDocument")
 
   @@index([profileId])
   @@index([reviewStatus, uploadedAt])
@@ -1490,6 +1494,18 @@ model StudentCase {
   fundingDetails      Json?
   educationHistory    Json?
   testingDetails      Json?
+  // Base drafts for the two Extracurricular & Recommendations writing boxes
+  // (Motivation Letter / Personal Statement) — see
+  // src/lib/applications/writingRequirement.ts. Same "fill once, reuse
+  // everywhere" JSON-bundle convention as the four fields above; a
+  // per-university editable copy lives separately in
+  // ApplicationWritingOverride and never mutates this base draft.
+  writingDetails      Json?
+  // Small confirmation flags for the Extracurricular & Recommendations
+  // section's two "not applicable to me" paths (an empty activities list or
+  // recommender list is otherwise indistinguishable from "hasn't gotten to
+  // this yet" for completion-tracking purposes).
+  extracurricularMeta Json?
   nextAction          String?
   humanHandoffActive  Boolean             @default(false)
   assignedStaffUserId String?
@@ -1696,11 +1712,138 @@ model StudentApplication {
   payments            Payment[]
   offerConditions     OfferCondition[]
   messages            ApplicationMessage[]
+  recommenderAssignments RecommenderAssignment[]
+  writingOverrides    ApplicationWritingOverride[]
 
   @@index([profileId, status, updatedAt])
   @@index([studentCaseId, status])
   @@index([universityId])
   @@map("student_applications")
+}
+
+// ----------------------------------------------------------------------------
+// Extracurricular & Recommendations (Activities, Recommenders, Writing)
+// ----------------------------------------------------------------------------
+
+// A single Common-App-style activity entry. Capped at 10 per profile and
+// re-numbered on add/remove/reorder — both enforced in the server action
+// (src/app/actions/activities.ts), not here, matching this codebase's
+// general preference for application-level invariants over DB constraints
+// for anything that isn't a hard uniqueness/FK rule.
+model StudentActivity {
+  id            String   @id @default(uuid())
+  profileId     String
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  position      Int
+  activityType  String
+  roleTitle     String?
+  organization  String?
+  description   String?
+  startDate     String?
+  endDate       String?
+  ongoing       Boolean  @default(false)
+  hoursPerWeek  Int?
+  weeksPerYear  Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([profileId, position])
+  @@map("student_activities")
+}
+
+// A recommender a student has invited to write a letter on their behalf.
+// Stored once per student and reused across every university via
+// RecommenderAssignment — see src/app/actions/recommenders.ts. Deliberately
+// a new model rather than reusing ReferenceRequest/ReferenceInvitation/
+// ReferenceResponse/ReferenceVerification: those model an unrelated
+// employment/professional-reference concept inherited from the GCI fork
+// this product started from and have zero usages anywhere in src/ today.
+model Recommender {
+  id                    String    @id @default(uuid())
+  profileId             String
+  profile               Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type                  String    // TEACHER | COUNSELOR | OTHER
+  firstName             String
+  lastName              String
+  email                 String
+  subjectOrTitle        String?
+  institution           String?
+  relationshipToStudent String?
+  waiverAcknowledged    Boolean   @default(false)
+  waiverAcknowledgedAt  DateTime?
+  status                String    @default("NOT_INVITED") // NOT_INVITED | INVITED | IN_PROGRESS | SUBMITTED
+  inviteToken           String?   @unique
+  inviteTokenExpiresAt  DateTime?
+  invitedAt             DateTime?
+  lastInviteSentAt      DateTime?
+  remindersSentCount    Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  assignments           RecommenderAssignment[]
+  letter                RecommendationLetter?
+
+  @@index([profileId, status])
+  @@map("recommenders")
+}
+
+// Which universities (StudentApplications) a given saved recommender has
+// been assigned to cover — this is what lets a recommender be entered once
+// and reused across every application instead of re-invited per school.
+model RecommenderAssignment {
+  id             String             @id @default(uuid())
+  recommenderId  String
+  recommender    Recommender        @relation(fields: [recommenderId], references: [id], onDelete: Cascade)
+  applicationId  String
+  application    StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime           @default(now())
+
+  @@unique([recommenderId, applicationId])
+  @@index([applicationId])
+  @@map("recommender_assignments")
+}
+
+// A recommender's one actual letter submission, made through their own
+// token-authenticated link (src/app/recommend/[token]) — not a SOUP
+// account. One per recommender, reused across every application they're
+// assigned to (an admissions recommendation letter isn't written
+// per-university in this product's model). Either a typed letter or an
+// uploaded file, per product decision — see submissionMethod.
+model RecommendationLetter {
+  id                String      @id @default(uuid())
+  recommenderId     String      @unique
+  recommender       Recommender @relation(fields: [recommenderId], references: [id], onDelete: Cascade)
+  submissionMethod  String      // TEXT | FILE
+  letterText        String?
+  documentId        String?     @unique
+  document          Document?   @relation("RecommendationLetterDocument", fields: [documentId], references: [id], onDelete: SetNull)
+  submittedAt       DateTime    @default(now())
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@map("recommendation_letters")
+}
+
+// A per-university editable copy of a Motivation Letter / Personal
+// Statement base draft (StudentCase.writingDetails). Created lazily on
+// first edit in My Colleges; the base draft itself is never mutated by an
+// override. boxType mirrors the two WritingDraft kinds rather than a
+// separate enum, matching Recommender.type/status's plain-string
+// convention elsewhere in this same feature.
+model ApplicationWritingOverride {
+  id             String             @id @default(uuid())
+  applicationId  String
+  application    StudentApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  boxType        String             // MOTIVATION_LETTER | PERSONAL_STATEMENT
+  text           String?
+  documentId     String?
+  document       Document?          @relation("WritingOverrideDocument", fields: [documentId], references: [id], onDelete: SetNull)
+  lastSavedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([applicationId, boxType])
+  @@map("application_writing_overrides")
 }
 
 // A single application's email communication history. Currently only

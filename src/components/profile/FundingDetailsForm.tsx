@@ -7,13 +7,15 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { saveFundingDetails } from "@/app/actions/coreProfile";
 import type { FundingDetails } from "@/lib/applications/coreProfile";
 import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
+import { UploadBox } from "@/components/documents/UploadBox";
+import { CATEGORY_CONFIG } from "@/lib/documents/categories";
+import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const FUNDING_SOURCES = ["Self-funded", "Parents", "Student loan", "Scholarship", "Sponsor / employer", "Government"];
 const SCHOLARSHIP_TYPES = ["Merit-based", "Need-based", "Country-specific"];
-const PROOF_OF_FUNDS_STATUSES = [["NOT_UPLOADED", "Not uploaded"], ["IN_PROGRESS", "In progress"], ["UPLOADED", "Uploaded"]] as const;
 
-export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
+export function FundingDetailsForm({ funding, bankStatementDocuments }: { funding: FundingDetails; bankStatementDocuments: CategoryDocument[] }) {
   const router = useRouter();
   const [fundingSource, setFundingSource] = useState(funding.fundingSource);
   const [sponsorName, setSponsorName] = useState(funding.sponsorName);
@@ -22,7 +24,6 @@ export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
   const [annualBudgetEstimate, setAnnualBudgetEstimate] = useState(funding.annualBudgetEstimate);
   const [scholarshipInterested, setScholarshipInterested] = useState<boolean | null>(funding.scholarshipInterested);
   const [scholarshipTypes, setScholarshipTypes] = useState<string[]>(funding.scholarshipTypes);
-  const [proofOfFundsStatus, setProofOfFundsStatus] = useState(funding.proofOfFundsStatus);
   const [loanStatus, setLoanStatus] = useState(funding.loanStatus);
   const [loanLender, setLoanLender] = useState(funding.loanLender);
   const [currencyPreference, setCurrencyPreference] = useState(funding.currencyPreference);
@@ -47,7 +48,6 @@ export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
       form.set("annualBudgetEstimate", annualBudgetEstimate);
       form.set("scholarshipInterested", scholarshipInterested === null ? "" : String(scholarshipInterested));
       form.set("scholarshipTypes", JSON.stringify(scholarshipTypes));
-      form.set("proofOfFundsStatus", proofOfFundsStatus);
       form.set("loanStatus", loanStatus);
       form.set("loanLender", loanLender);
       form.set("currencyPreference", currencyPreference);
@@ -65,7 +65,7 @@ export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
     <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-8">
       <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>Dashboard</Link>
       <div className="mt-4">
-        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 2</div>
+        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 5</div>
         <h1 className="mt-2 text-2xl font-semibold text-ink">Funding & Sponsorship</h1>
         <p className="mt-2 text-sm leading-6 text-mute">Fill this in once — it's reused across every university application you start.</p>
       </div>
@@ -107,12 +107,7 @@ export function FundingDetailsForm({ funding }: { funding: FundingDetails }) {
         </div>
 
         <div className="border-t border-hair pt-4">
-          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Bank statement / proof of funds</span>
-          <div className="flex flex-wrap gap-2">
-            {PROOF_OF_FUNDS_STATUSES.map(([value, label]) => (
-              <button key={value} type="button" onClick={() => setProofOfFundsStatus(value)} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${proofOfFundsStatus === value ? "border-navy bg-navy text-white" : "border-hair text-ink"}`}>{label}</button>
-            ))}
-          </div>
+          <UploadBox category="BANK_STATEMENT" label={CATEGORY_CONFIG.BANK_STATEMENT.label} required existing={bankStatementDocuments}/>
         </div>
 
         <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-2">

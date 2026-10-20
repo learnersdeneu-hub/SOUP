@@ -4,16 +4,17 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // Mirrors the "My Application Progress" section order in
-// src/lib/applications/progress.ts (profile -> funding -> academic ->
-// documents -> testing -> applications). Only the four dedicated
-// profile/* form pages are included here — Documents and Selected
-// Universities already have their own distinct pages/UI, not this form
-// pattern, so a prev/next control there would not fit the same flow.
+// src/lib/applications/progress.ts (profile -> academic ->
+// extracurricular -> testing -> funding). Only the five dedicated
+// profile/* form pages are included here — Selected Universities already
+// has its own distinct page/UI (/colleges), not this form pattern, so a
+// prev/next control there would not fit the same flow.
 const FLOW = [
   { label: "Profile & Details", href: "/profile/details" },
-  { label: "Funding & Sponsorship", href: "/profile/funding" },
-  { label: "Education & Academic Background", href: "/profile/education" },
+  { label: "Education Background", href: "/profile/education" },
+  { label: "Extracurricular & Recommendations", href: "/profile/extracurricular" },
   { label: "Testing & Requirements", href: "/profile/testing" },
+  { label: "Funding & Sponsorship", href: "/profile/funding" },
 ];
 
 export function ProfileSectionNav({ current }: { current: string }) {

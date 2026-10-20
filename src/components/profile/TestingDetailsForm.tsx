@@ -7,12 +7,25 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { saveTestingDetails } from "@/app/actions/coreProfile";
 import type { TestingDetails } from "@/lib/applications/coreProfile";
 import { ProfileSectionNav } from "@/components/profile/ProfileSectionNav";
+import { UploadBox } from "@/components/documents/UploadBox";
+import { CATEGORY_CONFIG } from "@/lib/documents/categories";
+import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
 const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
 const ENGLISH_TESTS = ["NONE_YET", "IELTS", "TOEFL", "Duolingo", "PTE"];
 const REGISTRATION_STATUSES = [["NOT_REGISTERED", "Not registered"], ["REGISTERED", "Registered"], ["TAKEN", "Taken"], ["SCORE_PENDING", "Score pending"]] as const;
 
-export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
+export function TestingDetailsForm({
+  testing,
+  englishTestDocuments,
+  satActDocuments,
+  graduateTestDocuments,
+}: {
+  testing: TestingDetails;
+  englishTestDocuments: CategoryDocument[];
+  satActDocuments: CategoryDocument[];
+  graduateTestDocuments: CategoryDocument[];
+}) {
   const router = useRouter();
   const [englishTestType, setEnglishTestType] = useState(testing.englishTestType);
   const [englishScore, setEnglishScore] = useState(testing.englishScore);
@@ -64,7 +77,7 @@ export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
     <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-8">
       <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>Dashboard</Link>
       <div className="mt-4">
-        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 5</div>
+        <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">My Application Progress · Section 4</div>
         <h1 className="mt-2 text-2xl font-semibold text-ink">Testing & Requirements</h1>
         <p className="mt-2 text-sm leading-6 text-mute">Fill this in once — it's reused across every university application you start.</p>
       </div>
@@ -80,6 +93,11 @@ export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
               <label className="block"><span className="mb-1 block text-[9px] text-mute">Expiry date</span><input type="date" value={englishExpiryDate} onChange={(e) => setEnglishExpiryDate(e.target.value)} className={inputClass}/></label>
             </div>
           )}
+          {englishTestType !== "NONE_YET" && (
+            <div className="mt-3">
+              <UploadBox category="ENGLISH_TEST" label={CATEGORY_CONFIG.ENGLISH_TEST.label} existing={englishTestDocuments}/>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-hair pt-4">
@@ -89,6 +107,11 @@ export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
             <input value={satActScore} onChange={(e) => setSatActScore(e.target.value)} placeholder="Score" className={inputClass}/>
             <input type="date" value={satActDate} onChange={(e) => setSatActDate(e.target.value)} className={inputClass}/>
           </div>
+          {satActType && (
+            <div className="mt-3">
+              <UploadBox category="SAT_ACT_SCORE_REPORT" label={CATEGORY_CONFIG.SAT_ACT_SCORE_REPORT.label} existing={satActDocuments}/>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-hair pt-4">
@@ -98,6 +121,11 @@ export function TestingDetailsForm({ testing }: { testing: TestingDetails }) {
             <input value={graduateTestScore} onChange={(e) => setGraduateTestScore(e.target.value)} placeholder="Score" className={inputClass}/>
             <input type="date" value={graduateTestDate} onChange={(e) => setGraduateTestDate(e.target.value)} className={inputClass}/>
           </div>
+          {graduateTestType && (
+            <div className="mt-3">
+              <UploadBox category="GRADUATE_TEST_SCORE_REPORT" label={CATEGORY_CONFIG.GRADUATE_TEST_SCORE_REPORT.label} existing={graduateTestDocuments}/>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-3 border-t border-hair pt-4 sm:grid-cols-2">

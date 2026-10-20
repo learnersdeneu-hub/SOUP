@@ -7,6 +7,12 @@ import { isSupersededChecklist } from "@/lib/journey/checklists";
 import { deadlineUrgency } from "@/lib/applications/lifecycle";
 import { effectiveCollegesCap } from "@/lib/applications/capacity";
 import { CAPACITY_UPGRADE_PRICE_USD, CAPACITY_UPGRADE_CAP } from "@/lib/payments/config";
+import { isReferenceLetterItem } from "@/lib/journey/reconcileRecommender";
+import { isEuropeanCountry, isUnitedStates } from "@/lib/applications/europeCountries";
+import { MOTIVATION_LETTER_WORD_RANGE, PERSONAL_STATEMENT_WORD_RANGE } from "@/lib/applications/writingRequirement";
+import { normalizeWritingDetails } from "@/lib/applications/coreProfile";
+import { RecommenderAssignmentPanel } from "@/components/colleges/RecommenderAssignmentPanel";
+import { ApplicationWritingBox } from "@/components/colleges/ApplicationWritingBox";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -40,6 +46,8 @@ export default async function CollegesPage() {
       university: true,
       program: true,
       checklists: { where: { kind: "ADMISSION" }, include: { items: { orderBy: { position: "asc" } } }, orderBy: { createdAt: "desc" }, take: 10 },
+      recommenderAssignments: { select: { recommenderId: true } },
+      writingOverrides: true,
     },
   });
 
@@ -47,6 +55,21 @@ export default async function CollegesPage() {
   const cap = await effectiveCollegesCap(profile.id);
   const slotsRemaining = Math.max(0, cap - slotsUsed);
   const capacityUpgraded = cap === CAPACITY_UPGRADE_CAP;
+
+  // Recommenders and the base writing draft are both saved once on the
+  // profile (src/app/profile/extracurricular) and reused per-university
+  // below, rather than re-entered per application.
+  const [recommenders, studentCase] = await Promise.all([
+    prisma.recommender.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: "asc" }, select: { id: true, firstName: true, lastName: true } }),
+    prisma.studentCase.findUnique({ where: { profileId: profile.id }, select: { writingDetails: true } }),
+  ]);
+  const writingDetails = normalizeWritingDetails(studentCase?.writingDetails);
+
+  const overrideDocumentIds = applications.flatMap((application) => application.writingOverrides.map((override) => override.documentId).filter((id): id is string => Boolean(id)));
+  const overrideDocuments = overrideDocumentIds.length
+    ? await prisma.document.findMany({ where: { id: { in: overrideDocumentIds } }, select: { id: true, originalFileName: true, uploadedAt: true, reviewStatus: true } })
+    : [];
+  const overrideDocumentById = new Map(overrideDocuments.map((doc) => [doc.id, { id: doc.id, originalFileName: doc.originalFileName, uploadedAt: doc.uploadedAt.toISOString(), reviewStatus: doc.reviewStatus }]));
 
   return (
     <div className="min-h-screen bg-paper">
@@ -93,6 +116,13 @@ export default async function CollegesPage() {
               const metadata = item.metadata && typeof item.metadata === "object" && !Array.isArray(item.metadata) ? item.metadata as Record<string, unknown> : {};
               return metadata.belowThreshold === true;
             });
+
+            const requiresReferenceLetter = items.some((item) => item.required && item.status !== "NOT_APPLICABLE" && isReferenceLetterItem(item));
+            const country = application.university?.country || null;
+            const motivationLetterRequired = isEuropeanCountry(country);
+            const personalStatementRequired = isUnitedStates(country);
+            const motivationLetterOverride = application.writingOverrides.find((override) => override.boxType === "MOTIVATION_LETTER") || null;
+            const personalStatementOverride = application.writingOverrides.find((override) => override.boxType === "PERSONAL_STATEMENT") || null;
 
             return (
               <div key={application.id} className="rounded-2xl border border-hair bg-white p-5 sm:p-6">
@@ -151,6 +181,36 @@ export default async function CollegesPage() {
                     })}
                     {items.length > 8 && <div className="pt-2 text-[11px] text-mute">+{items.length - 8} more on the full application page.</div>}
                   </div>
+                )}
+
+                <RecommenderAssignmentPanel
+                  applicationId={application.id}
+                  allRecommenders={recommenders}
+                  assignedRecommenderIds={application.recommenderAssignments.map((assignment) => assignment.recommenderId)}
+                  requiresReferenceLetter={requiresReferenceLetter}
+                />
+
+                {motivationLetterRequired && (
+                  <ApplicationWritingBox
+                    applicationId={application.id}
+                    boxType="MOTIVATION_LETTER"
+                    title="Motivation Letter"
+                    range={MOTIVATION_LETTER_WORD_RANGE}
+                    initialText={motivationLetterOverride?.text ?? writingDetails.motivationLetter.text}
+                    initialLastSavedAt={motivationLetterOverride?.lastSavedAt?.toISOString() ?? null}
+                    existing={motivationLetterOverride?.documentId ? [overrideDocumentById.get(motivationLetterOverride.documentId)].filter((doc): doc is NonNullable<typeof doc> => Boolean(doc)) : []}
+                  />
+                )}
+                {personalStatementRequired && (
+                  <ApplicationWritingBox
+                    applicationId={application.id}
+                    boxType="PERSONAL_STATEMENT"
+                    title="Personal Statement"
+                    range={PERSONAL_STATEMENT_WORD_RANGE}
+                    initialText={personalStatementOverride?.text ?? writingDetails.personalStatement.text}
+                    initialLastSavedAt={personalStatementOverride?.lastSavedAt?.toISOString() ?? null}
+                    existing={personalStatementOverride?.documentId ? [overrideDocumentById.get(personalStatementOverride.documentId)].filter((doc): doc is NonNullable<typeof doc> => Boolean(doc)) : []}
+                  />
                 )}
 
                 <Link href={`/applications/${application.id}`} className="mt-4 inline-flex rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white">Open full application</Link>
