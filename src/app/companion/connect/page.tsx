@@ -39,30 +39,32 @@ export default async function CompanionConnectPage() {
       <Header signedIn />
       <main className="mx-auto max-w-2xl px-5 py-10 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP Companion</div>
-        <h1 className="mt-2 text-2xl font-semibold text-ink">Download SOUP Companion</h1>
-        <p className="mt-2 text-sm leading-6 text-mute">SOUP Companion is a Windows app with a built-in browser and the SOUP assistant panel alongside it, so you can fill university, visa and accommodation application forms directly on the official site using information already saved in your SOUP account.</p>
+        <h1 className="mt-2 text-2xl font-semibold text-ink">Get SOUP Companion</h1>
+        <p className="mt-2 text-sm leading-6 text-mute">SOUP Companion helps you fill university, visa and accommodation application forms using information already saved in your SOUP account — as a Windows desktop app with a built-in browser, or right in your phone or browser without installing anything.</p>
 
-        <div className="mt-6 rounded-2xl border border-hair bg-white p-5">
-          <div className="text-xs font-semibold text-ink">Get the app</div>
-          {DOWNLOAD_URL ? (
-            <a href={DOWNLOAD_URL} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Download for Windows</a>
-          ) : (
-            <button disabled className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-[#D8DDE2] px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Coming soon</button>
-          )}
-          <p className="mt-2 text-[11px] text-mute">Windows only for now. Once installed, generate a one-time code below and enter it into the app to connect your SOUP account.</p>
+        {/* On a phone, the web option is the one that actually applies —
+            these two cards swap order below the sm breakpoint via CSS alone
+            (no device detection needed) so it's the first thing a phone
+            visitor sees instead of a Windows-only download. */}
+        <div className="mt-6 flex flex-col gap-6">
+          <div className="order-1 rounded-2xl border border-hair bg-white p-5 sm:order-2">
+            <div className="text-xs font-semibold text-ink">Get the app (Windows)</div>
+            {DOWNLOAD_URL ? (
+              <a href={DOWNLOAD_URL} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Download for Windows</a>
+            ) : (
+              <button disabled className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-[#D8DDE2] px-4 py-2.5 text-xs font-semibold text-white"><Download size={14} /> Coming soon</button>
+            )}
+            <p className="mt-2 text-[11px] text-mute">Windows only for now. Once installed, generate a one-time code below and enter it into the app to connect your SOUP account.</p>
+          </div>
+
+          <div className="order-2 rounded-2xl border border-hair bg-white p-5 sm:order-1">
+            <div className="text-xs font-semibold text-ink">Use it on your phone or any browser</div>
+            <p className="mt-1 text-[11px] leading-5 text-mute">{plusActive ? "Open your SOUP answers in a browser tab you can copy from, or open alongside the real site on a computer." : "Available on SOUP Scholar and SOUP Concierge — a reference-only view of your SOUP answers, no install needed."}</p>
+            <div className="mt-3">{plusActive ? <OpenWebCompanionButton /> : <Link href="/premium" className="inline-flex items-center gap-2 rounded-xl border border-hair bg-white px-4 py-2.5 text-xs font-semibold text-ink">See SOUP Scholar</Link>}</div>
+          </div>
         </div>
 
         <div className="mt-6"><CompanionConnect /></div>
-
-        <div className="mt-6 rounded-2xl border border-hair bg-white p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-xs font-semibold text-ink">Not on Windows, or don't want to install anything?</div>
-              <p className="mt-1 text-[11px] leading-5 text-mute">{plusActive ? "Open your SOUP answers in a small browser popup you can copy or drag from onto any site." : "Available on SOUP Scholar and SOUP Concierge — a reference-only popup with your SOUP answers, no install needed."}</p>
-            </div>
-          </div>
-          <div className="mt-3">{plusActive ? <OpenWebCompanionButton /> : <Link href="/premium" className="inline-flex items-center gap-2 rounded-xl border border-hair bg-white px-4 py-2.5 text-xs font-semibold text-ink">See SOUP Scholar</Link>}</div>
-        </div>
 
         <div className="mt-8 rounded-2xl border border-hair bg-white p-5">
           <div className="text-xs font-semibold text-ink">Connected devices</div>

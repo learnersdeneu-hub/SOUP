@@ -56,7 +56,7 @@ function CopyRow({ label, value, highlight }: { label: string; value: string; hi
         <div className="text-[10.5px] text-mute">{label}</div>
         <div className="mt-0.5 truncate text-[13px] font-semibold text-ink">{value}</div>
       </div>
-      <button onClick={copy} className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold ${copied ? "bg-teal text-white" : "border border-hair bg-white text-ink"}`}>
+      <button onClick={copy} className={`inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-semibold ${copied ? "bg-teal text-white" : "border border-hair bg-white text-ink"}`}>
         {copied ? <Check size={12} /> : <Copy size={12} />}
         {copied ? "Copied" : "Copy"}
       </button>
@@ -81,23 +81,24 @@ function DocumentRow({ id, fileName, uploadedAt, signedUrl }: { id: string; file
     // drag end on a native file picker/input as a real dropped file — the
     // browser fetches the URL and hands the OS a file, the same mechanism
     // Gmail uses to let you drag an attachment out of the browser. Chrome
-    // and Edge support it; Firefox and Safari don't, so the "Open" button
-    // beside every row is the guaranteed fallback on those browsers.
+    // and Edge support it; Firefox and Safari don't, and touch devices have
+    // no drag gesture at all, so the "Open" button beside every row (which
+    // works everywhere) is always visible, not just a fallback.
     event.dataTransfer.setData("DownloadURL", `${guessMimeType(fileName)}:${fileName}:${signedUrl}`);
   }
   return (
     <div
       draggable={Boolean(signedUrl)}
       onDragStart={onDragStart}
-      className="flex items-center gap-2.5 rounded-xl border border-hair bg-white px-3 py-2.5"
-      title={signedUrl ? "Drag onto the file box on the real site, or use Open" : "Preparing a secure link…"}
+      className="flex items-center gap-2.5 rounded-xl border border-hair bg-white px-3 py-3"
+      title={signedUrl ? "On a computer, drag onto the file box on the real site. On your phone, tap Open." : "Preparing a secure link…"}
     >
-      <GripVertical size={14} className={signedUrl ? "shrink-0 cursor-grab text-mute" : "shrink-0 text-[#D5D9D1]"} />
+      <GripVertical size={14} className={`hidden shrink-0 sm:block ${signedUrl ? "cursor-grab text-mute" : "text-[#D5D9D1]"}`} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[12.5px] font-semibold text-ink">{fileName}</div>
         <div className="mt-0.5 text-[10.5px] text-mute">Uploaded {new Date(uploadedAt).toLocaleDateString()}</div>
       </div>
-      <button onClick={open} disabled={opening} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-hair bg-white px-2.5 py-1.5 text-[11px] font-semibold text-ink disabled:opacity-50">
+      <button onClick={open} disabled={opening} className="inline-flex min-h-[36px] shrink-0 items-center gap-1 rounded-lg border border-hair bg-white px-3 py-2 text-[11px] font-semibold text-ink disabled:opacity-50">
         <ExternalLink size={12} />{opening ? "Opening…" : "Open"}
       </button>
     </div>
@@ -156,7 +157,7 @@ export function CompanionWebPanel({ studentName, answerBank, documents, applicat
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`rounded-t-[10px] px-3 py-2 text-[12.5px] font-semibold capitalize ${tab === key ? "bg-white text-ink" : "text-mute"}`}
+            className={`min-h-[40px] rounded-t-[10px] px-3 py-2.5 text-[12.5px] font-semibold capitalize ${tab === key ? "bg-white text-ink" : "text-mute"}`}
           >
             {key}
           </button>
@@ -210,7 +211,10 @@ export function CompanionWebPanel({ studentName, answerBank, documents, applicat
 
         {tab === "documents" && (
           <div className="flex flex-col gap-4">
-            <p className="text-[11px] leading-5 text-mute">Drag a document onto the file box on the real site (Chrome/Edge), or use Open to download it and attach manually.</p>
+            <p className="text-[11px] leading-5 text-mute">
+              <span className="hidden sm:inline">On a computer, drag a document straight onto the file box on the real site (Chrome/Edge), or tap Open to download it and attach manually.</span>
+              <span className="sm:hidden">Tap Open, then use Share → Save to Files (or your downloads), and attach it from there when the site asks for it.</span>
+            </p>
             {documentsByCategory.length === 0 && <p className="text-xs text-mute">No processed documents yet.</p>}
             {documentsByCategory.map(({ category, docs }) => (
               <div key={category}>

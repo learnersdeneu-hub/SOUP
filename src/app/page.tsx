@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, Download, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, Download, FileText, Globe, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StudyHeader } from "@/components/layout/StudyHeader";
 import { ChatWithNoodlesFab } from "@/components/home/ChatWithNoodlesFab";
@@ -239,7 +239,8 @@ export default async function HomePage() {
               <h2 className="m-0 text-[26px] font-extrabold leading-tight tracking-tight sm:text-[28px]">Fill out applications without leaving the page</h2>
               <p className="m-0 max-w-[480px] text-sm leading-6 text-[#D3DAEA]">SOUP Companion is a desktop browser that scans real university, visa and accommodation forms, fills them from your SOUP profile, and flags anything that needs your attention — browse normally, UCAS and Common App included.</p>
               <div className="mt-1 flex flex-wrap gap-2.5">
-                <Link href="/companion/connect" className="inline-flex h-[46px] items-center gap-2 rounded-[13px] bg-white px-5 text-sm font-bold text-navy no-underline"><Download size={16} /> Download for Windows</Link>
+                <Link href="/companion/connect" className="hidden h-[46px] items-center gap-2 rounded-[13px] bg-white px-5 text-sm font-bold text-navy no-underline sm:inline-flex"><Download size={16} /> Download for Windows</Link>
+                <Link href="/companion/connect" className="inline-flex h-[46px] items-center gap-2 rounded-[13px] bg-white px-5 text-sm font-bold text-navy no-underline sm:hidden"><Globe size={16} /> Use it on your phone</Link>
                 <Link href="/companion/connect" className="inline-flex h-[46px] items-center rounded-[13px] border-[1.5px] border-white/30 px-5 text-sm font-bold text-white no-underline">See how it works</Link>
               </div>
             </div>
