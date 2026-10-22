@@ -4,7 +4,9 @@ import { Header } from "@/components/Header";
 import { requireProfile } from "@/lib/auth/currentUser";
 import { prisma } from "@/lib/prisma";
 import { CompanionConnect } from "@/components/companion/CompanionConnect";
+import { OpenWebCompanionButton } from "@/components/companion/OpenWebCompanionButton";
 import { revokeCompanionDevice } from "@/app/actions/companion";
+import { getPremiumStatus } from "@/lib/payments/status";
 
 // Explicit defense-in-depth against Next.js's client-side Router Cache
 // serving one authenticated user's rendered page to a different user in
@@ -23,11 +25,14 @@ const DOWNLOAD_URL = "/downloads/soup-companion-setup.exe";
 
 export default async function CompanionConnectPage() {
   const { profile } = await requireProfile();
-  const devices = await prisma.companionDevice.findMany({
-    where: { profileId: profile.id, revokedAt: null },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+  const [devices, { plusActive }] = await Promise.all([
+    prisma.companionDevice.findMany({
+      where: { profileId: profile.id, revokedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    getPremiumStatus(profile.id),
+  ]);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -48,6 +53,16 @@ export default async function CompanionConnectPage() {
         </div>
 
         <div className="mt-6"><CompanionConnect /></div>
+
+        <div className="mt-6 rounded-2xl border border-hair bg-white p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold text-ink">Not on Windows, or don't want to install anything?</div>
+              <p className="mt-1 text-[11px] leading-5 text-mute">{plusActive ? "Open your SOUP answers in a small browser popup you can copy or drag from onto any site." : "Available on SOUP Scholar and SOUP Concierge — a reference-only popup with your SOUP answers, no install needed."}</p>
+            </div>
+          </div>
+          <div className="mt-3">{plusActive ? <OpenWebCompanionButton /> : <Link href="/premium" className="inline-flex items-center gap-2 rounded-xl border border-hair bg-white px-4 py-2.5 text-xs font-semibold text-ink">See SOUP Scholar</Link>}</div>
+        </div>
 
         <div className="mt-8 rounded-2xl border border-hair bg-white p-5">
           <div className="text-xs font-semibold text-ink">Connected devices</div>

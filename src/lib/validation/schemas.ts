@@ -292,6 +292,10 @@ export const resumeExportQuerySchema = z.object({
 }).strict();
 
 
+export const companionDocumentMatchQuerySchema = z.object({
+  category: z.string().trim().min(1).max(64),
+}).strict();
+
 export const adminOfferUploadSchema = z.object({
   file: z.unknown(),
   conditional: z.string().optional().default("false"),

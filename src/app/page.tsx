@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BedDouble, BriefcaseBusiness, ChefHat, Download, FileText, LifeBuoy, Mail, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StudyHeader } from "@/components/layout/StudyHeader";
 import { ChatWithNoodlesFab } from "@/components/home/ChatWithNoodlesFab";
@@ -227,6 +227,51 @@ export default async function HomePage() {
               </Link>
             );
           })}
+          </div>
+        </section>
+
+        <section className="mt-14 overflow-hidden rounded-[28px] bg-navy">
+          <div className="flex flex-col lg:flex-row">
+            <div className="flex flex-1 flex-col gap-4 p-8 text-white sm:p-11">
+              <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-[#FFF4CC] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.06em] text-[#6B5000]">
+                <Download size={12} /> New · Free download
+              </span>
+              <h2 className="m-0 text-[26px] font-extrabold leading-tight tracking-tight sm:text-[28px]">Fill out applications without leaving the page</h2>
+              <p className="m-0 max-w-[480px] text-sm leading-6 text-[#D3DAEA]">SOUP Companion is a desktop browser that scans real university, visa and accommodation forms, fills them from your SOUP profile, and flags anything that needs your attention — browse normally, UCAS and Common App included.</p>
+              <div className="mt-1 flex flex-wrap gap-2.5">
+                <Link href="/companion/connect" className="inline-flex h-[46px] items-center gap-2 rounded-[13px] bg-white px-5 text-sm font-bold text-navy no-underline"><Download size={16} /> Download for Windows</Link>
+                <Link href="/companion/connect" className="inline-flex h-[46px] items-center rounded-[13px] border-[1.5px] border-white/30 px-5 text-sm font-bold text-white no-underline">See how it works</Link>
+              </div>
+            </div>
+            <div className="flex flex-1 items-center justify-center bg-[#0E1830] p-7">
+              <div className="w-full max-w-[420px] overflow-hidden rounded-xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                <div className="flex items-center gap-1.5 bg-[#1A2B4D] px-2.5 py-2">
+                  <span className="rounded-t-md bg-paper px-2.5 py-1 text-[9px] font-bold text-ink">UCAS — Apply</span>
+                  <span className="rounded-t-md bg-white/10 px-2 py-1 text-[9px] font-semibold text-[#B9C4DB]">SOUP</span>
+                </div>
+                <div className="flex gap-1.5 bg-[#1A2B4D] px-2.5 pb-2 pt-1.5">
+                  <span className="h-4 w-4 rounded-md bg-white/10" />
+                  <span className="h-4 w-4 rounded-md bg-white/10" />
+                  <span className="h-4 flex-1 rounded-lg bg-white" />
+                </div>
+                <div className="flex">
+                  <div className="flex-1 space-y-2 p-3.5">
+                    <span className="block h-[7px] w-3/5 rounded bg-hair" />
+                    <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
+                    <span className="mt-1 block h-[7px] w-2/5 rounded bg-hair" />
+                    <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
+                    <span className="mt-1 block h-[7px] w-1/2 rounded bg-hair" />
+                    <span className="block h-5 w-11/12 rounded-md border border-[#F1C564] bg-[#FFFBEF]" />
+                  </div>
+                  <div className="flex w-[118px] shrink-0 flex-col gap-1.5 border-l border-hair bg-white p-2.5">
+                    <span className="h-5 w-5 rounded-md bg-[#FFF4CC]" />
+                    <span className="h-[34px] w-full rounded-lg bg-paper" />
+                    <span className="h-11 w-full rounded-lg bg-[#FFF8E1]" />
+                    <span className="mt-auto h-[22px] w-full rounded-lg bg-teal" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
