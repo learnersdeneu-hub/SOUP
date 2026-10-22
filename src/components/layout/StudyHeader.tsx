@@ -30,7 +30,7 @@ export function StudyHeader({ current, signedIn, fullName, unreadCount = 0 }: { 
 
   return (
     <header className="bg-white border-b border-hair">
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-4 px-6 py-3.5">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-3.5 xl:px-10">
         <BrandLogo className="h-11" />
         <nav aria-label="Main" className="ml-6 flex flex-1 flex-wrap gap-1">
           {NAV.map((item) => {

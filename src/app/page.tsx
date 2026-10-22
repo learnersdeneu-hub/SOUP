@@ -185,7 +185,7 @@ export default async function HomePage() {
     <div className="min-h-screen w-full bg-paper">
       <StudyHeader current="home" signedIn={!!user} fullName={dashboardData?.profile.user.fullName}/>
       <SupportLauncher signedIn={!!user} />
-      <main className="mx-auto w-full max-w-[1200px] px-5 pb-16 pt-6 sm:px-6">
+      <main className="mx-auto w-full max-w-[1600px] px-5 pb-16 pt-6 sm:px-6 xl:px-10">
         <HomeHero
           signedIn={!!user}
           firstName={dashboardData ? firstNameOf(dashboardData.profile.user.fullName) : null}
@@ -196,7 +196,7 @@ export default async function HomePage() {
 
         <section aria-labelledby="iwant" className="mt-7 flex flex-col gap-4">
           <h2 id="iwant" className="m-0 text-[22px] font-extrabold text-ink">I want to…</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
           {WORKFLOWS.map((wf) => {
             const Icon = wf.icon;
             const universityPromo = wf.href === "/universities"
@@ -286,7 +286,7 @@ export default async function HomePage() {
             <Link href="/universities" className="text-[15px] font-bold text-navy no-underline">See all universities</Link>
           </div>
           <p className="m-0 max-w-xl text-sm leading-6 text-mute">Strong European options from SOUP's direct and network access — including Hungary, France, Germany, Ireland and the UK. SOUP broadens beyond Europe whenever you ask for something different.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
             {universityPartners.length ? universityPartners.slice(0, 5).map((university, index) => (
               <article key={university.id} className="flex flex-col overflow-hidden rounded-[20px] border border-hair bg-white">
                 <div className="flex h-[120px] items-end p-3.5" style={{ background: PICK_BAND_COLORS[index % PICK_BAND_COLORS.length] }}>

@@ -29,7 +29,7 @@ export default async function InsuranceServicePage({ searchParams }: { searchPar
   return (
     <div className="min-h-screen bg-paper">
       <StudyHeader signedIn={Boolean(user)} fullName={profile?.user.fullName}/>
-      <main className="mx-auto max-w-[1200px] px-5 pb-28 pt-6 sm:px-6">
+      <main className="mx-auto max-w-[1600px] px-5 pb-28 pt-6 sm:px-6 xl:px-10">
         <nav aria-label="Breadcrumb" className="flex gap-2 text-sm text-mute">
           <Link href="/" className="text-mute no-underline">Home</Link><span aria-hidden="true">/</span>
           <span>Student insurance</span><span aria-hidden="true">/</span>

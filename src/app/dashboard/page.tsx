@@ -123,7 +123,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-paper">
       <StudyHeader current="dashboard" signedIn fullName={user.fullName} unreadCount={data.notifications.filter((item) => !item.readAt).length}/>
       <SupportLauncher signedIn />
-      <main className="mx-auto max-w-[1200px] px-5 pb-16 pt-6 sm:px-6">
+      <main className="mx-auto max-w-[1600px] px-5 pb-16 pt-6 sm:px-6 xl:px-10">
         {!user.institutionName && <InstitutionPromptBanner fullName={user.fullName} />}
 
         <section className="flex flex-wrap items-center gap-7 rounded-[28px] bg-navy p-8 text-white">
