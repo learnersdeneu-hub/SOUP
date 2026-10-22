@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>New tab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #F6F7F4; font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; display: flex; align-items: center; justify-content: center; }
+  .wrap { width: 100%; max-width: 620px; padding: 32px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  h1 { margin: 0; font-size: 26px; font-weight: 800; color: #14213D; text-align: center; }
+  form { width: 100%; height: 48px; border-radius: 24px; background: #fff; border: 1.5px solid #E4E7E1; display: flex; align-items: center; gap: 10px; padding: 0 18px; }
+  form:focus-within { box-shadow: 0 0 0 2px #0B6B50; }
+  form svg { flex-shrink: 0; color: #5A6478; }
+  input { flex: 1; min-width: 0; border: none; outline: none; font-size: 14px; font-family: inherit; color: #14213D; background: transparent; }
+  input::placeholder { color: #A7AEBB; }
+  .tiles { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .tile { text-decoration: none; display: flex; align-items: center; gap: 12px; border-radius: 16px; padding: 14px 16px; }
+  .tile-icon { width: 36px; height: 36px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tile-name { display: block; font-size: 13.5px; font-weight: 700; color: #14213D; }
+  .tile-sub { display: block; margin-top: 1px; font-size: 11px; color: #3D4A63; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Where do you want to go?</h1>
+    <form action="https://www.google.com/search" method="get" target="_self">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input name="q" placeholder='Try &quot;UCAS&quot;, &quot;Common App&quot;, or any web address' autofocus />
+    </form>
+    <div class="tiles">
+      <a class="tile" style="background:#E8F4EF" href="https://www.soupassist.com">
+        <span class="tile-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B6B50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0Z"/><path d="M8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg></span>
+        <span><span class="tile-name">SOUP</span><span class="tile-sub">soupassist.com</span></span>
+      </a>
+      <a class="tile" style="background:#E9EEFB" href="https://www.ucas.com">
+        <span class="tile-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F3FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+        <span><span class="tile-name">UCAS</span><span class="tile-sub">ucas.com</span></span>
+      </a>
+      <a class="tile" style="background:#F1E9FA" href="https://www.commonapp.org">
+        <span class="tile-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6A3FA0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15h6M9 11h6"/></svg></span>
+        <span><span class="tile-name">Common App</span><span class="tile-sub">commonapp.org</span></span>
+      </a>
+      <a class="tile" style="background:#FFF4CC" href="https://www.google.com">
+        <span class="tile-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A6A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <span><span class="tile-name">Search the web</span><span class="tile-sub">Type above, or click here</span></span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

@@ -17,7 +17,7 @@
     "appId": "com.soupassist.companion",
     "productName": "SOUP Companion",
     "directories": { "output": "dist" },
-    "files": ["main.js", "preload-panel.js", "panel/**/*", "inject/**/*", "icons/**/*"],
+    "files": ["main.js", "preload-panel.js", "preload-chrome.js", "panel/**/*", "inject/**/*", "icons/**/*"],
     "win": {
       "target": ["nsis"],
       "icon": "icons/icon.ico",

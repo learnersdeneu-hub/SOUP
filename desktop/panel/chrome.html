@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SOUP Companion — browser chrome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="chrome.css" />
+</head>
+<body>
+  <div id="tabstrip" class="cc-tabstrip" role="tablist"></div>
+  <div class="cc-addressbar">
+    <button class="cc-icon-btn" data-action="back" aria-label="Back" title="Back">&#8592;</button>
+    <button class="cc-icon-btn" data-action="forward" aria-label="Forward" title="Forward">&#8594;</button>
+    <button class="cc-icon-btn" data-action="reload" aria-label="Reload" title="Reload">&#8635;</button>
+    <button class="cc-icon-btn" data-action="home" aria-label="SOUP home" title="SOUP home">&#8962;</button>
+    <form id="address-form" class="cc-address-form">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="cc-address-icon"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="address-input" class="cc-address-input" placeholder="Search or enter a web address" autocomplete="off" />
+    </form>
+  </div>
+  <script src="chrome.js"></script>
+</body>
+</html>

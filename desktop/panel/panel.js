@@ -27,8 +27,26 @@ const state = {
   reviewOpenField: null,
   error: null,
   documentsOpen: false,
-  currentPortalUrl: "",
+  // Continuous narration (what's being scanned/filled/attached/asked),
+  // modeled directly on how Claude Code itself communicates progress —
+  // see renderActivity(). Reset at the start of every scan.
+  activity: [],
+  // One entry per detected file-upload field whose category was recognised
+  // (see field-dictionary.js's soupClassifyDocumentField): { field, result,
+  // selectedDocumentId, attached, dismissed }. result.outcome is
+  // SINGLE_MATCH / AMBIGUOUS / NO_MATCH / ERROR from
+  // GET /api/companion/documents/match.
+  fileFields: [],
 };
+
+const DOCUMENT_CATEGORY_LABELS = {
+  PASSPORT: "a passport", ENGLISH_TEST: "English proficiency", SAT_ACT_SCORE_REPORT: "an SAT/ACT score report",
+  GRADUATE_TEST_SCORE_REPORT: "a GRE/GMAT score report", BACHELORS_DEGREE_CERTIFICATE: "a Bachelor's degree certificate",
+  BACHELORS_TRANSCRIPT: "a Bachelor's transcript", MASTERS_DEGREE_CERTIFICATE: "a Master's degree certificate",
+  MASTERS_TRANSCRIPT: "a Master's transcript", HS_DIPLOMA: "a high school diploma", HS_TRANSCRIPT: "a high school transcript",
+  RESUME_CV: "a resume/CV", BANK_STATEMENT: "a bank statement", MOTIVATION_LETTER: "a motivation letter", PERSONAL_STATEMENT: "a personal statement",
+};
+function categoryLabel(category) { return DOCUMENT_CATEGORY_LABELS[category] || String(category || "").replace(/_/g, " ").toLowerCase(); }
 
 // ---------- transport (desktop bridge, see preload-panel.js) ----------
 function storageGet(keys) { return window.soupDesktop.storageGet(keys); }
@@ -36,6 +54,7 @@ function storageSet(values) { return window.soupDesktop.storageSet(values); }
 function storageRemove(keys) { return window.soupDesktop.storageRemove(keys); }
 function scanPortal() { return window.soupDesktop.scanPage(); }
 function fillPortal(assignments) { return window.soupDesktop.fillFields(assignments); }
+function attachDocument(fieldId, documentUrl, fileName) { return window.soupDesktop.attachDocument(fieldId, documentUrl, fileName); }
 function openExternal(url) { return window.soupDesktop.openExternal(url); }
 
 // ---------- backend ----------
@@ -108,45 +127,18 @@ function classifiedOnly(resolved) { return resolved.filter((r) => r.field.matche
 const app = document.getElementById("app");
 
 // The panel re-renders wholesale on most state changes (simple, correct,
-// fast enough at this size — see the file header). That would normally
-// steal focus/cursor position out of the address bar mid-type, so its
-// value and selection are explicitly preserved across a render() call
-// rather than trying to avoid full re-renders altogether.
+// fast enough at this size — see the file header). Navigation (address
+// bar, tabs) now lives entirely in the separate chrome BrowserView — see
+// panel/chrome.js — so this panel has no input whose focus needs
+// preserving across a render() call anymore.
 function render() {
-  const navInput = document.getElementById("nav-url");
-  const hadFocus = document.activeElement === navInput;
-  const draft = navInput ? navInput.value : state.currentPortalUrl;
-  const selectionStart = navInput ? navInput.selectionStart : null;
-  const selectionEnd = navInput ? navInput.selectionEnd : null;
-
   app.innerHTML = "";
-  app.appendChild(renderNavBar(draft));
   app.appendChild(renderHeader());
   const body = document.createElement("div");
   body.className = "sc-body";
   body.appendChild(renderScreen());
   app.appendChild(body);
   bindEvents();
-
-  if (hadFocus) {
-    const restored = document.getElementById("nav-url");
-    restored?.focus();
-    if (selectionStart !== null) restored?.setSelectionRange(selectionStart, selectionEnd);
-  }
-}
-
-function renderNavBar(draftUrl) {
-  return el(`
-    <div class="sc-navbar">
-      <button class="sc-nav-btn" data-action="nav-back" title="Back" aria-label="Back">&#8592;</button>
-      <button class="sc-nav-btn" data-action="nav-forward" title="Forward" aria-label="Forward">&#8594;</button>
-      <button class="sc-nav-btn" data-action="nav-reload" title="Reload" aria-label="Reload">&#8635;</button>
-      <button class="sc-nav-btn" data-action="nav-home" title="SOUP home" aria-label="SOUP home">&#8962;</button>
-      <form class="sc-navbar-form" data-role="nav-form">
-        <input id="nav-url" class="sc-nav-input" placeholder="Go to a university, visa or accommodation site..." value="${escapeHtml(draftUrl || "")}" autocomplete="off" />
-      </form>
-    </div>
-  `);
 }
 
 function el(html) {
@@ -249,6 +241,58 @@ function stepperGroups() {
   });
 }
 
+// ---------- Activity feed (continuous narration) ----------
+function activityDotGlyph(status) {
+  if (status === "done") return "&#10003;";
+  if (status === "error") return "!";
+  if (status === "active") return "&#8943;";
+  return "";
+}
+function renderActivity() {
+  if (!state.activity.length) return "";
+  return `
+    <div class="sc-card">
+      <div class="sc-eyebrow">Activity</div>
+      <div class="sc-activity" style="margin-top:9px;">
+        ${state.activity.map((item) => `
+          <div class="sc-activity-item ${item.status}">
+            <span class="sc-activity-dot">${activityDotGlyph(item.status)}</span>
+            <span class="sc-activity-text">${escapeHtml(item.text)}</span>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// ---------- Ask-when-unsure (bounded-choice question, never a silent guess) ----------
+function renderAskCards() {
+  const pending = state.fileFields.filter((entry) => entry.result.outcome === "AMBIGUOUS" && !entry.attached && !entry.dismissed);
+  if (!pending.length) return "";
+  return pending.map((entry) => `
+    <div class="sc-ask-card">
+      <div class="sc-ask-card-question">
+        <span class="sc-ask-card-icon">?</span>
+        <span>You have ${entry.result.documents.length} documents that could work for ${escapeHtml(categoryLabel(entry.field.matchedCategory))} — which one should I use?</span>
+      </div>
+      ${entry.result.documents.map((doc) => `
+        <button type="button" class="sc-doc-option ${entry.selectedDocumentId === doc.id ? "selected" : ""}" data-action="select-doc-option" data-field-id="${entry.field.id}" data-document-id="${doc.id}">
+          <span class="sc-doc-option-icon">&#128196;</span>
+          <span style="flex:1; min-width:0; text-align:left;">
+            <span class="sc-doc-option-title">${escapeHtml(doc.originalFileName || "Document")}</span>
+            <span class="sc-doc-option-sub">Uploaded ${new Date(doc.uploadedAt).toLocaleDateString()} &middot; ${doc.reviewStatus === "APPROVED" ? "approved" : String(doc.reviewStatus).replace(/_/g, " ").toLowerCase()}</span>
+          </span>
+          <span class="sc-doc-option-radio"></span>
+        </button>
+      `).join("")}
+      <div class="sc-btn-row">
+        <button class="sc-btn sc-btn-primary" data-action="use-doc-choice" data-field-id="${entry.field.id}" ${entry.selectedDocumentId ? "" : "disabled"}>Use this one</button>
+        <button class="sc-btn sc-btn-secondary" data-action="dismiss-doc-ask" data-field-id="${entry.field.id}">Not now</button>
+      </div>
+    </div>
+  `).join("");
+}
+
 function renderReady() {
   const counts = fieldCounts();
   const app0 = state.context && state.context.applications && state.context.applications[0];
@@ -259,6 +303,8 @@ function renderReady() {
 
   return el(`
     <div class="sc-stack" style="display:flex; flex-direction:column; gap:12px;">
+      ${renderActivity()}
+      ${renderAskCards()}
       ${app0 ? `
       <div class="sc-card">
         <div class="sc-eyebrow">Application context</div>
@@ -461,12 +507,6 @@ function bindEvents() {
       handleAction(action, node, event);
     });
   });
-  const navForm = app.querySelector('[data-role="nav-form"]');
-  navForm?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const input = document.getElementById("nav-url");
-    if (input && input.value.trim()) window.soupDesktop.navigate(input.value.trim());
-  });
 }
 
 async function handleAction(action, node) {
@@ -474,11 +514,24 @@ async function handleAction(action, node) {
     case "pair": return doPair();
     case "reconnect": return doReconnect();
     case "rescan": return runScan();
-    case "nav-back": return window.soupDesktop.navBack();
-    case "nav-forward": return window.soupDesktop.navForward();
-    case "nav-reload": return window.soupDesktop.navReload();
-    case "nav-home": return window.soupDesktop.navHome();
     case "toggle-documents": state.documentsOpen = !state.documentsOpen; return render();
+    case "select-doc-option": {
+      const entry = state.fileFields.find((e) => e.field.id === node.dataset.fieldId);
+      if (entry) entry.selectedDocumentId = node.dataset.documentId;
+      return render();
+    }
+    case "use-doc-choice": {
+      const entry = state.fileFields.find((e) => e.field.id === node.dataset.fieldId);
+      if (!entry || !entry.selectedDocumentId) return null;
+      state.activity.push({ text: `Attaching ${categoryLabel(entry.field.matchedCategory)}…`, status: "active" });
+      render();
+      return attachDocumentForEntry(entry, entry.selectedDocumentId, state.activity.length - 1);
+    }
+    case "dismiss-doc-ask": {
+      const entry = state.fileFields.find((e) => e.field.id === node.dataset.fieldId);
+      if (entry) entry.dismissed = true;
+      return render();
+    }
     case "open-document": return openDocument(node.dataset.documentId);
     case "open-review": state.screen = "review"; return render();
     case "back-to-ready": state.screen = "ready"; return render();
@@ -531,12 +584,24 @@ async function runScan(quiet) {
   try {
     if (!state.context) { state.loadingMessage = "Loading your SOUP profile…"; if (!quiet) render(); await loadContext(); }
     const scan = await scanPortal();
+    state.activity = [];
+    state.fileFields = [];
     if (!scan) { state.scan = null; state.resolved = []; state.screen = "unsupported"; return render(); }
     state.scan = scan;
     state.resolved = resolveFields(scan, state.context);
     const counts = fieldCounts();
-    state.screen = counts.detected === 0 ? "unsupported" : "ready";
+    const fileFieldsDetected = (scan.fileFields || []).filter((f) => f.matchedCategory);
+
+    state.activity.push({
+      text: `Scanned this page — found ${counts.detected} field${counts.detected === 1 ? "" : "s"}${fileFieldsDetected.length ? `, including ${fileFieldsDetected.length} document upload${fileFieldsDetected.length === 1 ? "" : "s"}` : ""}`,
+      status: "done",
+    });
+    if (counts.ready > 0) state.activity.push({ text: `${counts.ready} field${counts.ready === 1 ? "" : "s"} ready to fill from your SOUP profile`, status: "done" });
+
+    state.screen = (counts.detected === 0 && fileFieldsDetected.length === 0) ? "unsupported" : "ready";
     render();
+
+    if (fileFieldsDetected.length) await resolveFileFieldsFlow(fileFieldsDetected);
   } catch (error) {
     state.error = { code: error.code || "BACKEND_ERROR", message: error.message };
     state.screen = "error";
@@ -544,6 +609,60 @@ async function runScan(quiet) {
   }
 }
 function runScanQuiet() { return runScan(true); }
+
+// Checks the student's own SOUP document vault for each detected file-
+// upload field, one at a time, narrating as it goes — a single match
+// attaches automatically (via CDP, see main.js), several matches pause
+// with a bounded-choice question instead of guessing (renderAskCards), and
+// no match is flagged as needing the student's own input.
+async function resolveFileFieldsFlow(fileFieldsDetected) {
+  for (const field of fileFieldsDetected) {
+    const activityIndex = state.activity.length;
+    state.activity.push({ text: `Checking your vault for ${categoryLabel(field.matchedCategory)}…`, status: "active" });
+    render();
+
+    let result;
+    try { result = await apiFetch(`/api/companion/documents/match?category=${encodeURIComponent(field.matchedCategory)}`); }
+    catch { result = { outcome: "ERROR" }; }
+
+    const entry = { field, result, selectedDocumentId: result.outcome === "SINGLE_MATCH" ? result.document.id : null, attached: false, dismissed: false };
+    state.fileFields.push(entry);
+
+    if (result.outcome === "SINGLE_MATCH") {
+      state.activity[activityIndex] = { text: `Found a match for ${categoryLabel(field.matchedCategory)} — attaching…`, status: "active" };
+      render();
+      await attachDocumentForEntry(entry, result.document.id, activityIndex);
+    } else if (result.outcome === "AMBIGUOUS") {
+      state.activity[activityIndex] = { text: `You have ${result.documents.length} documents that could work for ${categoryLabel(field.matchedCategory)} — which one should I use?`, status: "active" };
+      render();
+    } else if (result.outcome === "NO_MATCH") {
+      state.activity[activityIndex] = { text: `${categoryLabel(field.matchedCategory)} — nothing in your vault yet. You'll need to attach this one yourself.`, status: "pending" };
+      render();
+    } else {
+      state.activity[activityIndex] = { text: `Couldn't check your documents for ${categoryLabel(field.matchedCategory)} right now.`, status: "error" };
+      render();
+    }
+  }
+}
+
+async function attachDocumentForEntry(entry, documentId, activityIndex) {
+  try {
+    const link = await apiFetch(`/api/companion/documents/${encodeURIComponent(documentId)}/link`, { method: "POST" });
+    const doc = entry.result.outcome === "SINGLE_MATCH" ? entry.result.document : (entry.result.documents || []).find((d) => d.id === documentId);
+    const fileName = (doc && doc.originalFileName) || entry.field.label || "document";
+    const attachResult = await attachDocument(entry.field.id, link.url, fileName);
+    entry.attached = Boolean(attachResult && attachResult.ok);
+    entry.selectedDocumentId = documentId;
+    const resultEntry = entry.attached
+      ? { text: `Attached ${fileName} automatically`, status: "done" }
+      : { text: `Couldn't attach ${fileName} automatically — please attach it yourself`, status: "error" };
+    if (typeof activityIndex === "number") state.activity[activityIndex] = resultEntry; else state.activity.push(resultEntry);
+  } catch {
+    const failure = { text: `Couldn't attach that document automatically — please attach it yourself`, status: "error" };
+    if (typeof activityIndex === "number") state.activity[activityIndex] = failure; else state.activity.push(failure);
+  }
+  render();
+}
 
 async function startFill() {
   const targets = classifiedOnly(state.resolved).filter((r) => r.status === "ready" && normalize(r.field.currentValue) !== normalize(r.answer.value));
@@ -632,22 +751,18 @@ function submitAsk() {
 
 // ---------- init ----------
 async function init() {
-  render(); // paint the nav bar immediately, before the token lookup resolves
+  render();
   const stored = await storageGet([STORAGE_KEY_TOKEN, STORAGE_KEY_PROFILE]);
   state.token = stored[STORAGE_KEY_TOKEN] || null;
   state.profile = stored[STORAGE_KEY_PROFILE] || null;
-  const currentUrl = await window.soupDesktop.currentUrl();
-  if (currentUrl) state.currentPortalUrl = currentUrl;
   if (!state.token) { state.screen = "connect"; return render(); }
   await runScan();
 }
 
+// Re-scans whenever the active tab changes (switching tabs, or this tab
+// navigating to a new page) — "tab-changed"/"portal-url-changed" are sent
+// by main.js's switchTab()/createTab() nav listeners respectively.
 window.soupDesktop.onTabChanged(() => { if (state.token) runScanQuiet(); });
-window.soupDesktop.onPortalUrlChanged((url) => {
-  state.currentPortalUrl = url;
-  const input = document.getElementById("nav-url");
-  // Don't clobber the URL the student is actively typing/editing.
-  if (input && document.activeElement !== input) input.value = url;
-});
+window.soupDesktop.onPortalUrlChanged(() => { if (state.token) runScanQuiet(); });
 
 init();

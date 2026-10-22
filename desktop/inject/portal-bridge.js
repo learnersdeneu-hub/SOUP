@@ -65,23 +65,47 @@
     return String(el.value || "");
   }
 
+  function assignFieldId(el) {
+    if (!el.dataset.soupFieldId) {
+      window.__soupFieldIdCounter = (window.__soupFieldIdCounter || 0) + 1;
+      el.dataset.soupFieldId = "soup-field-" + window.__soupFieldIdCounter + "-" + Date.now();
+    }
+    return el.dataset.soupFieldId;
+  }
+
   window.__soupScanPage = function () {
     var nodes = Array.prototype.slice.call(document.querySelectorAll("input, select, textarea"));
     var fields = [];
-    var uidCounter = 0;
+    var fileFields = [];
     nodes.forEach(function (el) {
       var type = (el.getAttribute("type") || el.tagName.toLowerCase()).toLowerCase();
-      if (["hidden", "submit", "button", "image", "reset", "file"].indexOf(type) !== -1) return;
       if (el.disabled || el.readOnly) return;
       if (!isVisible(el)) return;
       var label = labelFor(el);
-      var match = typeof soupClassifyField === "function" ? soupClassifyField(label, el.name || "", el.id || "") : null;
-      if (!el.dataset.soupFieldId) {
-        uidCounter += 1;
-        el.dataset.soupFieldId = "soup-field-" + uidCounter + "-" + Date.now();
+
+      // File-upload fields never get a text value typed into them — they go
+      // through CDP-based auto-attach (main.js's attachDocumentToField, via
+      // Chrome DevTools Protocol's DOM.setFileInputFiles, the only way to
+      // programmatically set an <input type="file">'s files in any browser
+      // context) rather than window.__soupFillFields, so they're classified
+      // and reported separately here.
+      if (type === "file") {
+        var category = typeof soupClassifyDocumentField === "function" ? soupClassifyDocumentField(label, el.name || "", el.id || "") : null;
+        fileFields.push({
+          id: assignFieldId(el),
+          label: (label || "").slice(0, 160),
+          name: el.name || "",
+          required: Boolean(el.required),
+          matchedCategory: category,
+          hasFile: Boolean(el.files && el.files.length),
+        });
+        return;
       }
+
+      if (["hidden", "submit", "button", "image", "reset"].indexOf(type) !== -1) return;
+      var match = typeof soupClassifyField === "function" ? soupClassifyField(label, el.name || "", el.id || "") : null;
       fields.push({
-        id: el.dataset.soupFieldId,
+        id: assignFieldId(el),
         label: (label || "").slice(0, 160),
         name: el.name || "",
         inputType: type,
@@ -93,7 +117,7 @@
         matchedLabel: match ? match.label : null,
       });
     });
-    return { fields: fields, portalHost: location.host, pageUrl: location.href, pageTitle: document.title };
+    return { fields: fields, fileFields: fileFields, portalHost: location.host, pageUrl: location.href, pageTitle: document.title };
   };
 
   function nativeSetValue(el, value) {

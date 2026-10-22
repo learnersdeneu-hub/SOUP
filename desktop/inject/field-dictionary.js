@@ -35,3 +35,39 @@ function soupClassifyField(labelText, name, id) {
   }
   return null;
 }
+
+// Classifies <input type="file"> fields into the same DocumentCategory keys
+// the backend understands (src/lib/documents/categories.ts /
+// src/lib/companion/documentMatch.ts) so a scanned field can be looked up
+// directly against GET /api/companion/documents/match?category=... without
+// any translation step. Kept as a parallel keyword list rather than a
+// shared module because this file is injected verbatim into a sandboxed
+// page with no bundler — if you change the category keywords on the server
+// side, mirror the change here too.
+var SOUP_DOCUMENT_FIELD_DICTIONARY = [
+  { category: "PASSPORT", patterns: [/passport/i] },
+  { category: "ENGLISH_TEST", patterns: [/ielts/i, /toefl/i, /pte\s*academic/i, /duolingo/i, /english\s*(proficiency|test|language)/i] },
+  { category: "SAT_ACT_SCORE_REPORT", patterns: [/sat\s*score/i, /act\s*score/i, /sat\s*\/\s*act/i] },
+  { category: "GRADUATE_TEST_SCORE_REPORT", patterns: [/\bgre\b/i, /\bgmat\b/i] },
+  { category: "BACHELORS_DEGREE_CERTIFICATE", patterns: [/bachelor.?s?\s*degree/i, /undergraduate\s*degree\s*certificate/i] },
+  { category: "BACHELORS_TRANSCRIPT", patterns: [/bachelor.?s?\s*transcript/i, /undergraduate\s*transcript/i] },
+  { category: "MASTERS_DEGREE_CERTIFICATE", patterns: [/master.?s?\s*degree/i, /graduate\s*degree\s*certificate/i] },
+  { category: "MASTERS_TRANSCRIPT", patterns: [/master.?s?\s*transcript/i, /graduate\s*transcript/i] },
+  { category: "HS_DIPLOMA", patterns: [/high\s*school\s*diploma/i, /secondary\s*school\s*certificate/i] },
+  { category: "HS_TRANSCRIPT", patterns: [/high\s*school\s*transcript/i, /a-level\s*transcript/i, /secondary\s*school\s*transcript/i] },
+  { category: "RESUME_CV", patterns: [/\bresume\b/i, /\bcv\b/i, /curriculum\s*vitae/i] },
+  { category: "BANK_STATEMENT", patterns: [/bank\s*statement/i, /proof\s*of\s*funds/i] },
+  { category: "MOTIVATION_LETTER", patterns: [/motivation\s*letter/i] },
+  { category: "PERSONAL_STATEMENT", patterns: [/personal\s*statement/i, /statement\s*of\s*purpose/i] },
+];
+
+function soupClassifyDocumentField(labelText, name, id) {
+  var haystack = (String(labelText || "") + " " + String(name || "") + " " + String(id || "")).toLowerCase();
+  for (var i = 0; i < SOUP_DOCUMENT_FIELD_DICTIONARY.length; i++) {
+    var entry = SOUP_DOCUMENT_FIELD_DICTIONARY[i];
+    for (var j = 0; j < entry.patterns.length; j++) {
+      if (entry.patterns[j].test(haystack)) return entry.category;
+    }
+  }
+  return null;
+}

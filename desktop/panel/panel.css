@@ -1,22 +1,24 @@
-/* Identical design tokens/layout to extension/sidepanel.css — same SOUP
-   visual language, ported verbatim since none of it is Chrome-specific. */
+/* Rebrand: matches the live soupassist.com token set exactly (navy/teal/
+   paper/hair/mute + Plus Jakarta Sans) instead of the pre-redesign palette
+   this file used to carry — see the plan's Phase 0. Class names/layout are
+   unchanged so this is a token-and-font swap, not a rewrite. */
 :root {
-  --ink: #1C1D1F;
-  --mute: #6B6E73;
-  --paper: #FAFAFA;
-  --navy: #1E3A5F;
-  --navy-dark: #163049;
-  --navy-tint: #EAF0F5;
-  --teal: #0F7B6C;
-  --teal-tint: #F0F7F5;
-  --hair: #E5E5E5;
-  --amber-text: #80651A;
-  --amber-bg: #FFF7DF;
-  --amber-border: #D8C89C;
-  --danger-text: #9D3127;
-  --danger-bg: #FFF8F7;
-  --danger-border: #F0D5D1;
-  --radius-lg: 16px;
+  --ink: #14213D;
+  --mute: #3D4A63;
+  --paper: #F6F7F4;
+  --navy: #14213D;
+  --navy-dark: #0E1830;
+  --navy-tint: #E9EEFB;
+  --teal: #0B6B50;
+  --teal-tint: #E8F4EF;
+  --hair: #E4E7E1;
+  --amber-text: #8A6A00;
+  --amber-bg: #FFF4CC;
+  --amber-border: #F1C564;
+  --danger-text: #B23C0B;
+  --danger-bg: #FDE8DE;
+  --danger-border: #F0C3AC;
+  --radius-lg: 20px;
   --radius-md: 12px;
   --radius-full: 999px;
 }
@@ -29,7 +31,7 @@ html, body {
   min-width: 300px;
   background: var(--paper);
   color: var(--ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -45,56 +47,34 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 #app { display: flex; flex-direction: column; min-height: 100vh; }
 
-/* ---------- Nav bar (controls the portal view alongside this panel) ---------- */
-.sc-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  background: var(--navy);
-}
-.sc-nav-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
-  border: none; background: rgba(255,255,255,.12); color: #fff; font-size: 13px;
-}
-.sc-nav-btn:hover { background: rgba(255,255,255,.22); }
-.sc-navbar-form { flex: 1; min-width: 0; }
-.sc-nav-input {
-  width: 100%; height: 26px; border-radius: 8px; border: none;
-  padding: 0 10px; font-size: 11.5px; outline: none;
-  background: rgba(255,255,255,.92); color: var(--ink);
-}
-.sc-nav-input:focus { background: #fff; }
+/* Navigation (address bar, tabs, back/forward/reload) now lives in its own
+   BrowserView — see chrome.html/chrome.js/chrome.css and main.js's
+   createChromeView() — so this panel no longer renders a nav bar itself. */
 
 .sc-header {
   position: sticky;
-  top: 42px; /* exact rendered height of .sc-navbar: 8px+8px padding + 26px controls */
+  top: 0;
   z-index: 5;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
-  background: #fff;
-  border-bottom: 1px solid var(--hair);
+  padding: 14px;
+  background: var(--navy);
 }
-.sc-header img { width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; }
+.sc-header img { width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0; background: var(--amber-bg); }
 .sc-header-titles { min-width: 0; flex: 1; }
-.sc-header-brand { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--ink); }
-.sc-header-portal { font-size: 11px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-header-brand { font-size: 13px; font-weight: 800; letter-spacing: -.01em; color: #fff; }
+.sc-header-portal { font-size: 11px; color: #B9C4DB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 .sc-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.sc-status-dot.ok { background: var(--teal); }
-.sc-status-dot.warn { background: #C99A2E; }
-.sc-status-dot.off { background: #B8C0C7; }
+.sc-status-dot.ok { background: #5FD9A4; }
+.sc-status-dot.warn { background: #F1C564; }
+.sc-status-dot.off { background: rgba(255,255,255,.35); }
 .sc-icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; border-radius: var(--radius-full);
-  border: 1px solid transparent; background: transparent; color: var(--mute);
+  border: 1px solid transparent; background: rgba(255,255,255,.12); color: #fff;
 }
-.sc-icon-btn:hover { background: var(--paper); color: var(--ink); }
+.sc-icon-btn:hover { background: rgba(255,255,255,.22); }
 
 .sc-body { flex: 1; padding: 12px 14px 20px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -181,3 +161,34 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .sc-back-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
 .sc-collapsible-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; background: none; border: none; padding: 0; text-align: left; }
 [hidden] { display: none !important; }
+
+/* ---------- Activity feed (continuous narration — see sc-ask-card below) ---------- */
+.sc-activity { display: flex; flex-direction: column; gap: 9px; }
+.sc-activity-item { display: flex; gap: 9px; align-items: flex-start; }
+.sc-activity-dot {
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800;
+}
+.sc-activity-item.done .sc-activity-dot { background: var(--teal-tint); color: var(--teal); }
+.sc-activity-item.active .sc-activity-dot { background: var(--amber-bg); color: var(--amber-text); }
+.sc-activity-item.error .sc-activity-dot { background: var(--danger-bg); color: var(--danger-text); }
+.sc-activity-item.pending { opacity: .55; }
+.sc-activity-item.pending .sc-activity-dot { background: #F1F2EE; color: #9AA0A6; }
+.sc-activity-text { font-size: 12.5px; line-height: 1.5; color: var(--mute); }
+.sc-activity-item.active .sc-activity-text, .sc-activity-item.error .sc-activity-text { color: var(--ink); }
+
+/* ---------- Ask-when-unsure card — modeled on how Claude Code itself pauses
+   with a bounded-choice question instead of guessing when blocked. ---------- */
+.sc-ask-card { border: 1.5px solid var(--navy); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sc-ask-card-question { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--ink); }
+.sc-ask-card-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
+.sc-doc-option {
+  display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: var(--radius-md);
+  border: 1.5px solid var(--hair); background: #fff; cursor: pointer; width: 100%; text-align: left;
+}
+.sc-doc-option.selected { border-color: var(--teal-tint); background: var(--teal-tint); border-color: #C8E2D6; }
+.sc-doc-option-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--paper); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.sc-doc-option-title { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.sc-doc-option-sub { font-size: 11px; color: var(--mute); margin-top: 1px; }
+.sc-doc-option-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--hair); flex-shrink: 0; }
+.sc-doc-option.selected .sc-doc-option-radio { border-color: var(--teal); background: var(--teal); }

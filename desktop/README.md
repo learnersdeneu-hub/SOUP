@@ -1,52 +1,60 @@
 # SOUP Companion (desktop app)
 
 A standalone Windows app — no Google, no Chrome Web Store, no browser
-extension. One window: a built-in mini-browser (left) that the student
-navigates to the actual university/visa/accommodation site, and the SOUP
-assistant panel (right), which also owns the navigation controls (address
-bar, back/forward/reload/home) at its own top — see "Why navigation lives
-in the panel" below.
+extension. Three BrowserViews in one window: a tab strip + address bar
+across the top ("chrome"), the active tab's embedded page below-left
+("portal"), and the SOUP assistant panel below-right ("panel"). It behaves
+like a real multi-tab browser — open any site, including soupassist.com
+itself to sign in or subscribe — with the assistant staying attached
+regardless of which tab is focused.
 
-## Status: confirmed running on real hardware
+## Status: core single-tab loop confirmed on real hardware; the rest is new and unverified here
 
-Earlier claims here were "should work, built with standard Electron APIs,
-not personally verified" — that's since been superseded by actually running
-it and fixing what broke:
+- **Confirmed working, from a real screenshot (earlier, single-tab build):**
+  the app launches, the portal and panel render side by side, the panel
+  connects to the SOUP backend, scans a real page, detects fields, shows
+  the consistency check, and renders the progress stepper.
+- **New in this pass, built but NOT yet run on real hardware** — this
+  sandbox forces `ELECTRON_RUN_AS_NODE=1`, which makes Electron behave as
+  plain Node with no GUI, so none of this could be visually confirmed here.
+  Syntax-checked (`node --check`) on every file; a real Windows run is
+  still needed before trusting it:
+  - Multi-tab browsing: `main.js` now tracks a `Map` of tabs, each its own
+    BrowserView, with a dedicated "chrome" BrowserView (`panel/chrome.html`
+    / `chrome.js` / `chrome.css`, `preload-chrome.js`) owning the tab strip
+    and address bar. Clicking "+" opens `panel/newtab.html` (quick tiles for
+    SOUP/UCAS/Common App/search) — a plain static page with ordinary
+    `<a href>`/`<form>` elements, so it needs no preload or IPC of its own.
+  - Full SOUP brand rebrand: `panel/panel.css` tokens and font now match
+    the live web app exactly (navy `#14213D`, teal `#0B6B50`, Plus Jakarta
+    Sans) instead of the old pre-redesign palette.
+  - Document auto-attach: `inject/field-dictionary.js` and
+    `inject/portal-bridge.js` now also detect and classify `<input
+    type="file">` fields (passport, English test, transcripts, etc. — the
+    same `DocumentCategory` vocabulary as `src/lib/documents/categories.ts`
+    on the web side). `main.js`'s `attachDocumentToField()` uses the Chrome
+    DevTools Protocol (`webContents.debugger` + `DOM.setFileInputFiles`) —
+    the only way, in any browser context, to programmatically set a file
+    input's files — to attach a matching document without the student
+    picking it by hand.
+  - Continuous narration + ask-when-unsure: the panel now keeps a running
+    "Activity" feed of what it's scanning/filling/attaching, and — when a
+    document category matches more than one uploaded file (e.g. both an
+    IELTS and a TOEFL report) — pauses with an explicit bounded-choice card
+    ("which one should I use?") instead of guessing, the same way this
+    assistant itself asks when blocked. See `panel/panel.js`'s
+    `renderActivity()` / `renderAskCards()` / `resolveFileFieldsFlow()`.
 
-- **Confirmed working, from a real screenshot:** the app launches, the
-  portal and panel render correctly side by side, the panel connects to the
-  SOUP backend, scans a real page, detects fields, shows the consistency
-  check, and renders the progress stepper — the whole core loop functions.
-- **Found and fixed by that same real run:** the original design put
-  navigation controls (address bar, back/forward/reload) in a separate
-  strip of the main window's own content, above the two BrowserViews. On
-  the tester's actual machine, that strip never rendered — the portal
-  BrowserView covered it regardless of two rounds of timing-based fixes
-  attempted blind (multiple `layout()` retrigger points, then a
-  `backgroundColor` fallback). Rather than guess a third time, navigation
-  was moved into the panel itself instead, which was already confirmed
-  rendering correctly — removing the failure mode rather than continuing to
-  patch around it. `shell.html`/`shell.js`/`preload-shell.js` are gone;
-  `main.js` now gives both BrowserViews the full window (no reserved gap),
-  and the panel's own `sc-navbar` (see `panel/panel.js` /
-  `renderNavBar()`) drives navigation via `window.soupDesktop.navigate()`
-  and friends (`preload-panel.js`).
-- **Still needs a fresh confirm from a real run:** this exact change (nav
-  bar now inside the panel) hasn't been visually verified yet — it was
-  built and packaged in the same sandboxed environment that still can't
-  launch a real GUI window (`ELECTRON_RUN_AS_NODE=1`). Install the rebuilt
-  `.exe` and check the navy nav bar appears at the very top of the panel,
-  above "SOUP Companion" / the portal hostname.
+## Why navigation lives in its own "chrome" BrowserView
 
-## Why navigation lives in the panel, not a separate toolbar
-
-The panel BrowserView was the one piece proven to render reliably on real
-hardware from the start. Rather than keep debugging a second, separately
-positioned UI surface blind (no way to see a screenshot until the tester
-runs a new build each time), folding the nav bar into the already-working
-panel removes an entire class of BrowserView-layering timing bugs, at the
-cost of the address bar being on the right instead of spanning the top like
-a conventional browser — an acceptable trade for reliability.
+An earlier single-tab version first tried a separate toolbar strip in the
+main window's own content (not a BrowserView) and found it got covered by
+the portal BrowserView's z-order on real hardware; it was then moved *into*
+the panel BrowserView as a workaround. Going multi-tab needed a tab strip
+regardless, so navigation now gets its own dedicated BrowserView — pinned
+full-width across the top, same proven approach (a BrowserView renders
+reliably; a bare window-content toolbar area did not) without permanently
+borrowing panel space for it.
 
 ## Building it yourself
 
@@ -79,7 +87,10 @@ It's currently hosted as a static file at
 from `/companion/connect`), which is a real, working, verified-live link —
 but committing a ~78MB binary into git isn't scalable for every future
 release. Worth moving to dedicated release hosting (GitHub Releases on a
-separate repo, or a storage bucket) before this ships frequent updates.
+separate repo, or a storage bucket) before this ships frequent updates. The
+binary there still reflects the earlier single-tab build — it needs a
+fresh `npm run dist` and re-upload before the multi-tab/auto-attach work
+above reaches real students.
 
 ## Scoping notes
 
@@ -90,9 +101,12 @@ separate repo, or a storage bucket) before this ships frequent updates.
 - The progress stepper is page-local, not a persisted cross-page tracker.
 - "Add answer" for a missing field fills the current page only; it doesn't
   write back to the student's SOUP profile yet.
+- Document auto-attach only looks at the top-level frame of the active
+  tab's page (same scope as the existing text-field scan) — a file input
+  inside a cross-origin iframe won't be found.
 - No auto-update mechanism is wired up yet — a new build needs to be
   manually re-distributed when the app changes.
-- The backend is fully shared with the (now-removed) browser-extension
-  prototype this was ported from: same `/api/companion/*` routes, same
-  pairing flow, same `/companion/connect` page — no backend changes needed
-  for this app to work.
+- The backend is fully shared with the web app: same `/api/companion/*`
+  routes, same pairing flow, same `/companion/connect` page. The new
+  `GET /api/companion/documents/match` route is the one addition this pass
+  made on the backend side, specifically to support auto-attach.

@@ -54,6 +54,7 @@ export default async function AdminDashboardPage() {
     hasRole(role, COMMERCIAL_ROLES) && ["/admin/referrals", "Partner referrals & revenue"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/support", "Support queue"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/audit", "Audit trail"],
+    hasRole(role, SUPPORT_ROLES) && ["/admin/companion", "Companion activity"],
     hasRole(role, CASE_ROLES) && ["/admin/concierge", "SOUP Concierge queue"],
     hasRole(role, CASE_ROLES) && ["/admin/sessions", "Counselor sessions"],
     hasRole(role, ADMIN_ROLES) && ["/admin/analytics", "Funnel analytics"],
