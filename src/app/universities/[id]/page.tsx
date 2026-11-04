@@ -161,7 +161,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
 
           <div className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard label="Fee range" value={feeText} note={summary.feeRange ? "From active catalog programs" : "Noodles can verify current tuition"}/>
-            {summary.applicationFeeRange ? <SummaryCard label="Application fee" value={summary.applicationFeeRange} note="From active catalog programs"/> : null}
+            {summary.applicationFeeRange ? <SummaryCard label="Application fee" value={summary.applicationFeeRange} note={`For ${university.name}`}/> : null}
             <SummaryCard label="Intakes" value={intakeText} note={summary.intakes.length ? "From active catalog programs" : "Current intake check required"}/>
             <SummaryCard label="Study levels" value={levelText} note={summary.levels.length ? undefined : "Program-level check required"}/>
             <SummaryCard label="Programs in SOUP" value={String(summary.programCount)} note={summary.programCount ? "Current active catalog rows" : "Use live program search"}/>
@@ -189,7 +189,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
                       {program.intake ? <span className="inline-flex items-center gap-1"><CalendarDays size={11}/>{program.intake}</span> : <span className="inline-flex items-center gap-1"><CalendarDays size={11}/>Intake: verify live</span>}
                       {program.tuitionAmount ? <span className="inline-flex items-center gap-1"><Coins size={11}/>{program.tuitionCurrency || ""} {Number(program.tuitionAmount).toLocaleString("en")} / year</span> : <span className="inline-flex items-center gap-1"><Coins size={11}/>Fee: verify live</span>}
                       {program.duration ? <span className="inline-flex items-center gap-1"><GraduationCap size={11}/>{program.duration} {/^\d+(\.\d+)?$/.test(program.duration) ? "years" : ""}</span> : null}
-                      {programFees[index] ? <span className="inline-flex items-center gap-1 font-semibold text-ink"><Coins size={11}/>Application fee: {programFees[index]!.currency} {programFees[index]!.amount.toLocaleString("en")}</span> : null}
+                      {programFees[index] ? <span className="inline-flex items-center gap-1 font-semibold text-ink"><Coins size={11}/>{university.name} application fee: {programFees[index]!.currency} {programFees[index]!.amount.toLocaleString("en")}</span> : null}
                     </div>
                     {program.applicationDeadline ? <div className="mt-2 text-[11px] text-mute">Saved deadline: <strong className="font-semibold text-ink">{program.applicationDeadline}</strong></div> : null}
                     <div className="mt-2"><SourceFreshnessBadge checkedAt={program.sourceCheckedAt}/></div>

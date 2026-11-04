@@ -309,8 +309,11 @@ export function UniversityApplyPanel({
 
           {applicationFee && (
             <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-hair bg-paper px-3 py-2.5">
-              <span className="text-[11px] font-semibold uppercase tracking-[.08em] text-mute">Application fee</span>
-              <span className="text-sm font-semibold text-ink">{applicationFee.currency} {applicationFee.amount.toLocaleString("en")}</span>
+              <span className="min-w-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-[.08em] text-mute">Application fee</span>
+                <span className="block truncate text-[10.5px] text-mute">{universityName}</span>
+              </span>
+              <span className="shrink-0 text-sm font-semibold text-ink">{applicationFee.currency} {applicationFee.amount.toLocaleString("en")}</span>
             </div>
           )}
 
