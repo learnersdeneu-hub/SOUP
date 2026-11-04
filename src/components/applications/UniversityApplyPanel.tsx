@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2, FileUp, Loader2, NotebookPen, X } from "lucid
 import { updateCustomerProfile } from "@/app/actions/account";
 import { uploadEvidenceFile, type EvidenceUploadResult } from "@/lib/documents/uploadEvidence";
 
-export type ApplyProgram = { id: string; title: string; level: string; intake: string | null };
+export type ApplyProgram = { id: string; title: string; level: string; intake: string | null; applicationFeeAmount?: number | null; applicationFeeCurrency?: string | null };
 export type ExistingApplication = { id: string; status: string; ownership: string } | null;
 export type ApplicantPrefill = {
   fullName: string;
@@ -77,6 +77,22 @@ export function UniversityApplyPanel({
   const selectedProgram = programByLabel.get(programText.trim()) || null;
   const hasPrograms = programs.length > 0;
   const intendedSubjectNote = !hasPrograms || !selectedProgram ? programText.trim().slice(0, 160) : "";
+
+  // Shown as a plain application fee, same wording regardless of program —
+  // if a specific program is picked, its own fee applies; otherwise, if
+  // every program here shares the same fee, that figure is shown up front
+  // rather than waiting for a program to be chosen.
+  const applicationFee = useMemo(() => {
+    if (selectedProgram?.applicationFeeAmount != null && selectedProgram.applicationFeeCurrency) {
+      return { amount: selectedProgram.applicationFeeAmount, currency: selectedProgram.applicationFeeCurrency };
+    }
+    if (selectedProgram) return null;
+    const withFee = programs.filter((p) => p.applicationFeeAmount != null && p.applicationFeeCurrency);
+    if (withFee.length !== programs.length || withFee.length === 0) return null;
+    const first = withFee[0];
+    const allSame = withFee.every((p) => p.applicationFeeAmount === first.applicationFeeAmount && p.applicationFeeCurrency === first.applicationFeeCurrency);
+    return allSame ? { amount: first.applicationFeeAmount as number, currency: first.applicationFeeCurrency as string } : null;
+  }, [programs, selectedProgram]);
 
   const combinedAcademicSummary = [
     highestQualification.trim() && institution.trim() ? `${highestQualification.trim()} at ${institution.trim()}` : highestQualification.trim() || institution.trim(),
@@ -290,6 +306,13 @@ export function UniversityApplyPanel({
               </ul>
             )}
           </div>
+
+          {applicationFee && (
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-hair bg-paper px-3 py-2.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[.08em] text-mute">Application fee</span>
+              <span className="text-sm font-semibold text-ink">{applicationFee.currency} {applicationFee.amount.toLocaleString("en")}</span>
+            </div>
+          )}
 
           <button onClick={submit} disabled={loading} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-60">
             {loading && <Loader2 size={12} className="animate-spin" />}
