@@ -37,6 +37,11 @@ const state = {
   // SINGLE_MATCH / AMBIGUOUS / NO_MATCH / ERROR from
   // GET /api/companion/documents/match.
   fileFields: [],
+  // AI readiness review of the application just filled — "idle" until a
+  // fill finishes, then "thinking" while /api/companion/review runs, then
+  // "done"/"error". See runReview() and renderReviewResult().
+  reviewStatus: "idle",
+  review: null,
 };
 
 const DOCUMENT_CATEGORY_LABELS = {
@@ -249,18 +254,27 @@ function activityDotGlyph(status) {
   if (status === "active") return "&#8943;";
   return "";
 }
+// Styled the same way Claude Code itself shows its own work inside VS
+// Code: window-chrome dots, a dark monospace feed, a blinking cursor
+// while still actively doing something — used for every "thinking" state
+// (scanning, filling, attaching, reviewing), not just a plain spinner.
 function renderActivity() {
   if (!state.activity.length) return "";
+  const stillWorking = state.activity.some((item) => item.status === "active") || state.reviewStatus === "thinking";
   return `
-    <div class="sc-card">
-      <div class="sc-eyebrow">Activity</div>
-      <div class="sc-activity" style="margin-top:9px;">
+    <div class="sc-card sc-terminal">
+      <div class="sc-terminal-header">
+        <span class="sc-terminal-dot red"></span><span class="sc-terminal-dot yellow"></span><span class="sc-terminal-dot green"></span>
+        <span class="sc-terminal-label">SOUP Companion — ${stillWorking ? "working…" : "done"}</span>
+      </div>
+      <div class="sc-activity sc-terminal-body">
         ${state.activity.map((item) => `
           <div class="sc-activity-item ${item.status}">
             <span class="sc-activity-dot">${activityDotGlyph(item.status)}</span>
             <span class="sc-activity-text">${escapeHtml(item.text)}</span>
           </div>
         `).join("")}
+        ${stillWorking ? '<span class="sc-terminal-cursor"></span>' : ""}
       </div>
     </div>
   `;
@@ -446,28 +460,66 @@ function renderFilling() {
   `);
 }
 
+// Readiness verdict a review returned — matches companion/review.ts's
+// overallReadiness. Mirrors the same badge/copy used on the PDF filler's
+// web review screen so the two surfaces feel like one product.
+const REVIEW_READINESS_COPY = {
+  STRONG: { label: "Ready to submit", cls: "strong" },
+  NEEDS_WORK: { label: "Needs work first", cls: "needs-work" },
+  NOT_READY: { label: "Not ready yet", cls: "not-ready" },
+};
+
+function renderReviewResult() {
+  if (state.reviewStatus !== "done" || !state.review) return "";
+  const review = state.review;
+  const readiness = REVIEW_READINESS_COPY[review.overallReadiness] || REVIEW_READINESS_COPY.NEEDS_WORK;
+  return `
+    <div class="sc-card" style="margin-top:10px;">
+      <div class="sc-eyebrow">SOUP's review</div>
+      <div style="margin-top:6px;"><span class="sc-review-badge ${readiness.cls}">${escapeHtml(readiness.label)}</span></div>
+      <p class="sc-note" style="margin-top:8px;">${escapeHtml(review.summary)}</p>
+      ${review.strengths && review.strengths.length ? `
+        <div class="sc-review-section-title" style="color:var(--teal);">Strengths</div>
+        <ul class="sc-review-list">${review.strengths.map((s) => `<li>• ${escapeHtml(s)}</li>`).join("")}</ul>
+      ` : ""}
+      ${review.gaps && review.gaps.length ? `
+        <div class="sc-review-section-title" style="color:var(--amber-text);">What to add or fix</div>
+        <ul class="sc-review-list">${review.gaps.map((g) => `<li><strong>${escapeHtml(g.field)}:</strong> ${escapeHtml(g.issue)}${g.suggestion ? ` — <span class="sc-note" style="display:inline;margin:0;">${escapeHtml(g.suggestion)}</span>` : ""}</li>`).join("")}</ul>
+      ` : ""}
+      ${review.credibilityNotes && review.credibilityNotes.length ? `
+        <div class="sc-review-section-title" style="color:var(--danger-text);">Credibility notes</div>
+        <ul class="sc-review-list">${review.credibilityNotes.map((c) => `<li><strong>${escapeHtml(c.field)}</strong> <span class="sc-note" style="display:inline;margin:0;text-transform:uppercase;font-weight:700;">(${escapeHtml(c.severity)})</span> — ${escapeHtml(c.concern)}</li>`).join("")}</ul>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderSuccess() {
   const s = state.fillSummary || { filled: 0, needInput: 0, conflicts: 0, failures: [] };
   const failures = s.failures || [];
   return el(`
-    <div class="sc-card">
-      <div class="sc-eyebrow">Page complete</div>
-      <div class="sc-title">${s.filled} field${s.filled === 1 ? "" : "s"} filled</div>
-      <ul class="sc-list" style="list-style:none; margin:10px 0 0; padding:0;">
-        <li class="sc-list-row"><span>Fields filled</span><strong>${s.filled}</strong></li>
-        <li class="sc-list-row"><span>Still need your input</span><strong>${s.needInput}</strong></li>
-        <li class="sc-list-row"><span>Conflicts detected</span><strong>${s.conflicts}</strong></li>
-        ${failures.length ? `<li class="sc-list-row"><span>Attempted but didn't go through</span><strong>${failures.length}</strong></li>` : ""}
-      </ul>
-      ${failures.length ? `
-        <div class="sc-warning" style="margin-top:10px;">
-          <div class="sc-warning-title">⚠ Needs a manual look</div>
-          <ul class="sc-list" style="list-style:none; margin:8px 0 0; padding:0;">
-            ${failures.map((f) => `<li class="sc-list-row"><span class="sc-list-label">${escapeHtml(f.label)}</span><span class="sc-note" style="margin:0; text-align:right;">${escapeHtml(f.reason)}</span></li>`).join("")}
-          </ul>
-        </div>
-      ` : ""}
-      <button class="sc-btn sc-btn-primary" data-action="continue-after-success" style="margin-top:12px;">Continue</button>
+    <div class="sc-stack" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="sc-card">
+        <div class="sc-eyebrow">Page complete</div>
+        <div class="sc-title">${s.filled} field${s.filled === 1 ? "" : "s"} filled</div>
+        <ul class="sc-list" style="list-style:none; margin:10px 0 0; padding:0;">
+          <li class="sc-list-row"><span>Fields filled</span><strong>${s.filled}</strong></li>
+          <li class="sc-list-row"><span>Still need your input</span><strong>${s.needInput}</strong></li>
+          <li class="sc-list-row"><span>Conflicts detected</span><strong>${s.conflicts}</strong></li>
+          ${failures.length ? `<li class="sc-list-row"><span>Attempted but didn't go through</span><strong>${failures.length}</strong></li>` : ""}
+        </ul>
+        ${failures.length ? `
+          <div class="sc-warning" style="margin-top:10px;">
+            <div class="sc-warning-title">⚠ Needs a manual look</div>
+            <ul class="sc-list" style="list-style:none; margin:8px 0 0; padding:0;">
+              ${failures.map((f) => `<li class="sc-list-row"><span class="sc-list-label">${escapeHtml(f.label)}</span><span class="sc-note" style="margin:0; text-align:right;">${escapeHtml(f.reason)}</span></li>`).join("")}
+            </ul>
+          </div>
+        ` : ""}
+        <button class="sc-btn sc-btn-primary" data-action="continue-after-success" style="margin-top:12px;">Continue</button>
+      </div>
+      ${renderActivity()}
+      ${renderReviewResult()}
     </div>
   `);
 }
@@ -686,12 +738,54 @@ const FILL_FAIL_COPY = {
   ERROR: "something on the page blocked it",
 };
 
+// Once SOUP has detected everything it can for this page and filled what
+// it could, it reviews the whole application the same way a counselor
+// would in the final minutes before submission — not a generic profile
+// check, but a review of exactly what is about to be submitted here:
+// every detected field (filled or not) and every document that did or
+// didn't get attached. Runs automatically, narrated into the same
+// terminal-styled activity feed as everything else Companion does.
+async function runReview() {
+  state.reviewStatus = "thinking";
+  state.review = null;
+  const stageIndex = state.activity.length;
+  state.activity.push({ text: "Reviewing this application…", status: "active" });
+  render();
+
+  const fieldsPayload = classifiedOnly(state.resolved).map((r) => ({
+    label: r.field.matchedLabel || r.field.label,
+    value: r.status === "ready" ? String(r.answer.value || "") : "",
+    filled: r.status === "ready",
+    source: r.status === "ready" ? r.answer.source : null,
+  }));
+  const documentsPayload = state.fileFields.map((entry) => ({
+    label: categoryLabel(entry.field.matchedCategory),
+    attached: Boolean(entry.attached),
+    fileName: (entry.result && entry.result.outcome === "SINGLE_MATCH" && entry.result.document && entry.result.document.originalFileName) || null,
+  }));
+
+  try {
+    const data = await apiFetch("/api/companion/review", {
+      method: "POST",
+      body: JSON.stringify({ fields: fieldsPayload, documents: documentsPayload, context: state.scan ? state.scan.pageTitle : null }),
+    });
+    state.review = data.review;
+    state.reviewStatus = "done";
+    state.activity[stageIndex] = { text: "Review complete — see SOUP's assessment below", status: "done" };
+  } catch {
+    state.reviewStatus = "error";
+    state.activity[stageIndex] = { text: "Couldn't generate a review right now", status: "error" };
+  }
+  render();
+}
+
 async function startFill() {
   const targets = classifiedOnly(state.resolved).filter((r) => r.status === "ready" && normalize(r.field.currentValue) !== normalize(r.answer.value));
   const plan = targets.map((r) => ({ fieldId: r.field.id, value: r.answer.value, label: r.field.matchedLabel || r.field.label }));
   if (!plan.length) {
     state.fillSummary = { filled: 0, needInput: fieldCounts().needs, conflicts: fieldCounts().conflicts, failures: [] };
     state.screen = "success";
+    runReview();
     return render();
   }
   state.screen = "filling";
@@ -734,6 +828,7 @@ async function startFill() {
   }).catch(() => {});
   state.screen = "success";
   render();
+  runReview();
 }
 
 async function saveAnswer(fieldId) {

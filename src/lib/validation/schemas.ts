@@ -296,6 +296,28 @@ export const companionDocumentMatchQuerySchema = z.object({
   category: z.string().trim().min(1).max(64),
 }).strict();
 
+// Request body for the AI application review (src/lib/companion/review.ts):
+// the client (desktop panel or the PDF filler) reports exactly what it
+// detected on the real form/PDF — field labels, whatever value will be
+// submitted, and which documents are attached — so the AI reviews the
+// application as it will actually be submitted, not a generic profile
+// check. Bounded generously but finitely since this is client-supplied
+// free text going straight into a prompt.
+export const companionReviewRequestSchema = z.object({
+  context: optionalShortTextSchema(300),
+  fields: z.array(z.object({
+    label: shortTextSchema(200),
+    value: shortTextSchema(2000).optional().default(""),
+    filled: z.boolean().optional().default(false),
+    source: optionalShortTextSchema(120),
+  })).max(80),
+  documents: z.array(z.object({
+    label: shortTextSchema(120),
+    attached: z.boolean().optional().default(false),
+    fileName: optionalShortTextSchema(300),
+  })).max(30).optional().default([]),
+}).strict();
+
 export const adminOfferUploadSchema = z.object({
   file: z.unknown(),
   conditional: z.string().optional().default("false"),
