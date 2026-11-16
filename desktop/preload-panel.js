@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("soupDesktop", {
   scanPage: () => ipcRenderer.invoke("portal-scan"),
   fillFields: (assignments) => ipcRenderer.invoke("portal-fill", assignments),
   openTab: (url) => ipcRenderer.invoke("tab-new", url),
+  clickControl: (fieldId) => ipcRenderer.invoke("portal-click-control", fieldId),
   attachDocument: (fieldId, documentUrl, fileName) => ipcRenderer.invoke("portal-attach-document", { fieldId, documentUrl, fileName }),
   openExternal: (url) => ipcRenderer.invoke("open-external", url),
   storageGet: (keys) => ipcRenderer.invoke("store-get", keys),
@@ -27,5 +28,10 @@ contextBridge.exposeInMainWorld("soupDesktop", {
     const listener = (_event, url) => callback(url);
     ipcRenderer.on("portal-url-changed", listener);
     return () => ipcRenderer.removeListener("portal-url-changed", listener);
+  },
+  onAuthPopup: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on("portal-auth-popup", listener);
+    return () => ipcRenderer.removeListener("portal-auth-popup", listener);
   },
 });

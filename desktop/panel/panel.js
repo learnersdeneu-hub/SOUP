@@ -70,6 +70,7 @@ function fillPortal(assignments) { return window.soupDesktop.fillFields(assignme
 function attachDocument(fieldId, documentUrl, fileName) { return window.soupDesktop.attachDocument(fieldId, documentUrl, fileName); }
 function openExternal(url) { return window.soupDesktop.openExternal(url); }
 function openTab(url) { return window.soupDesktop.openTab(url); }
+function clickControl(fieldId) { return window.soupDesktop.clickControl(fieldId); }
 
 // ---------- backend ----------
 async function apiFetch(path, options = {}) {
@@ -632,7 +633,7 @@ async function startApplicationRun(applicationIds) {
     state.screen = "applications-picker";
     return render();
   }
-  state.run = { queue, index: 0, status: "running", log: [{ text: runOpeningLine(queue), status: "done" }] };
+  state.run = { queue, index: 0, status: "running", log: [{ text: runOpeningLine(queue), status: "done" }], verdicts: {} };
   render();
   await openCurrentRunItem();
 }
@@ -671,10 +672,29 @@ async function openCurrentRunItem() {
 // Called once a page's scan settles (see the end of runScan()) when a
 // run is active: decides whether to autofill this page, pause for the
 // student, or treat the page as not an application form at all.
+// "Auth command" copy per kind (Phase D) — Companion never attempts to
+// solve, bypass or work around any of these; it only ever detects one and
+// waits for the student.
+const AUTH_BLOCK_COPY = {
+  CAPTCHA: "This page has a CAPTCHA. I won't try to solve it — please complete it yourself, then tell me to continue.",
+  OTP: "This page wants a verification code. Check your phone or email, enter it, then tell me to continue.",
+  PASSWORD: "This looks like an account sign-up. Type and confirm your own password — I never create or store one for you — then tell me to continue.",
+};
+
 function runHandleScanResult() {
   if (!state.run || state.run.status !== "running") return;
   const item = currentRunItem();
   if (!item) return;
+  // CAPTCHA/OTP pages are typically standalone verification steps with
+  // nothing else useful to fill — pause immediately rather than trying.
+  // A sign-up page's password field is different: there is usually a
+  // name/email to fill first, so that check happens after filling (see
+  // runAfterFillSettles()), not here.
+  if (state.scan && state.scan.authBlock && state.scan.authBlock.kind !== "PASSWORD") {
+    state.run.status = "paused";
+    runLog(`${item.universityName}: ${AUTH_BLOCK_COPY[state.scan.authBlock.kind] || "This page needs you before I can continue."}`, "error");
+    return render();
+  }
   if (state.screen === "unsupported") {
     state.run.status = "paused";
     runLog(`This doesn't look like an application form yet on ${item.universityName}. Take a look, then tell me to continue.`, "error");
@@ -691,11 +711,65 @@ function runHandleScanResult() {
     runLog(`I need some information for ${item.universityName} that isn't in SOUP yet — see "Need from you" below, then tell me to continue.`, "error");
     return render();
   }
+  if (state.scan && state.scan.authBlock && state.scan.authBlock.kind === "PASSWORD") {
+    state.run.status = "paused";
+    runLog(`${item.universityName}: ${AUTH_BLOCK_COPY.PASSWORD}`, "error");
+    return render();
+  }
   // Nothing to fill and nothing missing — likely a page before the real
   // form (a landing/login page). Pause rather than guess what to click.
   state.run.status = "paused";
   runLog(`I don't see a form to fill on this page yet for ${item.universityName}. Navigate to the application itself, then tell me to continue.`, "error");
   render();
+}
+
+// Every required field on the CURRENT page (not the whole application —
+// a later page's requirements aren't knowable yet) must already resolve
+// to "ready" before SOUP will click its own way past it.
+function pageRequiredFieldsSatisfied() {
+  if (!state.scan) return true;
+  const requiredIds = (state.scan.fields || []).filter((f) => f.required).map((f) => f.id);
+  if (!requiredIds.length) return true;
+  return requiredIds.every((id) => {
+    const entry = state.resolved.find((r) => r.field.id === id);
+    return entry && entry.status === "ready";
+  });
+}
+
+async function advancePageWithinApplication() {
+  const item = currentRunItem();
+  runLog(`Moving to the next step of ${item.universityName}'s form…`, "active");
+  render();
+  await clickControl(state.scan.nextControl.id);
+  // The page change this causes re-triggers the normal scan pipeline
+  // (same MutationObserver/navigation listeners as any real page change)
+  // — runHandleScanResult() picks up from there on the new page.
+}
+
+// Called wherever startFill() would otherwise go straight to the AI
+// review (Phase C): when a run is active and the current page is a
+// wizard step (has its own Next/Continue control distinct from the
+// form's real submit), finishing this page does not mean the
+// application is finished — it means "click Next and keep going" as
+// long as nothing required on THIS page is still missing. The real
+// per-application review only runs once there is no further Next
+// control to click (the last/only page).
+function runAfterFillSettles() {
+  if (!state.run || state.run.status !== "running") return runReview();
+  const item = currentRunItem();
+  if (!item) return runReview();
+  if (state.scan && state.scan.authBlock && state.scan.authBlock.kind === "PASSWORD") {
+    state.run.status = "paused";
+    runLog(`${item.universityName}: ${AUTH_BLOCK_COPY.PASSWORD}`, "error");
+    return render();
+  }
+  if (state.scan && state.scan.nextControl) {
+    if (pageRequiredFieldsSatisfied()) return advancePageWithinApplication();
+    state.run.status = "paused";
+    runLog(`Stuck partway through ${item.universityName}'s form — it needs more before I can move to the next page. See "Need from you" below, then tell me to continue.`, "error");
+    return render();
+  }
+  return runReview();
 }
 
 // Called at the end of runReview() once a fill+review pass settles: logs
@@ -723,12 +797,24 @@ function maybeAdvanceRun() {
   }
 
   if (state.review) {
-    const verdictText = {
-      STRONG: `I'm backing ${item.universityName} — it looks ready. Tell me when to submit it on the real site; I won't do that without you.`,
-      NEEDS_WORK: `${item.universityName} isn't quite sufficient yet: ${state.review.summary}`,
-      NOT_READY: `${item.universityName} is not ready for submission: ${state.review.summary}`,
-    }[state.review.overallReadiness] || `Reviewed ${item.universityName}.`;
-    runLog(verdictText, state.review.overallReadiness === "STRONG" ? "done" : "error");
+    // "I'll back it" requires both the AI's own STRONG opinion AND zero
+    // incomplete required items on SOUP's own checklist for this
+    // application — an AI opinion alone is not enough to tell a student
+    // their file is ready.
+    const incomplete = (item.checklist && item.checklist.incompleteRequiredCount) || 0;
+    const trulyStrong = state.review.overallReadiness === "STRONG" && incomplete === 0;
+    if (trulyStrong) {
+      runLog(`I'm backing ${item.universityName} — it looks ready. Approve it below when you agree; I still won't submit anything on the real site without you.`, "done");
+      state.run.verdicts[item.applicationId] = { universityName: item.universityName, approved: false, approving: false };
+    } else if (incomplete > 0 && state.review.overallReadiness === "STRONG") {
+      runLog(`${item.universityName}: SOUP's own checklist still has ${incomplete} required item${incomplete === 1 ? "" : "s"} outstanding, even though the fields I could see looked fine. Check My Colleges before treating this as ready.`, "error");
+    } else {
+      const verdictText = {
+        NEEDS_WORK: `${item.universityName} isn't quite sufficient yet: ${state.review.summary}`,
+        NOT_READY: `${item.universityName} is not ready for submission: ${state.review.summary}`,
+      }[state.review.overallReadiness] || `Reviewed ${item.universityName}.`;
+      runLog(verdictText, "error");
+    }
   } else {
     runLog(`Finished what I could for ${item.universityName}.`, "done");
   }
@@ -742,6 +828,30 @@ function maybeAdvanceRun() {
   state.run.index = nextIndex;
   render();
   return openCurrentRunItem();
+}
+
+// The only moment this run ever changes a StudentApplication's status —
+// explicitly triggered by the student clicking "Approve for submission"
+// in the run panel, never automatic. Reuses the exact same deterministic
+// check as the student-facing web approval (src/lib/applications/
+// approve.ts) via the bearer-authenticated companion route — this still
+// only moves SOUP's own record to READY_TO_SUBMIT, never clicks anything
+// on the university's own site.
+async function approveApplication(applicationId) {
+  const verdict = state.run && state.run.verdicts[applicationId];
+  if (!verdict) return;
+  verdict.approving = true;
+  render();
+  try {
+    await apiFetch(`/api/companion/applications/${encodeURIComponent(applicationId)}/approve`, { method: "POST" });
+    verdict.approved = true;
+    verdict.approving = false;
+    runLog(`${verdict.universityName}: approved in SOUP. You still need to actually submit it on the university's own site.`, "done");
+  } catch (error) {
+    verdict.approving = false;
+    runLog(`${verdict.universityName}: couldn't approve it — ${error.message || "something went wrong"}.`, "error");
+  }
+  render();
 }
 
 function renderRunPanel() {
@@ -764,6 +874,15 @@ function renderRunPanel() {
         `).join("")}
         ${stillWorking ? '<span class="sc-terminal-cursor"></span>' : ""}
       </div>
+      ${Object.keys(state.run.verdicts).length ? `
+        <div style="padding:0 12px 12px; display:flex; flex-direction:column; gap:6px;">
+          ${Object.entries(state.run.verdicts).map(([applicationId, verdict]) => verdict.approved ? "" : `
+            <button class="sc-btn sc-btn-primary" data-action="approve-application" data-application-id="${applicationId}" style="width:100%;" ${verdict.approving ? "disabled" : ""}>
+              ${verdict.approving ? "Approving…" : `Approve ${escapeHtml(verdict.universityName)} for submission`}
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
       <div style="padding:0 12px 12px;">
         ${state.run.status === "paused" ? '<button class="sc-btn sc-btn-primary" data-action="continue-run" style="width:100%;">Continue</button>' : ""}
         ${state.run.status !== "done" ? '<button class="sc-btn sc-btn-secondary" data-action="cancel-run" style="width:100%;margin-top:6px;">Stop this run</button>' : '<button class="sc-btn sc-btn-secondary" data-action="cancel-run" style="width:100%;">Done — close</button>'}
@@ -853,6 +972,7 @@ async function handleAction(action, node) {
     case "start-applications-run": return startApplicationRun(Array.from(state.applicationsPicker.selected));
     case "cancel-run": state.run = null; state.screen = "ready"; return runScanQuiet();
     case "continue-run": return maybeAdvanceRun();
+    case "approve-application": return approveApplication(node.dataset.applicationId);
     default: return null;
   }
 }
@@ -1013,10 +1133,30 @@ async function runReview() {
     fileName: (entry.result && entry.result.outcome === "SINGLE_MATCH" && entry.result.document && entry.result.document.originalFileName) || null,
   }));
 
+  // Inside a run, ground the review in SOUP's own real requirements
+  // tracking for this application too — not just whatever happened to be
+  // on the page just scanned. This is the same checklist data
+  // maybeAdvanceRun() checks deterministically.
+  const runItem = state.run ? currentRunItem() : null;
+  if (runItem && runItem.checklist) {
+    runItem.checklist.items.forEach((checklistItem) => {
+      fieldsPayload.push({
+        label: checklistItem.title,
+        value: checklistItem.status,
+        filled: ["COMPLETE", "DOCUMENT_UPLOADED", "NOT_APPLICABLE"].includes(checklistItem.status),
+        source: "SOUP checklist",
+      });
+    });
+  }
+
   try {
     const data = await apiFetch("/api/companion/review", {
       method: "POST",
-      body: JSON.stringify({ fields: fieldsPayload, documents: documentsPayload, context: state.scan ? state.scan.pageTitle : null }),
+      body: JSON.stringify({
+        fields: fieldsPayload,
+        documents: documentsPayload,
+        context: runItem ? `${runItem.universityName}${runItem.programTitle ? ` — ${runItem.programTitle}` : ""}` : (state.scan ? state.scan.pageTitle : null),
+      }),
     });
     state.review = data.review;
     state.reviewStatus = "done";
@@ -1035,8 +1175,8 @@ async function startFill() {
   if (!plan.length) {
     state.fillSummary = { filled: 0, needInput: fieldCounts().needs, conflicts: fieldCounts().conflicts, failures: [] };
     state.screen = "success";
-    runReview();
-    return render();
+    render();
+    return runAfterFillSettles();
   }
   state.screen = "filling";
   state.fillPlan = plan;
@@ -1078,7 +1218,7 @@ async function startFill() {
   }).catch(() => {});
   state.screen = "success";
   render();
-  runReview();
+  runAfterFillSettles();
 }
 
 async function saveAnswer(fieldId) {
@@ -1142,5 +1282,15 @@ async function init() {
 // by main.js's switchTab()/createTab() nav listeners respectively.
 window.soupDesktop.onTabChanged(() => { if (state.token) runScanQuiet(); });
 window.soupDesktop.onPortalUrlChanged(() => { if (state.token) runScanQuiet(); });
+// A real OAuth/SSO popup just opened (main.js's setWindowOpenHandler) —
+// only meaningful mid-run; outside a run there's nothing for this to
+// pause.
+window.soupDesktop.onAuthPopup(() => {
+  if (!state.run || state.run.status !== "running") return;
+  const item = currentRunItem();
+  state.run.status = "paused";
+  runLog(`${item ? item.universityName + ": " : ""}I opened a sign-in window for you. Complete it there, then tell me to continue.`, "error");
+  render();
+});
 
 init();

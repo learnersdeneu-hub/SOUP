@@ -104,6 +104,17 @@ function createTab(rawUrl) {
   const tab = { view, title: "New tab", url: target };
   tabs.set(id, tab);
 
+  // A real OAuth/SSO "Sign in with Google/Microsoft" button opens a popup
+  // via window.open() — with no handler, Electron denies it by default and
+  // the student simply cannot complete that sign-in at all. Allowing it
+  // (a real new window, same as any browser) plus notifying the panel is
+  // what makes that an "auth command" the run can pause and wait on,
+  // instead of a silent dead end.
+  view.webContents.setWindowOpenHandler(({ url }) => {
+    if (id === activeTabId) panelView?.webContents.send("portal-auth-popup", { url });
+    return { action: "allow" };
+  });
+
   view.webContents.on("dom-ready", () => injectBridge(view));
   view.webContents.on("page-title-updated", (_e, title) => { tab.title = title; notifyChrome(); });
   const onNav = (_e, url) => {
@@ -265,6 +276,15 @@ ipcMain.handle("portal-fill", async (_e, assignments) => {
   catch { return []; }
 });
 ipcMain.handle("open-external", (_e, url) => shell.openExternal(url));
+// Clicking a page's own "Next/Continue" wizard control (Phase B) — only
+// ever invoked by the run orchestrator after it has confirmed every
+// required field on the current page already has an answer.
+ipcMain.handle("portal-click-control", async (_e, fieldId) => {
+  const view = activeView();
+  if (!view) return { ok: false, reason: "NO_ACTIVE_TAB" };
+  try { return await view.webContents.executeJavaScript(`(window.__soupClickControl ? window.__soupClickControl(${JSON.stringify(fieldId)}) : { ok: false, reason: "NOT_FOUND" })`); }
+  catch { return { ok: false, reason: "ERROR" }; }
+});
 
 // A portal tab's own MutationObserver (see inject/portal-bridge.js) signals
 // here when its form changes without a full navigation -- a wizard step,

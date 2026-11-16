@@ -143,3 +143,20 @@ apps pick up the new `latest.yml` on their own.
   routes, same pairing flow, same `/companion/connect` page. The new
   `GET /api/companion/documents/match` route is the one addition this pass
   made on the backend side, specifically to support auto-attach.
+- **Multi-application run** ("APPS" button → pick from My Colleges →
+  Start): Companion opens one application at a time, fills what it can,
+  reviews it, and auto-advances. It never creates or stores a password
+  for a third-party account — a password field pauses the run and waits
+  for the student to type their own. It never attempts to solve a CAPTCHA
+  or one-time code — same pause-and-wait posture, by design, not a gap to
+  close later. Page-gating (holding off a wizard's "Next" button until
+  every required field on that page is answered) only recognizes a
+  same-document multi-step form with a visible Next/Continue control —
+  a true multi-page navigation (separate URLs) is handled too (the normal
+  did-navigate rescan picks it up), but a cross-origin iframe-embedded
+  form is not scanned at all (same limitation as the original single-page
+  scan). An OAuth/SSO popup is allowed to open as a real separate Electron
+  window (`setWindowOpenHandler` with `action: "allow"`) so the student
+  can actually complete it — that popup has no Companion bridge injected
+  into it and is not tracked by the run beyond pausing until the student
+  says to continue.

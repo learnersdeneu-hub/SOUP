@@ -149,7 +149,59 @@
       });
     });
 
-    return { fields: fields, fileFields: fileFields, portalHost: location.host, pageUrl: location.href, pageTitle: document.title };
+    // ---------- Multi-step gating: the "Next/Continue" control (Phase B) ----------
+    // A wizard's own "Next"/"Continue" control, distinct from its real
+    // final submit ("Submit"/"Finish"/"Apply now"/"Review") — the run
+    // orchestrator (panel.js) checks every required field on THIS page is
+    // answered before ever clicking this, rather than advancing blind into
+    // a page it can't come back from easily.
+    function controlText(el) { return (textOf(el) || el.value || "").trim(); }
+    function looksLikeNextControl(el) {
+      var text = controlText(el);
+      if (!/^(next|continue)\b/i.test(text)) return false;
+      if (/submit|finish|complete|apply\s*now|review/i.test(text)) return false;
+      return true;
+    }
+    var nextCandidates = Array.prototype.slice.call(document.querySelectorAll('button, input[type="submit"], input[type="button"], a[role="button"], [role="button"]'));
+    var nextEl = nextCandidates.find ? nextCandidates.find(function (el) { return isVisible(el) && !el.disabled && looksLikeNextControl(el); }) : null;
+    var nextControl = nextEl ? { id: assignFieldId(nextEl), label: controlText(nextEl).slice(0, 80) } : null;
+
+    // ---------- "Auth command" detection (Phase D) ----------
+    // Things only the student themselves can do — a visible CAPTCHA
+    // widget, a one-time verification code input, or a live password
+    // field on what looks like an account sign-up. Detected here and
+    // reported for the run orchestrator to pause on; this file never
+    // attempts to solve, fill or bypass any of these.
+    var hasCaptcha = Boolean(document.querySelector('iframe[src*="recaptcha" i], iframe[src*="hcaptcha" i], div.g-recaptcha, div.h-captcha, [data-sitekey]'));
+    var passwordEls = Array.prototype.slice.call(document.querySelectorAll('input[type="password"]')).filter(isVisible);
+    var otpEl = Array.prototype.slice.call(document.querySelectorAll("input")).find(function (el) {
+      if (!isVisible(el)) return false;
+      if ((el.getAttribute("autocomplete") || "").toLowerCase() === "one-time-code") return true;
+      var l = labelFor(el).toLowerCase();
+      return /verification code|one-time code|\botp\b|security code/.test(l);
+    });
+    var authBlock = hasCaptcha ? { kind: "CAPTCHA" }
+      : otpEl ? { kind: "OTP" }
+      : passwordEls.length ? { kind: "PASSWORD", fields: passwordEls.map(function (el) { return { id: assignFieldId(el), label: (labelFor(el) || "Password").slice(0, 80) }; }) }
+      : null;
+
+    return {
+      fields: fields,
+      fileFields: fileFields,
+      portalHost: location.host,
+      pageUrl: location.href,
+      pageTitle: document.title,
+      nextControl: nextControl,
+      authBlock: authBlock,
+    };
+  };
+
+  window.__soupClickControl = function (fieldId) {
+    var el = null;
+    try { el = document.querySelector('[data-soup-field-id="' + CSS.escape(fieldId) + '"]'); } catch (e) { el = null; }
+    if (!el) return { ok: false, reason: "NOT_FOUND" };
+    el.click();
+    return { ok: true };
   };
 
   // Multi-step/wizard forms swap their own fields in and out without a
