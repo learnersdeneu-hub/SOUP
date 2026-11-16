@@ -29,10 +29,11 @@
 // debugger exposes here), never achievable by a plain webpage or even a
 // content script — which is also exactly why the web-based (no-install)
 // Companion can only ever be a reference/copy-paste tool, never this.
-const { app, BrowserWindow, BrowserView, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, BrowserView, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { pathToFileURL } = require("url");
+const { autoUpdater } = require("electron-updater");
 
 const PANEL_WIDTH = 380;
 const CHROME_HEIGHT = 80;
@@ -185,8 +186,41 @@ function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+app.whenReady().then(initAutoUpdate);
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+
+// ---------- Auto-update ----------
+// Students install once and never need to uninstall/reinstall again: every
+// `npm run dist` release is copied to public/downloads/updates/ (see
+// desktop/README.md) alongside a latest.yml feed file electron-updater
+// polls. Silent no-op in dev (app.isPackaged is false when run via
+// `electron .`) — there's no installed app to update, and the generic
+// feed URL isn't reachable from a dev checkout anyway.
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+function initAutoUpdate() {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("update-downloaded", (info) => {
+    dialog.showMessageBox(mainWindow, {
+      type: "info",
+      title: "SOUP Companion update ready",
+      message: `Version ${info.version} has downloaded.`,
+      detail: "Restart now to finish installing it, or it will install automatically next time you close the app.",
+      buttons: ["Restart now", "Later"],
+      defaultId: 0,
+      cancelId: 1,
+    }).then(({ response }) => { if (response === 0) autoUpdater.quitAndInstall(); });
+  });
+  // Errors (offline, feed unreachable) are expected and non-fatal — the app
+  // keeps working on whatever version is already installed either way.
+  autoUpdater.on("error", (error) => console.error("[auto-update]", error && error.message));
+
+  autoUpdater.checkForUpdates().catch(() => {});
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), FOUR_HOURS_MS);
+}
 
 // ---------- Tabs (chrome <-> main) ----------
 ipcMain.handle("tab-list", () => listTabs());

@@ -163,6 +163,7 @@ function renderHeader() {
         <div class="sc-header-portal">${escapeHtml(portal)}</div>
       </div>
       <span class="sc-status-dot ${statusDotClass()}" title="${state.token ? "Connected" : "Not connected"}"></span>
+      <button class="sc-icon-btn" style="font-size:9px;font-weight:700;letter-spacing:.02em;" data-action="open-pdf-page" title="Fill a PDF application form" aria-label="Fill a PDF application form">PDF</button>
       ${state.token ? '<button class="sc-icon-btn" data-action="rescan" title="Rescan this page" aria-label="Rescan this page">⟳</button>' : ""}
     </header>
   `);
@@ -555,6 +556,7 @@ async function handleAction(action, node) {
     case "keep-current-value": return keepCurrentValue(node.dataset.fieldId);
     case "open-connect-page": return openExternal(`${API_BASE}/companion/connect`);
     case "open-documents-page": return openExternal(`${API_BASE}/documents`);
+    case "open-pdf-page": return openExternal(`${API_BASE}/companion/pdf`);
     default: return null;
   }
 }
