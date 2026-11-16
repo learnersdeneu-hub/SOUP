@@ -99,7 +99,7 @@ function createTab(rawUrl) {
   if (!target) target = NEW_TAB_URL;
   else if (!/^https?:\/\/|^file:\/\//i.test(target)) target = `https://${target}`;
 
-  const view = new BrowserView({ webPreferences: { contextIsolation: true, sandbox: true } });
+  const view = new BrowserView({ webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, "preload-portal.js") } });
   const tab = { view, title: "New tab", url: target };
   tabs.set(id, tab);
 
@@ -231,6 +231,16 @@ ipcMain.handle("portal-fill", async (_e, assignments) => {
   catch { return []; }
 });
 ipcMain.handle("open-external", (_e, url) => shell.openExternal(url));
+
+// A portal tab's own MutationObserver (see inject/portal-bridge.js) signals
+// here when its form changes without a full navigation -- a wizard step,
+// a conditionally-revealed section. Only acted on when it's the tab the
+// student is actually looking at; a background tab's own page churn
+// shouldn't trigger a rescan of whatever tab happens to be active.
+ipcMain.on("portal-dom-changed", (event) => {
+  const active = activeView();
+  if (active && event.sender === active.webContents) panelView?.webContents.send("tab-changed");
+});
 
 // ---------- Document auto-attach (Chrome DevTools Protocol) ----------
 async function attachDocumentToField(fieldId, documentUrl, fileName) {

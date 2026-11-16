@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeCoreProfileDetails } from "@/lib/applications/coreProfile";
 
 export type AnswerEntry = { value: string; source: string; confidence: "VERIFIED" | "PROFILE" | "STATED" };
 
@@ -63,6 +64,21 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
   if (studentCase?.preferredIntake) answerBank.preferredIntake = { value: studentCase.preferredIntake, source: "SOUP counselor profile", confidence: "STATED" };
   if (studentCase?.academicBackgroundSummary) answerBank.academicBackground = { value: studentCase.academicBackgroundSummary, source: "SOUP counselor profile", confidence: "STATED" };
   if (studentCase?.englishProficiencySummary) answerBank.englishProficiency = { value: studentCase.englishProficiencySummary, source: "SOUP counselor profile", confidence: "STATED" };
+
+  // The student's own "Profile & Details" form (src/components/profile/
+  // ProfileDetailsForm.tsx) already collects phone, address, passport and
+  // emergency-contact data — it just never reached the answer bank before,
+  // so field-dictionary.js's existing phone/address/passportNumber/
+  // passportExpiry/emergencyContactName patterns always fell through to
+  // "needs your input" regardless of how good the fill mechanics got.
+  const core = normalizeCoreProfileDetails(studentCase?.coreProfileDetails);
+  const phone = [core.phoneCountryCode, core.phone].filter(Boolean).join(" ").trim();
+  if (phone) answerBank.phone = { value: phone, source: "SOUP profile", confidence: "STATED" };
+  if (core.currentAddress) answerBank.address = { value: core.currentAddress, source: "SOUP profile", confidence: "STATED" };
+  if (core.passportNumber) answerBank.passportNumber = { value: core.passportNumber, source: "SOUP profile", confidence: "STATED" };
+  if (core.passportExpiry) answerBank.passportExpiry = { value: core.passportExpiry, source: "SOUP profile", confidence: "STATED" };
+  if (core.emergencyContactName) answerBank.emergencyContactName = { value: core.emergencyContactName, source: "SOUP profile", confidence: "STATED" };
+  if (core.emergencyContactRelationship) answerBank.emergencyContactRelationship = { value: core.emergencyContactRelationship, source: "SOUP profile", confidence: "STATED" };
 
   // Facts genuinely extracted from a processed document (e.g. a passport scan)
   // are surfaced separately from the core answer bank, tagged with their real

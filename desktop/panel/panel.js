@@ -10,8 +10,8 @@ const API_BASE = "https://www.soupassist.com";
 const STORAGE_KEY_TOKEN = "soup_companion_token";
 const STORAGE_KEY_PROFILE = "soup_companion_profile";
 
-const GROUP_LABELS = { personal: "Personal", contact: "Contact", education: "Education", documents: "Documents" };
-const GROUP_ORDER = ["personal", "contact", "education", "documents"];
+const GROUP_LABELS = { personal: "Personal", contact: "Contact", education: "Education", documents: "Documents", other: "Other" };
+const GROUP_ORDER = ["personal", "contact", "education", "documents", "other"];
 
 const state = {
   screen: "loading",
@@ -446,7 +446,8 @@ function renderFilling() {
 }
 
 function renderSuccess() {
-  const s = state.fillSummary || { filled: 0, needInput: 0, conflicts: 0 };
+  const s = state.fillSummary || { filled: 0, needInput: 0, conflicts: 0, failures: [] };
+  const failures = s.failures || [];
   return el(`
     <div class="sc-card">
       <div class="sc-eyebrow">Page complete</div>
@@ -455,7 +456,16 @@ function renderSuccess() {
         <li class="sc-list-row"><span>Fields filled</span><strong>${s.filled}</strong></li>
         <li class="sc-list-row"><span>Still need your input</span><strong>${s.needInput}</strong></li>
         <li class="sc-list-row"><span>Conflicts detected</span><strong>${s.conflicts}</strong></li>
+        ${failures.length ? `<li class="sc-list-row"><span>Attempted but didn't go through</span><strong>${failures.length}</strong></li>` : ""}
       </ul>
+      ${failures.length ? `
+        <div class="sc-warning" style="margin-top:10px;">
+          <div class="sc-warning-title">⚠ Needs a manual look</div>
+          <ul class="sc-list" style="list-style:none; margin:8px 0 0; padding:0;">
+            ${failures.map((f) => `<li class="sc-list-row"><span class="sc-list-label">${escapeHtml(f.label)}</span><span class="sc-note" style="margin:0; text-align:right;">${escapeHtml(f.reason)}</span></li>`).join("")}
+          </ul>
+        </div>
+      ` : ""}
       <button class="sc-btn sc-btn-primary" data-action="continue-after-success" style="margin-top:12px;">Continue</button>
     </div>
   `);
@@ -664,11 +674,21 @@ async function attachDocumentForEntry(entry, documentId, activityIndex) {
   render();
 }
 
+// Honest, specific reasons a field didn't take — surfaced to the student
+// instead of a bare "failed," matching the Claude-Code-style narration this
+// panel already does for everything else: say what happened and why.
+const FILL_FAIL_COPY = {
+  NOT_FOUND: "the field disappeared from the page before I could fill it",
+  NO_MATCHING_OPTION: "none of this dropdown's options matched the saved value",
+  DID_NOT_STICK: "the page reset the value right after I set it",
+  ERROR: "something on the page blocked it",
+};
+
 async function startFill() {
   const targets = classifiedOnly(state.resolved).filter((r) => r.status === "ready" && normalize(r.field.currentValue) !== normalize(r.answer.value));
   const plan = targets.map((r) => ({ fieldId: r.field.id, value: r.answer.value, label: r.field.matchedLabel || r.field.label }));
   if (!plan.length) {
-    state.fillSummary = { filled: 0, needInput: fieldCounts().needs, conflicts: fieldCounts().conflicts };
+    state.fillSummary = { filled: 0, needInput: fieldCounts().needs, conflicts: fieldCounts().conflicts, failures: [] };
     state.screen = "success";
     return render();
   }
@@ -679,15 +699,26 @@ async function startFill() {
 
   const results = (await fillPortal(plan.map((p) => ({ fieldId: p.fieldId, value: p.value })))) || [];
   const succeeded = results.filter((r) => r.ok).length;
+  const failures = results
+    .map((r, i) => ({ result: r, label: plan[i] ? plan[i].label : "A field" }))
+    .filter(({ result }) => !result.ok)
+    .map(({ result, label }) => ({ label, reason: FILL_FAIL_COPY[result.reason] || "it didn't go through for an unclear reason" }));
 
   for (let i = 0; i < plan.length; i++) {
     state.fillRevealCount = i + 1;
+    const result = results[i];
+    const label = plan[i].label;
+    state.activity.push(
+      result && result.ok
+        ? { text: `Filled "${label}"`, status: "done" }
+        : { text: `Couldn't fill "${label}" — ${FILL_FAIL_COPY[(result && result.reason) || "ERROR"] || "it didn't go through"}`, status: "error" },
+    );
     render();
     await new Promise((resolve) => setTimeout(resolve, 140));
   }
 
   const counts = fieldCounts();
-  state.fillSummary = { filled: succeeded, needInput: counts.needs, conflicts: counts.conflicts };
+  state.fillSummary = { filled: succeeded, needInput: counts.needs, conflicts: counts.conflicts, failures };
   apiFetch("/api/companion/fill-event", {
     method: "POST",
     body: JSON.stringify({

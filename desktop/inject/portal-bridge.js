@@ -117,8 +117,61 @@
         matchedLabel: match ? match.label : null,
       });
     });
+
+    // A div/button-driven custom dropdown, combobox or date picker (common
+    // in React component libraries) is invisible to the plain
+    // input/select/textarea query above -- it was never scanned, never
+    // shown as needing attention, and the student had no way to know
+    // Companion had anything to say about it. These can't be filled the
+    // same way (no safe, generic way to drive an arbitrary library's
+    // click/keyboard interaction), but surfacing them as a recognized
+    // "needs your input" item beats them not existing on the student's
+    // radar at all. matchedKey is a synthetic key with no answer-bank
+    // entry, so these always resolve to "needs" further down the pipeline,
+    // never a silent wrong guess.
+    var customWidgets = Array.prototype.slice.call(document.querySelectorAll('[role="combobox"], [role="listbox"], [contenteditable="true"]'));
+    customWidgets.forEach(function (el) {
+      if (el.closest && el.closest("[data-soup-field-id]")) return;
+      if (el.disabled || el.getAttribute("aria-disabled") === "true") return;
+      if (!isVisible(el)) return;
+      var label = labelFor(el);
+      fields.push({
+        id: assignFieldId(el),
+        label: (label || "Custom control").slice(0, 160),
+        name: el.name || "",
+        inputType: "custom-widget",
+        tag: el.tagName.toLowerCase(),
+        currentValue: "",
+        required: Boolean(el.getAttribute("aria-required") === "true"),
+        matchedKey: "custom_widget",
+        matchedGroup: "other",
+        matchedLabel: (label || "Custom control").slice(0, 160),
+      });
+    });
+
     return { fields: fields, fileFields: fileFields, portalHost: location.host, pageUrl: location.href, pageTitle: document.title };
   };
+
+  // Multi-step/wizard forms swap their own fields in and out without a
+  // full navigation -- did-navigate/dom-ready in main.js never fire again,
+  // so without this the panel keeps showing whatever it scanned on the
+  // very first load of that page. Debounced so typing into a field (which
+  // also mutates the DOM, e.g. a live validation message appearing) doesn't
+  // trigger a rescan storm; only fires when the preload bridge for this
+  // view actually exists (it won't for a view loaded before this file
+  // shipped, or in a context with no window.soupPortal for any reason).
+  if (window.soupPortal && typeof window.soupPortal.notifyDomChanged === "function") {
+    var domChangeTimer = null;
+    var observer = new MutationObserver(function () {
+      if (domChangeTimer) clearTimeout(domChangeTimer);
+      domChangeTimer = setTimeout(function () {
+        window.soupPortal.notifyDomChanged();
+      }, 600);
+    });
+    try {
+      observer.observe(document.documentElement || document.body, { childList: true, subtree: true });
+    } catch (e) { /* document not ready enough to observe yet -- safe to skip */ }
+  }
 
   function nativeSetValue(el, value) {
     var proto = el.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
@@ -135,36 +188,97 @@
     setTimeout(function () { el.style.outline = previous; }, 1000);
   }
 
+  // Every branch below re-reads the control after dispatching its events and
+  // reports ok:true only when the value actually stuck — "no exception was
+  // thrown" and "the page kept the value" are different things, and a
+  // React/Vue-controlled input can silently reset a programmatically-set
+  // value on its next render rather than rejecting it synchronously. The
+  // ~60ms wait before re-reading is what catches that next-tick reset
+  // instead of reporting false success the instant dispatchEvent returns.
   function fillOne(el, value) {
-    var type = (el.getAttribute("type") || el.tagName.toLowerCase()).toLowerCase();
-    if (el.tagName === "SELECT") {
-      var options = Array.prototype.slice.call(el.options);
-      var match = options.find(function (o) { return o.value === value; })
-        || options.find(function (o) { return o.textContent.trim().toLowerCase() === String(value).toLowerCase(); });
-      if (!match) return { ok: false, reason: "NO_MATCHING_OPTION" };
-      el.value = match.value;
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+    return new Promise(function (resolve) {
+      var type = (el.getAttribute("type") || el.tagName.toLowerCase()).toLowerCase();
+
+      function verifyAfter(stillCorrect) {
+        setTimeout(function () {
+          resolve(stillCorrect() ? { ok: true, verified: true } : { ok: false, reason: "DID_NOT_STICK" });
+        }, 60);
+      }
+
+      if (el.tagName === "SELECT") {
+        var options = Array.prototype.slice.call(el.options);
+        var optionMatch = options.find(function (o) { return o.value === value; })
+          || options.find(function (o) { return o.textContent.trim().toLowerCase() === String(value).toLowerCase(); });
+        if (!optionMatch) { resolve({ ok: false, reason: "NO_MATCHING_OPTION" }); return; }
+        el.value = optionMatch.value;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        flash(el);
+        verifyAfter(function () { return el.value === optionMatch.value; });
+        return;
+      }
+
+      if (type === "checkbox") {
+        var shouldCheck = value === "true" || value === true;
+        el.checked = shouldCheck;
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        flash(el);
+        verifyAfter(function () { return el.checked === shouldCheck; });
+        return;
+      }
+
+      // Radios were previously unhandled entirely (fell through to
+      // nativeSetValue, which sets .value -- meaningless for a radio, which
+      // is selected via .checked). The intended answer is the OPTION VALUE
+      // to select, not a boolean on the one element the scan happened to
+      // assign this fieldId to -- so this looks across every radio sharing
+      // the same name for the one whose value matches, and checks that one.
+      if (type === "radio") {
+        var target = el;
+        if (el.name) {
+          try {
+            var group = Array.prototype.slice.call(document.querySelectorAll('input[type="radio"][name="' + CSS.escape(el.name) + '"]'));
+            var byValue = group.find(function (r) { return r.value === String(value); })
+              || group.find(function (r) { return r.value.toLowerCase() === String(value).toLowerCase(); });
+            if (byValue) target = byValue;
+          } catch (e) { /* invalid name for CSS.escape -- fall back to el itself */ }
+        }
+        // If no sibling matched by value, treat `value` as a plain
+        // true/false "check this specific radio" instead (the same
+        // convention a checkbox uses) rather than silently doing nothing.
+        var radioShouldCheck = target !== el ? true : (value === "true" || value === true);
+        target.checked = radioShouldCheck;
+        target.dispatchEvent(new Event("change", { bubbles: true }));
+        flash(target);
+        verifyAfter(function () { return target.checked === radioShouldCheck; });
+        return;
+      }
+
+      nativeSetValue(el, value);
       flash(el);
-      return { ok: true };
-    }
-    if (type === "checkbox") {
-      el.checked = value === "true" || value === true;
-      el.dispatchEvent(new Event("change", { bubbles: true }));
-      flash(el);
-      return { ok: true };
-    }
-    nativeSetValue(el, value);
-    flash(el);
-    return { ok: true };
+      verifyAfter(function () { return String(el.value) === String(value); });
+    });
   }
 
   window.__soupFillFields = function (assignments) {
-    return (assignments || []).map(function (assignment) {
+    var list = assignments || [];
+    var results = [];
+    var index = 0;
+    // Sequential, not Promise.all: each fill briefly waits to verify, and
+    // doing that one field at a time avoids several near-simultaneous
+    // change events on the same form confusing a framework's own
+    // re-render/validation timing.
+    function next() {
+      if (index >= list.length) return Promise.resolve(results);
+      var assignment = list[index++];
       var el = null;
       try { el = document.querySelector('[data-soup-field-id="' + CSS.escape(assignment.fieldId) + '"]'); } catch (e) { el = null; }
-      if (!el) return { fieldId: assignment.fieldId, ok: false, reason: "NOT_FOUND" };
-      try { return Object.assign({ fieldId: assignment.fieldId }, fillOne(el, assignment.value)); }
-      catch (e) { return { fieldId: assignment.fieldId, ok: false, reason: "ERROR" }; }
-    });
+      var pending = !el
+        ? Promise.resolve({ fieldId: assignment.fieldId, ok: false, reason: "NOT_FOUND" })
+        : fillOne(el, assignment.value)
+            .then(function (result) { return Object.assign({ fieldId: assignment.fieldId }, result); })
+            .catch(function () { return { fieldId: assignment.fieldId, ok: false, reason: "ERROR" }; });
+      return pending.then(function (result) { results.push(result); return next(); });
+    }
+    return next();
   };
 })();
