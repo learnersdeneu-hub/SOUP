@@ -5,7 +5,6 @@ import { getCurrentUser } from "@/lib/auth/currentUser";
 import { normalizeField, summarizeUniversityPrograms } from "@/lib/universities/presentation";
 import { deriveCatalogChannel, networksFromMetadata } from "@/lib/universities/catalogChannels";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { UniversityCatalogBrowser, type CatalogUniversity } from "@/components/universities/UniversityCatalogBrowser";
 import { effectiveCollegesCap } from "@/lib/applications/capacity";
@@ -75,6 +74,14 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
     const networks = networksFromMetadata(university.publicMetadata);
     const fields = [...new Set(university.programs.map((program) => normalizeField(program.field)).filter((value): value is string => Boolean(value)))];
     const languages = [...new Set(university.programs.map((program) => String(program.language || "").trim()).filter(Boolean))].slice(0, 4);
+    // The cheapest active program's raw tuition number, regardless of
+    // currency — used only to bucket into a coarse "Fee range" filter
+    // (Free / Under 10,000 / 10,000-25,000 / 25,000+), the same
+    // no-FX-conversion approximation already used everywhere tuition is
+    // shown in this app (feeRange above displays each currency's raw
+    // number as-is too).
+    const tuitionAmounts = university.programs.map((p) => (p.tuitionAmount != null ? Number(p.tuitionAmount) : null)).filter((n): n is number => n != null && Number.isFinite(n));
+    const minTuition = tuitionAmounts.length ? Math.min(...tuitionAmounts) : null;
     return {
       id: university.id,
       name: university.name,
@@ -85,6 +92,7 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
       channel: deriveCatalogChannel(networks, Boolean(university.partnerId)),
       programCount: summary.programCount,
       feeRange: summary.feeRange,
+      minTuition,
       intakes: summary.intakes,
       levels: summary.levels,
       fields,
@@ -108,8 +116,17 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
           </div>
         </div>
 
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div className="min-w-0">
+            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} initialQuery={initialQuery} />
+          </div>
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            <HomeAIEntry compact/>
+          </div>
+        </div>
+
         {governmentPartners.length > 0 && (
-          <section className="mt-6 rounded-2xl border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-5 sm:p-6">
+          <section className="mt-10 rounded-2xl border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-5 sm:p-6">
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-navy">SOUP's first government partnership</div>
@@ -127,15 +144,6 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
             </div>
           </section>
         )}
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
-          <div className="min-w-0">
-            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} initialQuery={initialQuery} />
-          </div>
-          <div className="lg:sticky lg:top-8 lg:self-start">
-            <HomeAIEntry compact/>
-          </div>
-        </div>
       </main>
     </div>
   );
