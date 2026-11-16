@@ -33,8 +33,12 @@ function SummaryCard({ label, value, note }: { label: string; value: string; not
 
 export default async function UniversityDetailPage({ params }: { params: { id: string } }) {
   const current = await getCurrentUser();
-  const university = await prisma.university.findUnique({
-    where: { id: params.id },
+  // findFirst (not findUnique) so the isPublic filter can ride along with the
+  // id lookup — a university staff have explicitly hidden 404s for a student
+  // the same way a missing id already does, rather than needing a second
+  // check after the fact.
+  const university = await prisma.university.findFirst({
+    where: { id: params.id, isPublic: { not: false } },
     include: {
       partner: true,
       programs: {

@@ -31,7 +31,7 @@ export default async function AdminConversationPage({ params }: { params: { prof
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn/>
+      <Header signedIn role={current.user.role}/>
       <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
         <Link href={`/admin/users/${profile.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>Back to student case</Link>
         <section className="mt-4 rounded-2xl border border-hair bg-white p-5">

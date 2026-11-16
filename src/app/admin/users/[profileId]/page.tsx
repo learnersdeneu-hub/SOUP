@@ -73,7 +73,7 @@ export default async function AdminUserDetailPage({ params }: { params: { profil
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn/>
+      <Header signedIn role={current.user.role}/>
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
         <Link href="/admin/users" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={13}/>Student cases</Link>
 

@@ -29,7 +29,7 @@ export default async function AdminAuditPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn />
+      <Header signedIn role={current.user.role} />
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
         <Link href="/admin" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={13}/>Admin</Link>
         <div className="mt-4 flex items-end justify-between gap-4"><div><div className="text-xs font-semibold uppercase tracking-[.16em] text-mute">Internal operations</div><h1 className="mt-1 text-2xl font-semibold text-ink">Audit trail</h1><p className="mt-2 text-sm leading-6 text-mute">Sprint 1 exposes the real document-review audit records already persisted by Passport. Core access/case audit logs remain separate and are not duplicated here.</p></div><Activity size={22} className="text-navy"/></div>

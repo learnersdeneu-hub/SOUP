@@ -17,7 +17,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function PartnerDetailPage({ params }: { params: { id: string } }) {
-  await requireRole(ADMIN_ROLES);
+  const current = await requireRole(ADMIN_ROLES);
   const partner = await prisma.partner.findUnique({
     where: { id: params.id },
     include: { _count: { select: { universities: true, referrals: true } } },
@@ -25,7 +25,7 @@ export default async function PartnerDetailPage({ params }: { params: { id: stri
   if (!partner) notFound();
   const save = updatePartner.bind(null, partner.id);
 
-  return <div className="min-h-screen bg-paper"><Header signedIn/><main className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
+  return <div className="min-h-screen bg-paper"><Header signedIn role={current.user.role}/><main className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
     <Link href="/admin/partners" className="text-sm font-semibold text-navy">← Partner catalog</Link>
     <div className="mt-5 rounded-[28px] border border-hair bg-white p-6 shadow-soft">
       <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP partner operations</div>

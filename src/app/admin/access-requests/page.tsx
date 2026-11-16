@@ -15,7 +15,7 @@ import { approveAccessRequest, denyAccessRequest, resendAccessInvite } from "@/a
 export const dynamic = "force-dynamic";
 
 export default async function AccessRequestsPage() {
-  await requireRole(ADMIN_ROLES);
+  const current = await requireRole(ADMIN_ROLES);
 
   const [pending, decided] = await Promise.all([
     prisma.accessRequest.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "asc" } }),
@@ -24,7 +24,7 @@ export default async function AccessRequestsPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn />
+      <Header signedIn role={current.user.role} />
       <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-mute">Internal operations</div>
         <h1 className="mt-1 text-2xl font-semibold text-ink">Access requests</h1>

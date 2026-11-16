@@ -34,6 +34,11 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
   // fixed elsewhere (that was about ids echoing back in a Noodles reply,
   // not about a client needing to reference a program it's choosing).
   const universityCatalog = await prisma.university.findMany({
+    // isPublic is only ever explicitly set to false by staff in
+    // /admin/universities/[id] to hide a university from students — null
+    // (never set) and true both mean "show it", so every pre-existing row
+    // stays visible without needing a backfill.
+    where: { isPublic: { not: false } },
     orderBy: [{ country: "asc" }, { name: "asc" }],
     select: {
       id: true,
