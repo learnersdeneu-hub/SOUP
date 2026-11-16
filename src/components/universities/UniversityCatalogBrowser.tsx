@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CalendarDays, Coins, Search } from "lucide-react";
+import { ArrowRight, CalendarDays, Coins, Search, X } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { CHANNEL_LABELS, type CatalogChannel } from "@/lib/universities/catalogChannels";
 import { AddToMyCollegesButton, type AddToMyCollegesProgram, type AddToMyCollegesSelection } from "@/components/applications/AddToMyCollegesButton";
@@ -31,9 +31,9 @@ const PAGE_SIZE = 30;
 // sorted alphabetically after the known ones, rather than being hidden.
 const LEVEL_ORDER = ["Foundation", "Diploma", "Bachelors", "Masters", "MBA", "PhD"];
 
-export function UniversityCatalogBrowser({ universities, signedIn, capReached, initialChannel }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean; initialChannel?: CatalogChannel }) {
+export function UniversityCatalogBrowser({ universities, signedIn, capReached, initialChannel, initialQuery }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean; initialChannel?: CatalogChannel; initialQuery?: string }) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery || "");
   const [channel, setChannel] = useState<CatalogChannel | "ALL">(initialChannel && initialChannel in CHANNEL_LABELS ? initialChannel : "ALL");
   const [country, setCountry] = useState("ALL");
   const [level, setLevel] = useState("ALL");
@@ -116,6 +116,22 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
     setVisibleCount(PAGE_SIZE);
   }
 
+  // A student who picks several dropdown filters plus a typed phrase can
+  // easily land on a combination nothing matches (the search box only
+  // matches university/city/country text, not a free-form description) —
+  // with no visible way back to the full list, that reads as "the catalog
+  // is broken" rather than "these specific filters are too narrow."
+  function clearAllFilters() {
+    setQuery("");
+    setChannel("ALL");
+    setCountry("ALL");
+    setLevel("ALL");
+    setField("ALL");
+    setIntake("ALL");
+    setLanguage("ALL");
+    resetPage();
+  }
+
   // Goes to the university's own summary page (fees, intakes, levels,
   // program list) rather than straight into Noodles — a student clicking a
   // catalogue card wants to see what the university actually offers first.
@@ -141,8 +157,19 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
             value={query}
             onChange={(event) => { setQuery(event.target.value); resetPage(); }}
             placeholder="Search by university, city or country..."
-            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-11 text-sm text-ink outline-none focus:border-navy/40"
+            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-20 text-sm text-ink outline-none focus:border-navy/40"
           />
+          {query && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              title="Clear search"
+              onClick={() => { setQuery(""); resetPage(); }}
+              className="absolute right-11 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-mute hover:bg-paper hover:text-ink"
+            >
+              <X size={14} />
+            </button>
+          )}
           <button
             type="submit"
             aria-label="Search"
@@ -231,7 +258,14 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
       </section>
 
       {!filtered.length ? (
-        <div className="mt-8 rounded-2xl border border-hair bg-white p-6 text-sm text-mute">No universities match that search.</div>
+        <div className="mt-8 rounded-2xl border border-hair bg-white p-6 text-center text-sm text-mute">
+          <p className="m-0">No universities match that search.</p>
+          {filtersActive && (
+            <button onClick={clearAllFilters} className="mt-3 inline-flex rounded-full border border-hair bg-white px-4 py-2 text-xs font-semibold text-navy hover:border-navy/30">
+              Clear search &amp; filters
+            </button>
+          )}
+        </div>
       ) : visibleCount < filtered.length ? (
         <div className="mt-6 flex justify-center">
           <button onClick={() => setVisibleCount((count) => count + PAGE_SIZE)} className="rounded-full border border-hair bg-white px-5 py-2.5 text-xs font-semibold text-ink hover:border-navy/30">

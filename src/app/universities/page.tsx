@@ -18,12 +18,13 @@ function metadataLogo(value: unknown) {
   return /^https?:\/\//i.test(url) ? url : null;
 }
 
-export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string } }) {
+export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string; q?: string } }) {
   const current = await getCurrentUser();
   const user = current?.authUser || null;
   const initialChannel = searchParams.channel && ["GOVERNMENT", "DIRECT_SOUP", "AHZ", "GRANDLINK", "SOUP_CATALOGUE"].includes(searchParams.channel)
     ? (searchParams.channel as CatalogChannel)
     : undefined;
+  const initialQuery = searchParams.q?.trim().slice(0, 160) || undefined;
 
   // Only a light, bounded per-university payload is fetched even though the
   // full catalogue (300+) renders "as one list" to the student: each
@@ -129,7 +130,7 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="min-w-0">
-            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} />
+            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} initialQuery={initialQuery} />
           </div>
           <div className="lg:sticky lg:top-8 lg:self-start">
             <HomeAIEntry compact/>
