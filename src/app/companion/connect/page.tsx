@@ -71,6 +71,12 @@ export default async function CompanionConnectPage() {
               <p className="mt-2 text-[11px] text-mute">Windows only for now. Once installed, generate a one-time code below and enter it into the app.</p>
             </div>
 
+            <div className="rounded-2xl border border-hair bg-white p-5">
+              <div className="text-xs font-semibold text-ink">Have a PDF application form instead?</div>
+              <p className="mt-1 text-[11px] leading-5 text-mute">A visa form, a university's own downloadable PDF — upload it and SOUP fills what it can, right in your browser, no install needed.</p>
+              <Link href="/companion/pdf" className="mt-3 inline-flex items-center gap-2 rounded-xl border border-hair bg-white px-4 py-2.5 text-xs font-semibold text-ink hover:border-navy">Fill a PDF form</Link>
+            </div>
+
             <div>
               <div className="mb-2 text-[10.5px] font-bold uppercase tracking-[.08em] text-teal">Pairing code</div>
               <CompanionConnect />
