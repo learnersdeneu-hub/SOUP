@@ -36,9 +36,14 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
   const universityCatalog = await prisma.university.findMany({
     // isPublic is only ever explicitly set to false by staff in
     // /admin/universities/[id] to hide a university from students — null
-    // (never set) and true both mean "show it", so every pre-existing row
-    // stays visible without needing a backfill.
-    where: { isPublic: { not: false } },
+    // (never set) and true both mean "show it". `{ not: false }` looks
+    // equivalent but is a real Postgres trap: NULL <> false evaluates to
+    // NULL/unknown in SQL's three-valued logic, which excludes every NULL
+    // row from the result instead of including it — confirmed live,
+    // it silently hid 303 of 347 universities (everything that had never
+    // had isPublic touched) down to just the 44 explicitly marked true.
+    // An explicit OR is unambiguous regardless of null-handling semantics.
+    where: { OR: [{ isPublic: true }, { isPublic: null }] },
     orderBy: [{ country: "asc" }, { name: "asc" }],
     select: {
       id: true,
