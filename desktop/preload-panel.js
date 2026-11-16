@@ -12,6 +12,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("soupDesktop", {
   scanPage: () => ipcRenderer.invoke("portal-scan"),
   fillFields: (assignments) => ipcRenderer.invoke("portal-fill", assignments),
+  openTab: (url) => ipcRenderer.invoke("tab-new", url),
   attachDocument: (fieldId, documentUrl, fileName) => ipcRenderer.invoke("portal-attach-document", { fieldId, documentUrl, fileName }),
   openExternal: (url) => ipcRenderer.invoke("open-external", url),
   storageGet: (keys) => ipcRenderer.invoke("store-get", keys),

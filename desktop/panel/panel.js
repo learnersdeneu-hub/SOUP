@@ -42,6 +42,14 @@ const state = {
   // "done"/"error". See runReview() and renderReviewResult().
   reviewStatus: "idle",
   review: null,
+  // The "Start applications" picker (My Colleges list to choose a run
+  // from) — separate from the run itself, which lives in state.run.
+  applicationsPicker: { loading: false, applications: [], selected: new Set(), error: null },
+  // A multi-application run in progress: null when none is active. See
+  // startApplicationRun()/advanceRun()/maybeAdvanceRun() and
+  // renderRunPanel(). queue/index/log persist across tab switches —
+  // unlike state.activity, this is never reset by runScan().
+  run: null,
 };
 
 const DOCUMENT_CATEGORY_LABELS = {
@@ -61,6 +69,7 @@ function scanPortal() { return window.soupDesktop.scanPage(); }
 function fillPortal(assignments) { return window.soupDesktop.fillFields(assignments); }
 function attachDocument(fieldId, documentUrl, fileName) { return window.soupDesktop.attachDocument(fieldId, documentUrl, fileName); }
 function openExternal(url) { return window.soupDesktop.openExternal(url); }
+function openTab(url) { return window.soupDesktop.openTab(url); }
 
 // ---------- backend ----------
 async function apiFetch(path, options = {}) {
@@ -141,6 +150,11 @@ function render() {
   app.appendChild(renderHeader());
   const body = document.createElement("div");
   body.className = "sc-body";
+  // The run panel persists across tab switches and screen changes — it
+  // renders above whatever screen is currently showing rather than being
+  // owned by any one screen (unlike renderActivity(), which is scoped to
+  // the current page's own scan/fill).
+  if (state.run && state.screen !== "applications-picker") body.appendChild(el(`<div style="margin-bottom:12px;">${renderRunPanel()}</div>`));
   body.appendChild(renderScreen());
   app.appendChild(body);
   bindEvents();
@@ -169,6 +183,7 @@ function renderHeader() {
       </div>
       <span class="sc-status-dot ${statusDotClass()}" title="${state.token ? "Connected" : "Not connected"}"></span>
       <button class="sc-icon-btn" style="font-size:9px;font-weight:700;letter-spacing:.02em;" data-action="open-pdf-page" title="Fill a PDF application form" aria-label="Fill a PDF application form">PDF</button>
+      ${state.token && !state.run ? '<button class="sc-icon-btn" style="width:auto;padding:0 8px;font-size:9px;font-weight:700;letter-spacing:.02em;" data-action="open-applications-picker" title="Start applications for your My Colleges list" aria-label="Start applications">APPS</button>' : ""}
       ${state.token ? '<button class="sc-icon-btn" data-action="rescan" title="Rescan this page" aria-label="Rescan this page">⟳</button>' : ""}
     </header>
   `);
@@ -184,6 +199,7 @@ function renderScreen() {
     case "filling": return renderFilling();
     case "success": return renderSuccess();
     case "ask": return renderAsk();
+    case "applications-picker": return renderApplicationsPicker();
     case "error": return renderErrorScreen();
     default: return el('<div class="sc-card">Something went wrong.</div>');
   }
@@ -539,6 +555,223 @@ function renderAsk() {
   `);
 }
 
+// ---------- Start applications (multi-application run) ----------
+async function loadApplicationsPicker() {
+  state.applicationsPicker = { loading: true, applications: [], selected: new Set(), error: null };
+  render();
+  try {
+    const body = await apiFetch("/api/companion/applications/runnable");
+    state.applicationsPicker = { loading: false, applications: body.applications || [], selected: new Set(), error: null };
+  } catch (error) {
+    state.applicationsPicker = { loading: false, applications: [], selected: new Set(), error: error.message || "Could not load My Colleges." };
+  }
+  render();
+}
+
+function renderApplicationsPicker() {
+  const picker = state.applicationsPicker;
+  if (picker.loading) {
+    return el(`<div class="sc-center"><div class="sc-title">Loading My Colleges…</div></div>`);
+  }
+  if (picker.error) {
+    return el(`
+      <div>
+        <div class="sc-back-row"><button class="sc-btn-ghost" data-action="close-applications-picker">← Back</button></div>
+        <div class="sc-card"><p class="sc-note">${escapeHtml(picker.error)}</p></div>
+      </div>
+    `);
+  }
+  return el(`
+    <div>
+      <div class="sc-back-row"><button class="sc-btn-ghost" data-action="close-applications-picker">← Back</button></div>
+      <div class="sc-card">
+        <div class="sc-eyebrow">Start applications</div>
+        <div class="sc-title">Pick which ones to work on</div>
+        <p class="sc-note">SOUP will create accounts where needed, fill in your information and documents, and move to the next one automatically. It will stop and ask you here whenever it genuinely needs you — a verification step, something missing from SOUP, or your final approval to submit.</p>
+        ${picker.applications.length === 0 ? '<p class="sc-note" style="margin-top:10px;">Nothing in My Colleges is ready for a run yet.</p>' : `
+          <div class="sc-stack" style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+            ${picker.applications.map((app) => `
+              <label class="sc-field" style="flex-direction:row; align-items:center; gap:10px; cursor:pointer;">
+                <input type="checkbox" data-action="toggle-app-selection" data-application-id="${app.id}" ${picker.selected.has(app.id) ? "checked" : ""} style="width:16px; height:16px; flex-shrink:0;" />
+                <span style="flex:1; min-width:0;">
+                  <span style="display:block; font-size:12.5px; font-weight:600; color:var(--ink);">${escapeHtml(app.universityName)}</span>
+                  <span style="display:block; font-size:11px; color:var(--mute); margin-top:1px;">${escapeHtml(app.programTitle || "Programme TBC")}</span>
+                </span>
+              </label>
+            `).join("")}
+          </div>
+          <button class="sc-btn sc-btn-primary" data-action="start-applications-run" style="margin-top:14px;" ${picker.selected.size === 0 ? "disabled" : ""}>Start ${picker.selected.size || ""} application${picker.selected.size === 1 ? "" : "s"}</button>
+        `}
+      </div>
+    </div>
+  `);
+}
+
+// Narrated once, at the very start of a run, in Companion's own voice —
+// the opening statement the run follows for the rest of its course.
+function runOpeningLine(items) {
+  const names = items.map((i) => i.universityName).join(", ");
+  return `Starting applications for ${names}. I'll create accounts and add your information and documents, and move to the next one automatically. Stay close — I'll need you for verification steps, and I won't ask when I don't need to. I will not submit anything without your final approval.`;
+}
+
+async function startApplicationRun(applicationIds) {
+  if (!applicationIds.length) return;
+  state.screen = "loading";
+  state.loadingMessage = "Preparing your applications…";
+  render();
+  let queue;
+  try {
+    const body = await apiFetch("/api/companion/applications/queue", { method: "POST", body: JSON.stringify({ applicationIds }) });
+    queue = body.queue || [];
+  } catch (error) {
+    state.screen = "error";
+    state.error = { code: "BACKEND_ERROR", message: error.message || "Could not prepare the application run." };
+    return render();
+  }
+  if (!queue.length) {
+    state.screen = "applications-picker";
+    return render();
+  }
+  state.run = { queue, index: 0, status: "running", log: [{ text: runOpeningLine(queue), status: "done" }] };
+  render();
+  await openCurrentRunItem();
+}
+
+function currentRunItem() {
+  if (!state.run) return null;
+  return state.run.queue[state.run.index] || null;
+}
+
+function runLog(text, status) {
+  if (!state.run) return;
+  state.run.log.push({ text, status: status || "done" });
+}
+
+async function openCurrentRunItem() {
+  const item = currentRunItem();
+  if (!item) return;
+  if (!item.targetUrl) {
+    state.run.status = "paused";
+    runLog(`I don't have a reliable application link for ${item.universityName} yet — please open it yourself, then tell me to continue.`, "error");
+    return render();
+  }
+  if (item.targetUrlConfidence === "LOW") {
+    runLog(`I'm not fully certain this is ${item.universityName}'s official application page — opening it now, please double-check.`, "active");
+  } else {
+    runLog(`Opening ${item.universityName}${item.programTitle ? ` (${item.programTitle})` : ""}…`, "active");
+  }
+  render();
+  await openTab(item.targetUrl);
+  // The tab-changed event this triggers (see main.js's switchTab()) fires
+  // the panel's normal onTabChanged -> runScanQuiet() -> renderReady()/
+  // startFill() chain below, exactly like a student switching tabs by
+  // hand — the run just does it automatically.
+}
+
+// Called once a page's scan settles (see the end of runScan()) when a
+// run is active: decides whether to autofill this page, pause for the
+// student, or treat the page as not an application form at all.
+function runHandleScanResult() {
+  if (!state.run || state.run.status !== "running") return;
+  const item = currentRunItem();
+  if (!item) return;
+  if (state.screen === "unsupported") {
+    state.run.status = "paused";
+    runLog(`This doesn't look like an application form yet on ${item.universityName}. Take a look, then tell me to continue.`, "error");
+    return render();
+  }
+  const counts = fieldCounts();
+  if (counts.ready > 0) {
+    runLog(`Filling in what I know for ${item.universityName}…`, "active");
+    render();
+    return startFill();
+  }
+  if (counts.needs > 0 || counts.conflicts > 0) {
+    state.run.status = "paused";
+    runLog(`I need some information for ${item.universityName} that isn't in SOUP yet — see "Need from you" below, then tell me to continue.`, "error");
+    return render();
+  }
+  // Nothing to fill and nothing missing — likely a page before the real
+  // form (a landing/login page). Pause rather than guess what to click.
+  state.run.status = "paused";
+  runLog(`I don't see a form to fill on this page yet for ${item.universityName}. Navigate to the application itself, then tell me to continue.`, "error");
+  render();
+}
+
+// Called at the end of runReview() once a fill+review pass settles: logs
+// the verdict, then either pauses (something still needs the student) or
+// moves on to the next application automatically.
+function maybeAdvanceRun() {
+  if (!state.run) return;
+  const item = currentRunItem();
+  if (!item) return;
+
+  if (state.run.status === "paused") {
+    // The student asked to continue after resolving something themselves
+    // (a missing field, a page that needed navigating) — re-check rather
+    // than assuming they filled it, since "continue" is also reused to
+    // resume after SOUP's own pause.
+    state.run.status = "running";
+    return runHandleScanResult();
+  }
+
+  const counts = fieldCounts();
+  if (counts.needs > 0 || counts.conflicts > 0) {
+    state.run.status = "paused";
+    runLog(`Still need some information from you for ${item.universityName} before I can finish this one.`, "error");
+    return render();
+  }
+
+  if (state.review) {
+    const verdictText = {
+      STRONG: `I'm backing ${item.universityName} — it looks ready. Tell me when to submit it on the real site; I won't do that without you.`,
+      NEEDS_WORK: `${item.universityName} isn't quite sufficient yet: ${state.review.summary}`,
+      NOT_READY: `${item.universityName} is not ready for submission: ${state.review.summary}`,
+    }[state.review.overallReadiness] || `Reviewed ${item.universityName}.`;
+    runLog(verdictText, state.review.overallReadiness === "STRONG" ? "done" : "error");
+  } else {
+    runLog(`Finished what I could for ${item.universityName}.`, "done");
+  }
+
+  const nextIndex = state.run.index + 1;
+  if (nextIndex >= state.run.queue.length) {
+    state.run.status = "done";
+    runLog(`That's every application in this run. Review each verdict above when you're ready.`, "done");
+    return render();
+  }
+  state.run.index = nextIndex;
+  render();
+  return openCurrentRunItem();
+}
+
+function renderRunPanel() {
+  if (!state.run) return "";
+  const total = state.run.queue.length;
+  const position = Math.min(state.run.index + 1, total);
+  const stillWorking = state.run.status === "running";
+  return `
+    <div class="sc-card sc-terminal">
+      <div class="sc-terminal-header">
+        <span class="sc-terminal-dot red"></span><span class="sc-terminal-dot yellow"></span><span class="sc-terminal-dot green"></span>
+        <span class="sc-terminal-label">SOUP Companion — application ${position} of ${total}${state.run.status === "done" ? " · done" : state.run.status === "paused" ? " · paused" : ""}</span>
+      </div>
+      <div class="sc-activity sc-terminal-body">
+        ${state.run.log.map((item) => `
+          <div class="sc-activity-item ${item.status}">
+            <span class="sc-activity-dot">${activityDotGlyph(item.status)}</span>
+            <span class="sc-activity-text">${escapeHtml(item.text)}</span>
+          </div>
+        `).join("")}
+        ${stillWorking ? '<span class="sc-terminal-cursor"></span>' : ""}
+      </div>
+      <div style="padding:0 12px 12px;">
+        ${state.run.status === "paused" ? '<button class="sc-btn sc-btn-primary" data-action="continue-run" style="width:100%;">Continue</button>' : ""}
+        ${state.run.status !== "done" ? '<button class="sc-btn sc-btn-secondary" data-action="cancel-run" style="width:100%;margin-top:6px;">Stop this run</button>' : '<button class="sc-btn sc-btn-secondary" data-action="cancel-run" style="width:100%;">Done — close</button>'}
+      </div>
+    </div>
+  `;
+}
+
 function renderErrorScreen() {
   const messages = {
     OFFLINE: "SOUP Companion is offline. Check your connection and try again.",
@@ -609,6 +842,17 @@ async function handleAction(action, node) {
     case "open-connect-page": return openExternal(`${API_BASE}/companion/connect`);
     case "open-documents-page": return openExternal(`${API_BASE}/documents`);
     case "open-pdf-page": return openExternal(`${API_BASE}/companion/pdf`);
+    case "open-applications-picker": state.screen = "applications-picker"; render(); return loadApplicationsPicker();
+    case "close-applications-picker": state.screen = "ready"; return render();
+    case "toggle-app-selection": {
+      const id = node.dataset.applicationId;
+      if (state.applicationsPicker.selected.has(id)) state.applicationsPicker.selected.delete(id);
+      else state.applicationsPicker.selected.add(id);
+      return render();
+    }
+    case "start-applications-run": return startApplicationRun(Array.from(state.applicationsPicker.selected));
+    case "cancel-run": state.run = null; state.screen = "ready"; return runScanQuiet();
+    case "continue-run": return maybeAdvanceRun();
     default: return null;
   }
 }
@@ -650,7 +894,7 @@ async function runScan(quiet) {
     const scan = await scanPortal();
     state.activity = [];
     state.fileFields = [];
-    if (!scan) { state.scan = null; state.resolved = []; state.screen = "unsupported"; return render(); }
+    if (!scan) { state.scan = null; state.resolved = []; state.screen = "unsupported"; render(); return runHandleScanResult(); }
     state.scan = scan;
     state.resolved = resolveFields(scan, state.context);
     const counts = fieldCounts();
@@ -665,7 +909,12 @@ async function runScan(quiet) {
     state.screen = (counts.detected === 0 && fileFieldsDetected.length === 0) ? "unsupported" : "ready";
     render();
 
+    // Document attachment settles first when a run is driving this page
+    // automatically — fieldCounts()/startFill() further down and
+    // resolveFileFieldsFlow() both append to the same activity feed, and
+    // running them concurrently would interleave their narration.
     if (fileFieldsDetected.length) await resolveFileFieldsFlow(fileFieldsDetected);
+    runHandleScanResult();
   } catch (error) {
     state.error = { code: error.code || "BACKEND_ERROR", message: error.message };
     state.screen = "error";
@@ -777,6 +1026,7 @@ async function runReview() {
     state.activity[stageIndex] = { text: "Couldn't generate a review right now", status: "error" };
   }
   render();
+  maybeAdvanceRun();
 }
 
 async function startFill() {

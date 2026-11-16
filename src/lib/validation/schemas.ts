@@ -296,6 +296,15 @@ export const companionDocumentMatchQuerySchema = z.object({
   category: z.string().trim().min(1).max(64),
 }).strict();
 
+// Request body for starting a multi-application Companion run
+// (src/app/api/companion/applications/queue): an ordered list of the
+// student's own StudentApplication ids picked from My Colleges. Bounded
+// to 20 — a sanity limit, not a product decision; nothing about the run
+// logic itself assumes this number.
+export const companionApplicationQueueRequestSchema = z.object({
+  applicationIds: z.array(idSchema).min(1).max(20),
+}).strict();
+
 // Request body for the AI application review (src/lib/companion/review.ts):
 // the client (desktop panel or the PDF filler) reports exactly what it
 // detected on the real form/PDF — field labels, whatever value will be
