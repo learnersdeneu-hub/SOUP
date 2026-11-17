@@ -1,7 +1,7 @@
 {
   "name": "soup-companion-desktop",
   "productName": "SOUP Companion",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "private": true,
   "description": "SOUP Companion as a standalone desktop app: a built-in browser with the SOUP assistant panel alongside it, for filling university, visa and accommodation application forms.",
   "main": "main.js",
@@ -28,12 +28,14 @@
       "inject/**/*",
       "icons/**/*"
     ],
+    "compression": "maximum",
     "win": {
       "target": [
         "nsis"
       ],
       "icon": "icons/icon.ico",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "electronLanguages": ["en-US"]
     },
     "nsis": {
       "oneClick": false,
