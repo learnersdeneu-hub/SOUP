@@ -117,7 +117,18 @@ function findDocumentFact(matchedKey, documentFacts) {
 function resolveFields(scan, context) {
   if (!scan || !context) return [];
   return scan.fields.map((field) => {
-    if (!field.matchedKey) return { field, answer: null, status: "unrecognized" };
+    if (!field.matchedKey) {
+      // The student may have already answered this exact field — either
+      // typing it directly on the real page, or through the run panel's
+      // inline "Save" input (saveAnswer() writes the value onto the real
+      // field too) — in an earlier pass. Without this, a rescan would
+      // rebuild state.resolved from the live DOM and immediately flag
+      // the very field they just answered as unrecognized again, forever.
+      const typed = field.currentValue && field.currentValue.trim();
+      return typed
+        ? { field, answer: { value: typed, source: "You answered this", confidence: "STATED" }, status: "ready" }
+        : { field, answer: null, status: "unrecognized" };
+    }
     const bankEntry = context.answerBank[field.matchedKey];
     const docFact = !bankEntry ? findDocumentFact(field.matchedKey, context.documentFacts) : null;
     const answer = bankEntry
@@ -706,6 +717,15 @@ function runHandleScanResult() {
     render();
     return startFill();
   }
+  // A field matching nothing SOUP's dictionary recognizes at all is a
+  // different thing from a recognized field with no value yet — the
+  // student types it in right here in the terminal, not a silent gap.
+  const unrecognized = unrecognizedRequiredFields();
+  if (unrecognized.length) {
+    state.run.status = "paused";
+    runLog(`${item.universityName}: I found something SOUP doesn't have an answer for — ${unrecognized.map((r) => r.field.label || "a field").slice(0, 3).join(", ")}. Type it in below, then tell me to continue.`, "error");
+    return render();
+  }
   if (counts.needs > 0 || counts.conflicts > 0) {
     state.run.status = "paused";
     runLog(`I need some information for ${item.universityName} that isn't in SOUP yet — see "Need from you" below, then tell me to continue.`, "error");
@@ -716,11 +736,30 @@ function runHandleScanResult() {
     runLog(`${item.universityName}: ${AUTH_BLOCK_COPY.PASSWORD}`, "error");
     return render();
   }
+  // Password resolved (or never present) and nothing left to fill — if
+  // this was a sign-up page, finish creating the account now. This is
+  // not "submitting the application," so it does not need the same
+  // approval gate as a real submission.
+  if (state.scan && state.scan.signupControl) {
+    runLog(`Creating your account on ${item.universityName}…`, "active");
+    render();
+    clickControl(state.scan.signupControl.id);
+    return;
+  }
   // Nothing to fill and nothing missing — likely a page before the real
   // form (a landing/login page). Pause rather than guess what to click.
   state.run.status = "paused";
   runLog(`I don't see a form to fill on this page yet for ${item.universityName}. Navigate to the application itself, then tell me to continue.`, "error");
   render();
+}
+
+// Fields matching nothing in SOUP's field dictionary at all (as opposed
+// to a recognized field with no value yet) — resolveFields() tags these
+// "unrecognized". Only required ones are surfaced; an optional field SOUP
+// doesn't recognize (a newsletter opt-in, "how did you hear about us")
+// is not worth pausing a whole run over.
+function unrecognizedRequiredFields() {
+  return state.resolved.filter((r) => r.status === "unrecognized" && r.field.required);
 }
 
 // Every required field on the CURRENT page (not the whole application —
@@ -782,11 +821,14 @@ function maybeAdvanceRun() {
 
   if (state.run.status === "paused") {
     // The student asked to continue after resolving something themselves
-    // (a missing field, a page that needed navigating) — re-check rather
-    // than assuming they filled it, since "continue" is also reused to
-    // resume after SOUP's own pause.
+    // (typing a password, answering an unrecognized field, solving a
+    // CAPTCHA, navigating). A fresh rescan is required here, not just
+    // re-checking the stale scan from before they acted — typing into a
+    // field doesn't itself trigger the DOM-mutation rescan, so without
+    // this the password/unrecognized-field checks would see the exact
+    // same "still blocked" state forever.
     state.run.status = "running";
-    return runHandleScanResult();
+    return runScanQuiet();
   }
 
   const counts = fieldCounts();
@@ -874,6 +916,19 @@ function renderRunPanel() {
         `).join("")}
         ${stillWorking ? '<span class="sc-terminal-cursor"></span>' : ""}
       </div>
+      ${state.run.status === "paused" && unrecognizedRequiredFields().length ? `
+        <div style="padding:0 12px 12px; display:flex; flex-direction:column; gap:8px;">
+          ${unrecognizedRequiredFields().map((r) => `
+            <div class="sc-field">
+              <label>${escapeHtml(r.field.label || "Unrecognized field")}</label>
+              <div style="display:flex; gap:6px;">
+                <input class="sc-input" id="answer-input-${r.field.id}" placeholder="Type the answer" style="flex:1;" />
+                <button class="sc-btn sc-btn-secondary" data-action="save-answer" data-field-id="${r.field.id}">Save</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
       ${Object.keys(state.run.verdicts).length ? `
         <div style="padding:0 12px 12px; display:flex; flex-direction:column; gap:6px;">
           ${Object.entries(state.run.verdicts).map(([applicationId, verdict]) => verdict.approved ? "" : `

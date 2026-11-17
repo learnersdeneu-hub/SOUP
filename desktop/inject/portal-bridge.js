@@ -166,14 +166,26 @@
     var nextEl = nextCandidates.find ? nextCandidates.find(function (el) { return isVisible(el) && !el.disabled && looksLikeNextControl(el); }) : null;
     var nextControl = nextEl ? { id: assignFieldId(nextEl), label: controlText(nextEl).slice(0, 80) } : null;
 
+    // The account-creation submit itself ("Sign up"/"Create account"/
+    // "Register") — deliberately not matched by looksLikeNextControl
+    // above. Clicked by the run orchestrator only once the password
+    // field is no longer blocking (see authBlock below), i.e. only after
+    // the student has typed and confirmed their own password.
+    function looksLikeSignupControl(el) { return /^(sign\s*up|create\s*account|register|join)\b/i.test(controlText(el)); }
+    var signupEl = nextCandidates.find ? nextCandidates.find(function (el) { return isVisible(el) && !el.disabled && looksLikeSignupControl(el); }) : null;
+    var signupControl = signupEl ? { id: assignFieldId(signupEl), label: controlText(signupEl).slice(0, 80) } : null;
+
     // ---------- "Auth command" detection (Phase D) ----------
     // Things only the student themselves can do — a visible CAPTCHA
     // widget, a one-time verification code input, or a live password
     // field on what looks like an account sign-up. Detected here and
     // reported for the run orchestrator to pause on; this file never
-    // attempts to solve, fill or bypass any of these.
+    // attempts to solve, fill or bypass any of these. A password field
+    // only blocks while it is still EMPTY — once the student has typed
+    // their own password, it stops reporting as a block (otherwise every
+    // rescan after typing it would pause the run again, forever).
     var hasCaptcha = Boolean(document.querySelector('iframe[src*="recaptcha" i], iframe[src*="hcaptcha" i], div.g-recaptcha, div.h-captcha, [data-sitekey]'));
-    var passwordEls = Array.prototype.slice.call(document.querySelectorAll('input[type="password"]')).filter(isVisible);
+    var passwordEls = Array.prototype.slice.call(document.querySelectorAll('input[type="password"]')).filter(function (el) { return isVisible(el) && !el.value; });
     var otpEl = Array.prototype.slice.call(document.querySelectorAll("input")).find(function (el) {
       if (!isVisible(el)) return false;
       if ((el.getAttribute("autocomplete") || "").toLowerCase() === "one-time-code") return true;
@@ -192,6 +204,7 @@
       pageUrl: location.href,
       pageTitle: document.title,
       nextControl: nextControl,
+      signupControl: signupControl,
       authBlock: authBlock,
     };
   };
