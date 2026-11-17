@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { normalizeCoreProfileDetails } from "@/lib/applications/coreProfile";
+import { getLearnedAnswers, type LearnedAnswerMap } from "@/lib/companion/learnedAnswers";
 
 export type AnswerEntry = { value: string; source: string; confidence: "VERIFIED" | "PROFILE" | "STATED" };
 
@@ -9,6 +10,13 @@ export type AnswerBankResult = {
   documentFacts: Array<{ field: string; value: string; sourceDocumentType: string; verified: boolean }>;
   documents: Array<{ id: string; documentType: string; originalFileName: string | null; reviewStatus: string; uploadedAt: Date }>;
   applications: Array<{ id: string; university: string | null; program: string | null; level: string | null; intake: string | null; status: string }>;
+  // Free-form answers Companion collected directly from this student for
+  // questions outside the fixed answer-bank keys above (see
+  // src/lib/companion/learnedAnswers.ts) -- keyed by the same normalized
+  // question text the desktop panel computes client-side, so a field
+  // matching nothing in the dictionary still doesn't get re-asked once
+  // answered once.
+  learnedAnswers: LearnedAnswerMap;
 };
 
 type UserFacts = {
@@ -34,7 +42,7 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
 // honest signal both panels use to ask the student directly instead of
 // fabricating a value.
 export async function buildAnswerBank(profileId: string, user: UserFacts): Promise<AnswerBankResult> {
-  const [studentCase, applications, documents] = await Promise.all([
+  const [studentCase, applications, documents, learnedAnswers] = await Promise.all([
     prisma.studentCase.findUnique({ where: { profileId } }),
     prisma.studentApplication.findMany({
       where: { profileId, status: { notIn: ["WITHDRAWN", "REJECTED"] } },
@@ -48,6 +56,7 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
       take: 20,
       select: { id: true, documentType: true, originalFileName: true, reviewStatus: true, uploadedAt: true, aiAnalysis: true },
     }),
+    getLearnedAnswers(profileId),
   ]);
 
   const { firstName, lastName } = splitName(user.fullName || "");
@@ -105,5 +114,6 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
     documentFacts,
     documents: documents.map((d) => ({ id: d.id, documentType: d.documentType, originalFileName: d.originalFileName, reviewStatus: d.reviewStatus, uploadedAt: d.uploadedAt })),
     applications: applications.map((app) => ({ id: app.id, university: app.university?.name || null, program: app.program?.title || null, level: app.program?.level || null, intake: app.intake, status: app.status })),
+    learnedAnswers,
   };
 }

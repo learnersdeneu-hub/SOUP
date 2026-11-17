@@ -114,6 +114,14 @@ function findDocumentFact(matchedKey, documentFacts) {
   }) || null;
 }
 
+// Same normalization the server uses (src/lib/companion/learnedAnswers.ts)
+// to recognize "is this the same question I already learned the answer
+// to" across different pages/sites, independent of exact label wording
+// down to case/whitespace.
+function normalizeQuestionKey(label) {
+  return String(label || "").trim().toLowerCase().replace(/\s+/g, " ").slice(0, 200);
+}
+
 function resolveFields(scan, context) {
   if (!scan || !context) return [];
   return scan.fields.map((field) => {
@@ -125,9 +133,14 @@ function resolveFields(scan, context) {
       // rebuild state.resolved from the live DOM and immediately flag
       // the very field they just answered as unrecognized again, forever.
       const typed = field.currentValue && field.currentValue.trim();
-      return typed
-        ? { field, answer: { value: typed, source: "You answered this", confidence: "STATED" }, status: "ready" }
-        : { field, answer: null, status: "unrecognized" };
+      if (typed) return { field, answer: { value: typed, source: "You answered this", confidence: "STATED" }, status: "ready" };
+      // Or Companion may have learned this exact question on a DIFFERENT
+      // application already (see saveAnswer() -> POST /api/companion/
+      // answers) — a field matching nothing in the fixed dictionary still
+      // doesn't need re-asking once it's been answered once.
+      const learned = context.learnedAnswers && context.learnedAnswers[normalizeQuestionKey(field.label)];
+      if (learned) return { field, answer: { value: learned.value, source: learned.source || "Learned from an earlier answer", confidence: "STATED" }, status: "ready" };
+      return { field, answer: null, status: "unrecognized" };
     }
     const bankEntry = context.answerBank[field.matchedKey];
     const docFact = !bankEntry ? findDocumentFact(field.matchedKey, context.documentFacts) : null;
@@ -287,6 +300,11 @@ function activityDotGlyph(status) {
 // while still actively doing something — used for every "thinking" state
 // (scanning, filling, attaching, reviewing), not just a plain spinner.
 function renderActivity() {
+  // During a run, every bit of this narration already goes into
+  // state.run.log (see logPush/logSet) and renders in the run's own
+  // terminal (renderRunPanel()) instead — showing this box too would be
+  // the exact "two terminals stacked" problem this was built to avoid.
+  if (state.run) return "";
   if (!state.activity.length) return "";
   const stillWorking = state.activity.some((item) => item.status === "active") || state.reviewStatus === "thinking";
   return `
@@ -659,12 +677,37 @@ function runLog(text, status) {
   state.run.log.push({ text, status: status || "done" });
 }
 
+// Every narration call in this file (scanning, filling, attaching,
+// reviewing) goes through these two instead of touching state.activity
+// directly, so that during a run every bit of it lands in the run's own
+// terminal (state.run.log) — "the terminal is where most of the activity
+// should be," not a second box stacked underneath it. Outside a run,
+// narration still goes to the ordinary per-page activity feed exactly as
+// before.
+function activityLog() { return state.run ? state.run.log : state.activity; }
+function logPush(entry) { activityLog().push(entry); return activityLog().length - 1; }
+function logSet(index, entry) { activityLog()[index] = entry; }
+
+// Staff-facing visibility (src/app/admin/companion/page.tsx) into
+// exactly the three things a run does that a plain fill-event can't
+// show: a review verdict, an approval, or why it paused. Fire-and-forget
+// — losing one of these to a flaky connection should never block or
+// confuse the run itself.
+function reportRunEvent(kind, universityName, detail, applicationId) {
+  apiFetch("/api/companion/run-events", {
+    method: "POST",
+    body: JSON.stringify({ kind, universityName, detail: String(detail).slice(0, 2000), applicationId: applicationId || undefined }),
+  }).catch(() => {});
+}
+
 async function openCurrentRunItem() {
   const item = currentRunItem();
   if (!item) return;
   if (!item.targetUrl) {
     state.run.status = "paused";
-    runLog(`I don't have a reliable application link for ${item.universityName} yet — please open it yourself, then tell me to continue.`, "error");
+    const pauseText = `I don't have a reliable application link for ${item.universityName} yet — please open it yourself, then tell me to continue.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   if (item.targetUrlConfidence === "LOW") {
@@ -703,12 +746,16 @@ function runHandleScanResult() {
   // runAfterFillSettles()), not here.
   if (state.scan && state.scan.authBlock && state.scan.authBlock.kind !== "PASSWORD") {
     state.run.status = "paused";
-    runLog(`${item.universityName}: ${AUTH_BLOCK_COPY[state.scan.authBlock.kind] || "This page needs you before I can continue."}`, "error");
+    const pauseText = `${item.universityName}: ${AUTH_BLOCK_COPY[state.scan.authBlock.kind] || "This page needs you before I can continue."}`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   if (state.screen === "unsupported") {
     state.run.status = "paused";
-    runLog(`This doesn't look like an application form yet on ${item.universityName}. Take a look, then tell me to continue.`, "error");
+    const pauseText = `This doesn't look like an application form yet on ${item.universityName}. Take a look, then tell me to continue.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   const counts = fieldCounts();
@@ -723,17 +770,23 @@ function runHandleScanResult() {
   const unrecognized = unrecognizedRequiredFields();
   if (unrecognized.length) {
     state.run.status = "paused";
-    runLog(`${item.universityName}: I found something SOUP doesn't have an answer for — ${unrecognized.map((r) => r.field.label || "a field").slice(0, 3).join(", ")}. Type it in below, then tell me to continue.`, "error");
+    const pauseText = `${item.universityName}: I found something SOUP doesn't have an answer for — ${unrecognized.map((r) => r.field.label || "a field").slice(0, 3).join(", ")}. Type it in below, then tell me to continue.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   if (counts.needs > 0 || counts.conflicts > 0) {
     state.run.status = "paused";
-    runLog(`I need some information for ${item.universityName} that isn't in SOUP yet — see "Need from you" below, then tell me to continue.`, "error");
+    const pauseText = `I need some information for ${item.universityName} that isn't in SOUP yet — see "Need from you" below, then tell me to continue.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   if (state.scan && state.scan.authBlock && state.scan.authBlock.kind === "PASSWORD") {
     state.run.status = "paused";
-    runLog(`${item.universityName}: ${AUTH_BLOCK_COPY.PASSWORD}`, "error");
+    const pauseText = `${item.universityName}: ${AUTH_BLOCK_COPY.PASSWORD}`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   // Password resolved (or never present) and nothing left to fill — if
@@ -749,7 +802,9 @@ function runHandleScanResult() {
   // Nothing to fill and nothing missing — likely a page before the real
   // form (a landing/login page). Pause rather than guess what to click.
   state.run.status = "paused";
-  runLog(`I don't see a form to fill on this page yet for ${item.universityName}. Navigate to the application itself, then tell me to continue.`, "error");
+  const pauseText = `I don't see a form to fill on this page yet for ${item.universityName}. Navigate to the application itself, then tell me to continue.`;
+  runLog(pauseText, "error");
+  reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
   render();
 }
 
@@ -805,7 +860,9 @@ function runAfterFillSettles() {
   if (state.scan && state.scan.nextControl) {
     if (pageRequiredFieldsSatisfied()) return advancePageWithinApplication();
     state.run.status = "paused";
-    runLog(`Stuck partway through ${item.universityName}'s form — it needs more before I can move to the next page. See "Need from you" below, then tell me to continue.`, "error");
+    const pauseText = `Stuck partway through ${item.universityName}'s form — it needs more before I can move to the next page. See "Need from you" below, then tell me to continue.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
   return runReview();
@@ -834,7 +891,9 @@ function maybeAdvanceRun() {
   const counts = fieldCounts();
   if (counts.needs > 0 || counts.conflicts > 0) {
     state.run.status = "paused";
-    runLog(`Still need some information from you for ${item.universityName} before I can finish this one.`, "error");
+    const pauseText = `Still need some information from you for ${item.universityName} before I can finish this one.`;
+    runLog(pauseText, "error");
+    reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
     return render();
   }
 
@@ -846,16 +905,21 @@ function maybeAdvanceRun() {
     const incomplete = (item.checklist && item.checklist.incompleteRequiredCount) || 0;
     const trulyStrong = state.review.overallReadiness === "STRONG" && incomplete === 0;
     if (trulyStrong) {
-      runLog(`I'm backing ${item.universityName} — it looks ready. Approve it below when you agree; I still won't submit anything on the real site without you.`, "done");
+      const verdictText = `I'm backing ${item.universityName} — it looks ready. Approve it below when you agree; I still won't submit anything on the real site without you.`;
+      runLog(verdictText, "done");
       state.run.verdicts[item.applicationId] = { universityName: item.universityName, approved: false, approving: false };
+      reportRunEvent("REVIEW", item.universityName, `${verdictText} Summary: ${state.review.summary}`, item.applicationId);
     } else if (incomplete > 0 && state.review.overallReadiness === "STRONG") {
-      runLog(`${item.universityName}: SOUP's own checklist still has ${incomplete} required item${incomplete === 1 ? "" : "s"} outstanding, even though the fields I could see looked fine. Check My Colleges before treating this as ready.`, "error");
+      const verdictText = `${item.universityName}: SOUP's own checklist still has ${incomplete} required item${incomplete === 1 ? "" : "s"} outstanding, even though the fields I could see looked fine. Check My Colleges before treating this as ready.`;
+      runLog(verdictText, "error");
+      reportRunEvent("REVIEW", item.universityName, verdictText, item.applicationId);
     } else {
       const verdictText = {
         NEEDS_WORK: `${item.universityName} isn't quite sufficient yet: ${state.review.summary}`,
         NOT_READY: `${item.universityName} is not ready for submission: ${state.review.summary}`,
       }[state.review.overallReadiness] || `Reviewed ${item.universityName}.`;
       runLog(verdictText, "error");
+      reportRunEvent("REVIEW", item.universityName, verdictText, item.applicationId);
     }
   } else {
     runLog(`Finished what I could for ${item.universityName}.`, "done");
@@ -889,6 +953,7 @@ async function approveApplication(applicationId) {
     verdict.approved = true;
     verdict.approving = false;
     runLog(`${verdict.universityName}: approved in SOUP. You still need to actually submit it on the university's own site.`, "done");
+    reportRunEvent("APPROVED", verdict.universityName, "Student approved this application for submission in SOUP.", applicationId);
   } catch (error) {
     verdict.approving = false;
     runLog(`${verdict.universityName}: couldn't approve it — ${error.message || "something went wrong"}.`, "error");
@@ -993,9 +1058,9 @@ async function handleAction(action, node) {
     case "use-doc-choice": {
       const entry = state.fileFields.find((e) => e.field.id === node.dataset.fieldId);
       if (!entry || !entry.selectedDocumentId) return null;
-      state.activity.push({ text: `Attaching ${categoryLabel(entry.field.matchedCategory)}…`, status: "active" });
+      const attachIndex = logPush({ text: `Attaching ${categoryLabel(entry.field.matchedCategory)}…`, status: "active" });
       render();
-      return attachDocumentForEntry(entry, entry.selectedDocumentId, state.activity.length - 1);
+      return attachDocumentForEntry(entry, entry.selectedDocumentId, attachIndex);
     }
     case "dismiss-doc-ask": {
       const entry = state.fileFields.find((e) => e.field.id === node.dataset.fieldId);
@@ -1075,11 +1140,11 @@ async function runScan(quiet) {
     const counts = fieldCounts();
     const fileFieldsDetected = (scan.fileFields || []).filter((f) => f.matchedCategory);
 
-    state.activity.push({
+    logPush({
       text: `Scanned this page — found ${counts.detected} field${counts.detected === 1 ? "" : "s"}${fileFieldsDetected.length ? `, including ${fileFieldsDetected.length} document upload${fileFieldsDetected.length === 1 ? "" : "s"}` : ""}`,
       status: "done",
     });
-    if (counts.ready > 0) state.activity.push({ text: `${counts.ready} field${counts.ready === 1 ? "" : "s"} ready to fill from your SOUP profile`, status: "done" });
+    if (counts.ready > 0) logPush({ text: `${counts.ready} field${counts.ready === 1 ? "" : "s"} ready to fill from your SOUP profile`, status: "done" });
 
     state.screen = (counts.detected === 0 && fileFieldsDetected.length === 0) ? "unsupported" : "ready";
     render();
@@ -1105,8 +1170,7 @@ function runScanQuiet() { return runScan(true); }
 // no match is flagged as needing the student's own input.
 async function resolveFileFieldsFlow(fileFieldsDetected) {
   for (const field of fileFieldsDetected) {
-    const activityIndex = state.activity.length;
-    state.activity.push({ text: `Checking your vault for ${categoryLabel(field.matchedCategory)}…`, status: "active" });
+    const activityIndex = logPush({ text: `Checking your vault for ${categoryLabel(field.matchedCategory)}…`, status: "active" });
     render();
 
     let result;
@@ -1117,17 +1181,17 @@ async function resolveFileFieldsFlow(fileFieldsDetected) {
     state.fileFields.push(entry);
 
     if (result.outcome === "SINGLE_MATCH") {
-      state.activity[activityIndex] = { text: `Found a match for ${categoryLabel(field.matchedCategory)} — attaching…`, status: "active" };
+      logSet(activityIndex, { text: `Found a match for ${categoryLabel(field.matchedCategory)} — attaching…`, status: "active" });
       render();
       await attachDocumentForEntry(entry, result.document.id, activityIndex);
     } else if (result.outcome === "AMBIGUOUS") {
-      state.activity[activityIndex] = { text: `You have ${result.documents.length} documents that could work for ${categoryLabel(field.matchedCategory)} — which one should I use?`, status: "active" };
+      logSet(activityIndex, { text: `You have ${result.documents.length} documents that could work for ${categoryLabel(field.matchedCategory)} — which one should I use?`, status: "active" });
       render();
     } else if (result.outcome === "NO_MATCH") {
-      state.activity[activityIndex] = { text: `${categoryLabel(field.matchedCategory)} — nothing in your vault yet. You'll need to attach this one yourself.`, status: "pending" };
+      logSet(activityIndex, { text: `${categoryLabel(field.matchedCategory)} — nothing in your vault yet. You'll need to attach this one yourself.`, status: "pending" });
       render();
     } else {
-      state.activity[activityIndex] = { text: `Couldn't check your documents for ${categoryLabel(field.matchedCategory)} right now.`, status: "error" };
+      logSet(activityIndex, { text: `Couldn't check your documents for ${categoryLabel(field.matchedCategory)} right now.`, status: "error" });
       render();
     }
   }
@@ -1144,10 +1208,10 @@ async function attachDocumentForEntry(entry, documentId, activityIndex) {
     const resultEntry = entry.attached
       ? { text: `Attached ${fileName} automatically`, status: "done" }
       : { text: `Couldn't attach ${fileName} automatically — please attach it yourself`, status: "error" };
-    if (typeof activityIndex === "number") state.activity[activityIndex] = resultEntry; else state.activity.push(resultEntry);
+    if (typeof activityIndex === "number") logSet(activityIndex, resultEntry); else logPush(resultEntry);
   } catch {
     const failure = { text: `Couldn't attach that document automatically — please attach it yourself`, status: "error" };
-    if (typeof activityIndex === "number") state.activity[activityIndex] = failure; else state.activity.push(failure);
+    if (typeof activityIndex === "number") logSet(activityIndex, failure); else logPush(failure);
   }
   render();
 }
@@ -1172,16 +1236,30 @@ const FILL_FAIL_COPY = {
 async function runReview() {
   state.reviewStatus = "thinking";
   state.review = null;
-  const stageIndex = state.activity.length;
-  state.activity.push({ text: "Reviewing this application…", status: "active" });
+  const stageIndex = logPush({ text: "Reviewing this application…", status: "active" });
   render();
 
-  const fieldsPayload = classifiedOnly(state.resolved).map((r) => ({
-    label: r.field.matchedLabel || r.field.label,
-    value: r.status === "ready" ? String(r.answer.value || "") : "",
-    filled: r.status === "ready",
-    source: r.status === "ready" ? r.answer.source : null,
-  }));
+  // A "conflict" (the page already has a value that disagrees with
+  // SOUP's own record) used to be sent as if it were simply unfilled --
+  // the review never even saw that a real discrepancy existed. Surfacing
+  // it explicitly is what lets the review actually compare the page
+  // against SOUP's own records, not just check filled-vs-empty.
+  const fieldsPayload = classifiedOnly(state.resolved).map((r) => {
+    if (r.status === "conflict") {
+      return {
+        label: r.field.matchedLabel || r.field.label,
+        value: `page currently has "${r.field.currentValue}", but SOUP's own record for this student says "${r.answer.value}"`,
+        filled: true,
+        source: "Conflict with SOUP record",
+      };
+    }
+    return {
+      label: r.field.matchedLabel || r.field.label,
+      value: r.status === "ready" ? String(r.answer.value || "") : "",
+      filled: r.status === "ready",
+      source: r.status === "ready" ? r.answer.source : null,
+    };
+  });
   const documentsPayload = state.fileFields.map((entry) => ({
     label: categoryLabel(entry.field.matchedCategory),
     attached: Boolean(entry.attached),
@@ -1215,17 +1293,23 @@ async function runReview() {
     });
     state.review = data.review;
     state.reviewStatus = "done";
-    state.activity[stageIndex] = { text: "Review complete — see SOUP's assessment below", status: "done" };
+    logSet(stageIndex, { text: "Review complete — see SOUP's assessment below", status: "done" });
   } catch {
     state.reviewStatus = "error";
-    state.activity[stageIndex] = { text: "Couldn't generate a review right now", status: "error" };
+    logSet(stageIndex, { text: "Couldn't generate a review right now", status: "error" });
   }
   render();
   maybeAdvanceRun();
 }
 
 async function startFill() {
-  const targets = classifiedOnly(state.resolved).filter((r) => r.status === "ready" && normalize(r.field.currentValue) !== normalize(r.answer.value));
+  // Not classifiedOnly() here on purpose: a field with no dictionary
+  // match at all still gets status "ready" once a learned answer exists
+  // for it (see resolveFields()) or the student typed one directly, and
+  // those need to actually reach the page too, not just be marked ready
+  // internally while classifiedOnly() quietly excludes them from ever
+  // being filled.
+  const targets = state.resolved.filter((r) => r.status === "ready" && normalize(r.field.currentValue) !== normalize(r.answer.value));
   const plan = targets.map((r) => ({ fieldId: r.field.id, value: r.answer.value, label: r.field.matchedLabel || r.field.label }));
   if (!plan.length) {
     state.fillSummary = { filled: 0, needInput: fieldCounts().needs, conflicts: fieldCounts().conflicts, failures: [] };
@@ -1249,7 +1333,7 @@ async function startFill() {
     state.fillRevealCount = i + 1;
     const result = results[i];
     const label = plan[i].label;
-    state.activity.push(
+    logPush(
       result && result.ok
         ? { text: `Filled "${label}"`, status: "done" }
         : { text: `Couldn't fill "${label}" — ${FILL_FAIL_COPY[(result && result.reason) || "ERROR"] || "it didn't go through"}`, status: "error" },
@@ -1283,7 +1367,20 @@ async function saveAnswer(fieldId) {
   await fillPortal([{ fieldId, value }]);
   state.reviewOpenField = null;
   const entry = state.resolved.find((r) => r.field.id === fieldId);
-  if (entry) { entry.status = "ready"; entry.answer = { value, source: "You answered this", confidence: "STATED" }; entry.field.currentValue = value; }
+  if (entry) {
+    entry.status = "ready";
+    entry.answer = { value, source: "You answered this", confidence: "STATED" };
+    entry.field.currentValue = value;
+    // Only for a field matching nothing in the fixed dictionary — a
+    // classified field's answer belongs in SOUP's proper structured data
+    // (profile/case fields), a separate and much larger write-back this
+    // does not attempt; this is specifically the "SOUP had no concept of
+    // this question at all" case, so the only place to remember it is
+    // this free-form store.
+    if (!entry.field.matchedKey) {
+      apiFetch("/api/companion/answers", { method: "POST", body: JSON.stringify({ label: entry.field.label, value }) }).catch(() => {});
+    }
+  }
   render();
 }
 
@@ -1344,7 +1441,9 @@ window.soupDesktop.onAuthPopup(() => {
   if (!state.run || state.run.status !== "running") return;
   const item = currentRunItem();
   state.run.status = "paused";
-  runLog(`${item ? item.universityName + ": " : ""}I opened a sign-in window for you. Complete it there, then tell me to continue.`, "error");
+  const pauseText = `${item ? item.universityName + ": " : ""}I opened a sign-in window for you. Complete it there, then tell me to continue.`;
+  runLog(pauseText, "error");
+  if (item) reportRunEvent("PAUSED", item.universityName, pauseText, item.applicationId);
   render();
 });
 

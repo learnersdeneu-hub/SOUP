@@ -305,6 +305,26 @@ export const companionApplicationQueueRequestSchema = z.object({
   applicationIds: z.array(idSchema).min(1).max(20),
 }).strict();
 
+// A free-form answer Companion collected directly from a student for a
+// question outside SOUP's fixed field dictionary (src/lib/companion/
+// learnedAnswers.ts) — label is the field's own on-page text, not a
+// known answer-bank key.
+export const companionLearnedAnswerRequestSchema = z.object({
+  label: shortTextSchema(300),
+  value: shortTextSchema(2000),
+}).strict();
+
+// A staff-visible event from the multi-application run (src/app/admin/
+// companion/page.tsx) — a review verdict, an approval, or why a run
+// paused. applicationId is optional since a pause can happen before an
+// application is resolvable (e.g. no application in context yet).
+export const companionRunEventRequestSchema = z.object({
+  applicationId: optionalIdSchema,
+  universityName: shortTextSchema(300),
+  kind: z.enum(["REVIEW", "APPROVED", "PAUSED"]),
+  detail: shortTextSchema(2000),
+}).strict();
+
 // Request body for the AI application review (src/lib/companion/review.ts):
 // the client (desktop panel or the PDF filler) reports exactly what it
 // detected on the real form/PDF — field labels, whatever value will be

@@ -1,8 +1,8 @@
-version: 1.6.0
+version: 1.7.0
 files:
-  - url: SOUP Companion Setup 1.6.0.exe
-    sha512: u8vLPn/31m4OYwp9L8N5qNqIl1stl1Uhqb4FAmIMEp+kb8yVLho46J7Ig8vm9BTs4ecxMXWdlGP8VOc7/MLs7A==
-    size: 71724837
-path: SOUP Companion Setup 1.6.0.exe
-sha512: u8vLPn/31m4OYwp9L8N5qNqIl1stl1Uhqb4FAmIMEp+kb8yVLho46J7Ig8vm9BTs4ecxMXWdlGP8VOc7/MLs7A==
-releaseDate: '2026-11-17T00:12:10.987Z'
+  - url: SOUP Companion Setup 1.7.0.exe
+    sha512: yv1so+RcAnMss+kIRZxtQkL8SVAi1gvlcsNobzX9azbfLE3uEa2cEXDKvWC6Mk//I+WFu0ea0iqwcW3dM8eSKA==
+    size: 71726179
+path: SOUP Companion Setup 1.7.0.exe
+sha512: yv1so+RcAnMss+kIRZxtQkL8SVAi1gvlcsNobzX9azbfLE3uEa2cEXDKvWC6Mk//I+WFu0ea0iqwcW3dM8eSKA==
+releaseDate: '2026-11-17T01:47:41.896Z'
