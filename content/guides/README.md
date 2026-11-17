@@ -20,8 +20,24 @@ Status flow: `planned` → `researched` → `drafted` → `fact-checked` → `ap
 - `review_notes` in the front matter lists what an editor must confirm before publishing.
 - Internal links point to existing SOUP routes (`/universities`, `/counselor`, `/premium`, `/services/insurance`, `/services/accommodation`, `/companion/connect`, `/sign-up`) and to other guides at `/guides/<slug>`.
 
-## Technical blockers to publishing (from the audit)
+## How to preview and publish
 
-1. **The whole site is behind sign-in.** `src/middleware.ts` redirects every visitor who isn't signed in to `/sign-in`, except for a short `PUBLIC_PATHS` list. That includes the homepage. Search engines cannot crawl any page today. `/about` and `/guides` must be added to the public paths before anything can rank.
-2. **There is no article route, sitemap or robots file yet.** The site has no `/guides` route, `sitemap.ts` or `robots.ts`, and only the site-wide `<title>` and description in `src/app/layout.tsx`. A guides template needs canonical, Open Graph, Article/FAQ/Breadcrumb structured data and per-page metadata.
-3. **Analytics and Search Console.** No Search Console verification or conversion events were found. They are needed before any performance reporting.
+1. **Preview:** staff can open **Admin → Guides (editorial preview)** (`/admin/guides`). Every article renders in the real page template, with its status and review notes shown above it. Drafts are never public: their public URL returns 404, and they are left out of the sitemap.
+2. **Approve and publish:** in the article's front matter, set
+   ```
+   status: "published"
+   publication_date: "YYYY-MM-DD"
+   ```
+   and update `last_reviewed`. Then merge and deploy. The guide goes live at its URL, joins `/guides` and the sitemap, and gets Article, Breadcrumb and FAQ structured data.
+3. **Scheduling:** a guide goes live at the **first deploy on or after its `publication_date`**. Public guide pages are pre-built, which is what makes draft slugs return a real 404. To release scheduled guides on time without merging anything, set up a daily Vercel Deploy Hook. Edits to guides that are already live are picked up within the hour.
+4. **About page:** `about-soup.md` follows the same workflow and publishes `/about`.
+
+Each article's slug must equal its file name (the tests in `tests/unit/guides-content.test.ts` enforce this, and also check that every `/guides/` link points at a guide that exists).
+
+## Technical status (from the audit)
+
+1. ✅ **Public access:** `/guides`, `/about`, `/robots.txt` and `/sitemap.xml` are now public paths in `src/middleware.ts`. The rest of the site, including the homepage, still requires sign-in, so it can't be indexed. Making the homepage public is a separate product decision.
+2. ✅ **Article template, sitemap and robots:** these now exist, with per-page title, description, canonical URL, Open Graph, breadcrumbs and JSON-LD.
+3. ⏳ **Set `NEXT_PUBLIC_SITE_URL`** in production. Canonical URLs and the sitemap use it, and fall back to `https://soupassist.com`.
+4. ⏳ **Search Console and analytics:** verify the domain in Google Search Console and submit `https://soupassist.com/sitemap.xml`. No analytics or conversion-event tooling exists in the codebase yet.
+5. ⏳ **Featured images:** each article has an image brief and alt text in its front matter, but no images have been produced yet.

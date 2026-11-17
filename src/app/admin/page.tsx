@@ -59,6 +59,7 @@ export default async function AdminDashboardPage() {
     hasRole(role, CASE_ROLES) && ["/admin/sessions", "Counselor sessions"],
     hasRole(role, ADMIN_ROLES) && ["/admin/analytics", "Funnel analytics"],
     hasRole(role, ADMIN_ROLES) && ["/admin/access-requests", "Access requests"],
+    hasRole(role, STAFF_ROLES) && ["/admin/guides", "Guides (editorial preview)"],
     ["/notifications", "Staff notifications"],
     hasRole(role, ADMIN_ROLES) && ["/admin/settings", "Runtime settings"],
   ].filter(Boolean) as string[][];

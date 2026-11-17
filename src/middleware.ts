@@ -12,7 +12,11 @@ import { updateSession } from "@/lib/supabase/middleware";
 // recommender has no SOUP account at all; that page authenticates the
 // visitor against the token in the URL itself, not a session (see
 // src/app/recommend/[token]/page.tsx).
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend"];
+// /guides, /about, /robots.txt and /sitemap.xml are the public, indexable
+// editorial surface: search engines and signed-out readers must reach them
+// without a session. Draft guides never render there (they 404); staff
+// preview them under /admin/guides instead.
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/guides", "/about", "/robots.txt", "/sitemap.xml"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

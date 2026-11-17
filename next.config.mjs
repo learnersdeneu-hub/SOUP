@@ -2,6 +2,16 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Guide pages, the sitemap and the admin preview read content/guides/*.md
+  // with fs at runtime (hourly revalidation, force-dynamic previews). Those
+  // files aren't imported, so serverless output tracing must be told to ship
+  // them. The folder is a few dozen KB of Markdown, so one broad entry is
+  // simpler than tracking every route that reads it.
+  experimental: {
+    outputFileTracingIncludes: {
+      "/**": ["./content/guides/**/*"],
+    },
+  },
   async headers() {
     return [
       {
