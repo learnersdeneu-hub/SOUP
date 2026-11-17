@@ -52,3 +52,25 @@ textarea:disabled,
 select:disabled {
   cursor: not-allowed;
 }
+
+/* Signed-out landing page (/sign-in) motion. All of it is decorative, so it
+   is switched off entirely for visitors who prefer reduced motion. */
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes landing-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes landing-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+}
+.landing-float { animation: landing-float 6s ease-in-out infinite; }
+.landing-marquee { animation: landing-marquee 40s linear infinite; }
+.landing-marquee:hover { animation-play-state: paused; }
+.landing-blob { animation: landing-blob 18s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .landing-float, .landing-marquee, .landing-blob { animation: none; }
+}

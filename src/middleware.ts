@@ -12,7 +12,9 @@ import { updateSession } from "@/lib/supabase/middleware";
 // recommender has no SOUP account at all; that page authenticates the
 // visitor against the token in the URL itself, not a session (see
 // src/app/recommend/[token]/page.tsx).
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend"];
+// /journal is the SOUP Journal linked from the signed-out landing page —
+// public articles meant to be read before anyone has an account.
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/journal"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -38,8 +40,9 @@ export const config = {
   // does on every request. .exe wasn't previously in the static-extension
   // exclusion list either — public/downloads/*.exe was being silently
   // redirected to /sign-in (a 200 HTML response, not the file) until this
-  // was added.
+  // was added. .mp4/.webm likewise: the landing page's tour video
+  // (public/landing/soup-tour.mp4) must load for signed-out visitors.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|downloads/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|exe)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|downloads/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|exe|mp4|webm)$).*)",
   ],
 };
