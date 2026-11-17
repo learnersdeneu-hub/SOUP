@@ -437,6 +437,8 @@ model Profile {
   companionPairingCodes CompanionPairingCode[]
   companionDevices      CompanionDevice[]
   companionFillEvents   CompanionFillEvent[]
+  companionLearnedAnswers CompanionLearnedAnswer[]
+  companionRunEvents    CompanionRunEvent[]
   studentActivities     StudentActivity[]
   recommenders          Recommender[]
 
@@ -1706,6 +1708,7 @@ model StudentApplication {
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
 
+  companionRunEvents  CompanionRunEvent[]
   documents           StudentApplicationDocument[]
   checklists          JourneyChecklist[]
   events              StudentApplicationEvent[]
@@ -2161,4 +2164,56 @@ model CompanionFillEvent {
   @@index([profileId, createdAt])
   @@index([deviceId, createdAt])
   @@map("companion_fill_events")
+}
+
+// A free-form answer Companion collected directly from a student for a
+// question that does not fit any of SOUP's existing structured fields
+// (field-dictionary.js's fixed vocabulary, or a PDF/HTML field with no
+// SOUP concept at all) -- the only durable memory of "what we learned
+// about this student beyond the structured profile." questionKey is a
+// normalized (lowercased/trimmed) form of the field's own label, used to
+// recognize the same question again on a later application; the unique
+// constraint means a later answer overwrites the earlier one rather than
+// accumulating duplicates, which is the whole point -- a correction IS
+// the new truth, not a second opinion to reconcile.
+model CompanionLearnedAnswer {
+  id            String   @id @default(uuid())
+  profileId     String
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  questionKey   String
+  questionLabel String
+  value         String
+  source        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([profileId, questionKey])
+  @@index([profileId])
+  @@map("companion_learned_answers")
+}
+
+enum CompanionRunEventKind {
+  REVIEW
+  APPROVED
+  PAUSED
+}
+
+// Staff-facing visibility into the multi-application run specifically --
+// CompanionFillEvent above only ever recorded raw per-page fill counts,
+// with nothing about a review verdict, an approval, or why a run paused.
+// Surfaced on /admin/companion alongside the existing fill events.
+model CompanionRunEvent {
+  id             String                @id @default(uuid())
+  profileId      String
+  profile        Profile               @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  applicationId  String?
+  application    StudentApplication?   @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  universityName String
+  kind           CompanionRunEventKind
+  detail         String
+  createdAt      DateTime              @default(now())
+
+  @@index([profileId, createdAt])
+  @@index([applicationId])
+  @@map("companion_run_events")
 }
