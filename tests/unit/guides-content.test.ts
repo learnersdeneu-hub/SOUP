@@ -55,6 +55,12 @@ describe("publication gate", () => {
     expect(isPublished(undated, now)).toBe(false);
   });
 
+  it("defaults to the guides section and rejects unknown sections", () => {
+    expect(parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nstatus: "draft"`)).section).toBe("guides");
+    expect(parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nsection: "rankings"\nstatus: "draft"`)).section).toBe("rankings");
+    expect(() => parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nsection: "news"\nstatus: "draft"`))).toThrow();
+  });
+
   it("rejects slugs outside /guides/ and /about", () => {
     expect(() => parseGuide("x.md", MINIMAL(`slug: "/universities/x"\nstatus: "published"`))).toThrow();
     expect(parseGuide("a.md", MINIMAL(`slug: "/about"\nstatus: "published"`)).kind).toBe("about");
