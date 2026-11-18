@@ -3,7 +3,7 @@ import { CheckCircle2, Download, FileUp, Landmark, Lock, ShieldCheck } from "luc
 import { requestScholarInvoice, submitPaymentProof } from "@/app/actions/bankPayments";
 import { isGateExempt } from "@/lib/payments/access";
 import {
-  BANK_DETAILS, PARTNERSHIP_LINE, SCHOLAR_INVOICE, bankMetadata, bankTransferReady, formatPkr,
+  BANK_DETAILS, PARTNERSHIP_LINE, SCHOLAR_INVOICE, bankMetadata, bankTransferReady, formatPkr, formatUsd,
 } from "@/lib/payments/bankTransfer";
 
 const UNLOCKS = ["Uploading documents", "Approving applications for submission", "Accommodation & insurance requests", "SOUP Companion"];
@@ -66,8 +66,9 @@ export function PaymentAccessPanel({ role, paid, openInvoice }: { role: AppRole;
               <a href={`/api/payments/invoice/${openInvoice.id}`} className="inline-flex items-center gap-1.5 rounded-xl border border-hair px-3 py-2 text-xs font-semibold text-navy"><Download size={13} /> Download invoice (PDF)</a>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-              <div><dt className="text-mute">Amount</dt><dd className="mt-0.5 text-base font-semibold text-ink">{formatPkr(String(openInvoice.amount))}</dd></div>
+              <div><dt className="text-mute">Amount</dt><dd className="mt-0.5 text-base font-semibold text-ink">{formatUsd(String(openInvoice.amount))}</dd></div>
               <div><dt className="text-mute">Due</dt><dd className="mt-0.5 font-semibold text-ink">{fmt(openInvoice.dueAt || meta.dueAt)}</dd></div>
+              <div className="col-span-2 rounded-xl bg-[#FFF8F1] p-3"><dt className="text-mute">Amount to transfer in PKR</dt>{meta.pkrAmount && meta.usdToPkrRate ? <><dd className="mt-0.5 text-base font-semibold text-[#B23C0B]">{formatPkr(meta.pkrAmount)}</dd><dd className="mt-0.5 text-[11px] text-mute">1 USD = {meta.usdToPkrRate} PKR · rate of {fmt(meta.rateDate)}, fixed for this invoice</dd></> : <dd className="mt-0.5 text-xs text-ink">The PKR equivalent of {formatUsd(String(openInvoice.amount))} at your bank&apos;s rate on the day you pay.</dd>}</div>
               <div className="col-span-2"><dt className="text-mute">Status</dt><dd className={`mt-0.5 font-semibold ${underReview ? "text-navy" : "text-[#B23C0B]"}`}>{underReview ? `Submitted ${fmt(meta.submittedAt)}. SOUP is verifying your transfer (usually 1–2 working days).` : "Awaiting your bank transfer"}</dd></div>
             </dl>
             {meta.reviewNote && !underReview && (
@@ -81,6 +82,7 @@ export function PaymentAccessPanel({ role, paid, openInvoice }: { role: AppRole;
                   ["IBAN", BANK_DETAILS.iban], ["Branch", [BANK_DETAILS.branchName, BANK_DETAILS.branchCode && `(code ${BANK_DETAILS.branchCode})`].filter(Boolean).join(" ")], ["SWIFT", BANK_DETAILS.swiftCode],
                 ] as Array<[string, string]>).filter(([, v]) => v.trim()).map(([k, v]) => <div key={k} className="contents"><dt className="text-mute">{k}</dt><dd className="font-semibold text-ink">{v}</dd></div>)}
                 <dt className="text-mute">Reference</dt><dd className="font-semibold text-ink">{meta.invoiceNumber}</dd>
+                {meta.pkrAmount ? <><dt className="text-mute">Amount</dt><dd className="font-semibold text-ink">{formatPkr(meta.pkrAmount)}</dd></> : null}
               </dl>
             </div>
           </div>

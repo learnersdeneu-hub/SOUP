@@ -6,7 +6,7 @@ import { confirmBankPayment, rejectBankPayment } from "@/app/actions/bankPayment
 import { requireRole } from "@/lib/auth/currentUser";
 import { PAYMENT_REVIEW_ROLES } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
-import { BANK_TRANSFER_PROVIDER, bankMetadata, bankTransferReady, formatPkr } from "@/lib/payments/bankTransfer";
+import { BANK_TRANSFER_PROVIDER, bankMetadata, bankTransferReady, formatPkr, formatUsd } from "@/lib/payments/bankTransfer";
 
 // See src/app/actions/auth.ts (invalidateAuthenticatedPages) for why staff
 // pages force dynamic rendering explicitly.
@@ -43,7 +43,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
         <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-semibold text-mute"><ArrowLeft size={13} /> Admin</Link>
         <div className="mt-3 flex items-center gap-2"><Landmark size={20} className="text-teal" /><h1 className="text-2xl font-semibold text-ink">Bank transfer payments</h1></div>
         <p className="mt-2 max-w-2xl text-sm text-mute">Check each student&apos;s reference or receipt against the MCB Islamic account statement. Confirming marks the SOUP Scholar payment as paid and unlocks uploads and submissions on that account immediately.</p>
-        {!bankTransferReady() && <div className="mt-4 rounded-xl border border-[#E8C9A8] bg-[#FFF8F1] p-4 text-xs text-[#8A4B12]">Bank details or the PKR amount aren&apos;t configured yet (src/lib/payments/bankTransfer.ts), so students can&apos;t request invoices.</div>}
+        {!bankTransferReady() && <div className="mt-4 rounded-xl border border-[#E8C9A8] bg-[#FFF8F1] p-4 text-xs text-[#8A4B12]">Bank account details aren&apos;t configured yet (src/lib/payments/bankTransfer.ts), so students can&apos;t request invoices.</div>}
 
         <nav className="mt-6 flex gap-2">
           {TABS.map(([key, label, statuses]) => (
@@ -60,7 +60,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                 <div>
                   <div className="text-sm font-semibold text-ink">{payment.profile.user.fullName || payment.profile.user.email}</div>
                   <div className="text-xs text-mute">{payment.profile.user.email}</div>
-                  <div className="mt-2 text-xs text-ink"><b>{meta.invoiceNumber}</b> · {formatPkr(String(payment.amount))}</div>
+                  <div className="mt-2 text-xs text-ink"><b>{meta.invoiceNumber}</b> · {formatUsd(String(payment.amount))}{meta.pkrAmount ? ` = ${formatPkr(meta.pkrAmount)} (1 USD = ${meta.usdToPkrRate} PKR)` : " · PKR at bank rate"}</div>
                   <div className="mt-1 text-[11px] text-mute">Issued {fmt(payment.createdAt)}{meta.submittedAt ? ` · submitted ${fmt(meta.submittedAt)}` : ""}{payment.paidAt ? ` · confirmed ${fmt(payment.paidAt)} by ${meta.reviewedBy}` : ""}</div>
                 </div>
                 <div className="text-xs">

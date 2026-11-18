@@ -339,32 +339,32 @@ function InsuranceCard() {
 
 // Prices and names come from the same config the Stripe checkout uses, so the
 // landing page can never advertise a different price from the one charged.
-// Shown in EUR, matching /premium (see the note in payments/config).
+// Shown in USD, matching /premium and the Stripe charge.
 const PACKAGES = [
   {
     key: "free",
     name: "Free",
-    price: "€0",
+    price: "$0",
     note: "Included with every approved account",
     line: "Noodles, your AI counselor, helps you discover, compare and organise your university journey.",
-    features: ["Noodles AI guidance, any time", "University & program discovery", "Public and government university research", "Documents, deadlines and applications in one place"],
+    features: ["Noodles AI guidance, any time", "University & program discovery", "Public and government university research", "Deadlines and applications tracked in one place"],
     cta: "Request access",
     tone: "plain",
   },
   {
     key: "scholar",
     name: PREMIUM_COUNSELING_TITLE,
-    price: `€${PREMIUM_COUNSELING_PRICE_USD}`,
+    price: `$${PREMIUM_COUNSELING_PRICE_USD}`,
     note: "One-time payment",
     line: "Add real human counsellors around Noodles, plus managed support for eligible partner applications.",
-    features: ["Everything in Free", "Real-time human counselor access", "Managed eligible partner-university applications", "Priority document & deadline follow-up", "Offer, visa & pre-departure planning"],
+    features: ["Everything in Free", "Document uploads & application submission", "Real-time human counselor access", "Managed eligible partner-university applications", "Priority document & deadline follow-up", "Offer, visa & pre-departure planning"],
     cta: `Start with ${PREMIUM_COUNSELING_TITLE}`,
     tone: "featured",
   },
   {
     key: "concierge",
     name: PREMIUM_PLUS_TITLE,
-    price: `€${PREMIUM_PLUS_PRICE_USD}`,
+    price: `$${PREMIUM_PLUS_PRICE_USD}`,
     note: "One-time payment",
     line: "Our high-touch service: a senior counselor runs your whole application journey with you.",
     features: ["Everything in Scholar", "Weekly scheduled video sessions", "Senior counselor case oversight", "Private accommodation search support", "University-representative sessions, when available", "End-to-end case management"],

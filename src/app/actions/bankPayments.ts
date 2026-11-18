@@ -10,8 +10,9 @@ import { requireProfile, requireRole } from "@/lib/auth/currentUser";
 import { PAYMENT_REVIEW_ROLES } from "@/lib/auth/roles";
 import { hasSubmissionAccess } from "@/lib/payments/access";
 import {
-  BANK_TRANSFER_PROVIDER, INVOICE_CURRENCY, SCHOLAR_INVOICE, bankMetadata, bankTransferReady, invoiceNumberFor,
+  BANK_TRANSFER_PROVIDER, INVOICE_CURRENCY, SCHOLAR_INVOICE, bankMetadata, bankTransferReady, invoiceNumberFor, pkrFor,
 } from "@/lib/payments/bankTransfer";
+import { getUsdToPkrRate } from "@/lib/payments/fx";
 
 const PROOF_TYPES = new Set(["application/pdf", "image/png", "image/jpeg"]);
 const OPEN_STATUSES = ["PENDING", "REQUIRES_ACTION"] as const;
@@ -48,19 +49,22 @@ export async function requestScholarInvoice() {
   const dueAt = new Date(issuedAt.getTime() + SCHOLAR_INVOICE.dueInDays * 86_400_000);
   const id = randomUUID();
   const invoiceNumber = invoiceNumberFor(id, issuedAt);
+  // Lock the day's PKR conversion onto this invoice (null if unavailable).
+  const fx = await getUsdToPkrRate();
+  const conversion = fx ? { pkrAmount: pkrFor(SCHOLAR_INVOICE.amountUsd, fx.rate), usdToPkrRate: fx.rate, rateDate: fx.date, rateSource: fx.source } : {};
   await prisma.payment.create({
     data: {
       id,
       profileId: profile.id,
       type: "PREMIUM_COUNSELING",
       status: "PENDING",
-      amount: SCHOLAR_INVOICE.amountPkr!,
+      amount: SCHOLAR_INVOICE.amountUsd,
       currency: INVOICE_CURRENCY,
       title: SCHOLAR_INVOICE.title,
       description: `Invoice ${invoiceNumber} · bank transfer`,
       provider: BANK_TRANSFER_PROVIDER,
       dueAt,
-      metadata: { plan: "premium", method: BANK_TRANSFER_PROVIDER, invoiceNumber, dueAt: dueAt.toISOString() },
+      metadata: { plan: "premium", method: BANK_TRANSFER_PROVIDER, invoiceNumber, dueAt: dueAt.toISOString(), ...conversion },
     },
   });
   await prisma.notification.create({

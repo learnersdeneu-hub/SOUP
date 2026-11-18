@@ -10,7 +10,8 @@ vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn((url: string) => { throw new Error(`REDIRECT ${url}`); }) }));
 
 import { assertSubmissionAccess, hasSubmissionAccess, isGateExempt, paymentRequiredResponse, PAYMENT_REQUIRED_HEADER } from "../../src/lib/payments/access";
-import { bankTransferReady, invoiceNumberFor } from "../../src/lib/payments/bankTransfer";
+import { bankTransferReady, invoiceNumberFor, pkrFor } from "../../src/lib/payments/bankTransfer";
+import { getUsdToPkrRate } from "../../src/lib/payments/fx";
 
 beforeEach(() => {
   prismaMock.payment.findFirst.mockReset();
@@ -61,8 +62,13 @@ describe("bank transfer invoices", () => {
     expect(invoiceNumberFor("4f2a9c1e-0000-4000-8000-000000000000", new Date("2026-11-18T10:00:00Z"))).toBe("SOUP-INV-20261118-4F2A9C");
   });
 
-  it("refuses to issue invoices until bank details and the PKR amount are set", () => {
-    expect(bankTransferReady()).toBe(false);
+  it("is ready to issue invoices with the Learners Den MCB Islamic account", () => {
+    expect(bankTransferReady()).toBe(true);
+  });
+
+  it("rounds the PKR amount up to whole rupees so the transfer always covers the USD price", () => {
+    expect(pkrFor(20, 281.37)).toBe(5628);
+    expect(pkrFor(20, 280)).toBe(5600);
   });
 });
 
@@ -86,5 +92,23 @@ describe("gated entry points", () => {
   ];
   it.each(gated)("%s calls the payment gate", (file, fn) => {
     expect(fs.readFileSync(path.resolve(file), "utf8")).toContain(`${fn}(`);
+  });
+});
+
+describe("USD to PKR rate", () => {
+  const reply = (body: unknown, ok = true) => vi.fn(async () => ({ ok, json: async () => body })) as unknown as typeof fetch;
+
+  it("returns the live rate with its date", async () => {
+    const rate = await getUsdToPkrRate(reply({ result: "success", rates: { PKR: 281.3712 }, time_last_update_unix: 1795046400 }));
+    expect(rate).toEqual({ rate: 281.37, date: new Date(1795046400 * 1000).toISOString(), source: expect.stringContaining("ExchangeRate-API") });
+  });
+
+  it.each([
+    ["service error", reply({}, false)],
+    ["missing PKR", reply({ result: "success", rates: {} })],
+    ["implausible rate", reply({ result: "success", rates: { PKR: 0.0036 } })],
+    ["network failure", vi.fn(async () => { throw new Error("offline"); }) as unknown as typeof fetch],
+  ])("returns null on %s instead of guessing", async (_label, fetcher) => {
+    expect(await getUsdToPkrRate(fetcher)).toBeNull();
   });
 });
