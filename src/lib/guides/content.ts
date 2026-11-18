@@ -16,6 +16,12 @@ const GUIDE_PREFIX = "/guides/";
 
 export type Faq = { question: string; answer: string };
 
+// Guides are grouped into sections on /guides. "rankings" is the SOUP
+// Ranking guides series (top-10 lists, affordability and scholarship
+// rankings); everything else is a regular guide.
+export const GUIDE_SECTIONS = ["guides", "rankings"] as const;
+export type GuideSection = (typeof GUIDE_SECTIONS)[number];
+
 export type Guide = {
   file: string;
   path: string;
@@ -25,12 +31,14 @@ export type Guide = {
   metaDescription: string;
   h1: string;
   category: string;
+  section: GuideSection;
   primaryKeyword: string;
   supportingKeywords: string[];
   status: string;
   publicationDate: string | null;
   lastReviewed: string | null;
   featuredImageAlt: string;
+  eligibilityVerified: string | null;
   reviewNotes: string[];
   body: string;
   faqs: Faq[];
@@ -92,6 +100,10 @@ export function parseGuide(file: string, source: string): Guide {
   if (kind === "guide" && !guidePath.startsWith(GUIDE_PREFIX)) {
     throw new Error(`${file}: slug must be ${ABOUT_PATH} or start with ${GUIDE_PREFIX}.`);
   }
+  const section = scalar(data, "section", false) || "guides";
+  if (!(GUIDE_SECTIONS as readonly string[]).includes(section)) {
+    throw new Error(`${file}: section must be one of ${GUIDE_SECTIONS.join(", ")}.`);
+  }
   return {
     file,
     path: guidePath,
@@ -101,12 +113,14 @@ export function parseGuide(file: string, source: string): Guide {
     metaDescription: scalar(data, "meta_description"),
     h1: scalar(data, "h1"),
     category: scalar(data, "category"),
+    section: section as GuideSection,
     primaryKeyword: scalar(data, "primary_keyword"),
     supportingKeywords: list(data, "supporting_keywords"),
     status: scalar(data, "status"),
     publicationDate: isoOrNull(scalar(data, "publication_date", false)),
     lastReviewed: isoOrNull(scalar(data, "last_reviewed", false)),
     featuredImageAlt: scalar(data, "featured_image_alt", false),
+    eligibilityVerified: isoOrNull(scalar(data, "eligibility_verified", false)),
     reviewNotes: list(data, "review_notes"),
     body: stripLeadingH1(body),
     faqs: extractFaqs(body),

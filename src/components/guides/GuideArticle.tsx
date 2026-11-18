@@ -13,7 +13,12 @@ export function guideStructuredData(guide: Guide) {
   const url = `${base}${guide.path}`;
   const crumbs = guide.kind === "about"
     ? [{ name: "SOUP", url: base }, { name: "About", url }]
-    : [{ name: "SOUP", url: base }, { name: "Guides", url: `${base}/guides` }, { name: guide.h1, url }];
+    : [
+        { name: "SOUP", url: base },
+        { name: "Guides", url: `${base}/guides` },
+        ...(guide.section === "rankings" ? [{ name: "Ranking guides", url: `${base}/guides#ranking-guides` }] : []),
+        { name: guide.h1, url },
+      ];
   const graph: Record<string, unknown>[] = [
     {
       "@type": "BreadcrumbList",
@@ -44,6 +49,7 @@ export function guideStructuredData(guide: Guide) {
 export function GuideArticle({ guide, banner }: { guide: Guide; banner?: React.ReactNode }) {
   const published = formatDate(guide.publicationDate);
   const reviewed = formatDate(guide.lastReviewed);
+  const eligibility = formatDate(guide.eligibilityVerified);
   return (
     <article className="mx-auto w-full max-w-3xl px-4 pb-16 pt-4 sm:px-8">
       {/* JSON-LD is built only from the repository's own Markdown, never from user input; "<" is escaped so no string can close the script tag early. */}
@@ -56,6 +62,12 @@ export function GuideArticle({ guide, banner }: { guide: Guide; banner?: React.R
           <>
             <Link href="/guides" className="hover:text-ink">Guides</Link>
             <ChevronRight size={12} aria-hidden />
+            {guide.section === "rankings" && (
+              <>
+                <Link href="/guides#ranking-guides" className="hover:text-ink">Ranking guides</Link>
+                <ChevronRight size={12} aria-hidden />
+              </>
+            )}
             <span aria-current="page" className="line-clamp-1 text-ink">{guide.h1}</span>
           </>
         )}
@@ -67,6 +79,9 @@ export function GuideArticle({ guide, banner }: { guide: Guide; banner?: React.R
           {published && reviewed && " · "}
           {reviewed && <>Last reviewed <time dateTime={guide.lastReviewed || undefined}>{reviewed}</time></>}
         </p>
+      )}
+      {eligibility && (
+        <p className="mt-1 text-xs font-semibold text-teal">International-student eligibility checked <time dateTime={guide.eligibilityVerified || undefined}>{eligibility}</time></p>
       )}
       <div className="mt-2">
         <GuideMarkdown body={guide.body} />
