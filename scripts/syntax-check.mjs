@@ -1,8 +1,10 @@
+// Syntax/parse check for every TypeScript/TSX file under src/ and scripts/.
+// TypeScript 7 no longer ships a JavaScript API (ts.transpileModule), so this
+// runs the tsc binary and reports only syntax errors (TS1xxx codes) — type
+// errors are `npm run typecheck`'s job.
 import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
-const ts = require("typescript");
+import { spawnSync } from "node:child_process";
 
 const roots = ["src", "scripts"];
 const files = [];
@@ -15,22 +17,19 @@ function walk(directory) {
 }
 for (const root of roots) if (fs.existsSync(root)) walk(root);
 
-const errors = [];
-for (const file of files) {
-  const source = fs.readFileSync(file, "utf8");
-  const result = ts.transpileModule(source, {
-    compilerOptions: { jsx: ts.JsxEmit.Preserve, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
-    fileName: file,
-    reportDiagnostics: true,
-  });
-  for (const diagnostic of result.diagnostics || []) {
-    if (diagnostic.category !== ts.DiagnosticCategory.Error) continue;
-    errors.push(`${file}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")}`);
-  }
+const tsc = path.join("node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc");
+const result = spawnSync(tsc, ["--noEmit", "--pretty", "false", "-p", "tsconfig.json"], { encoding: "utf8", shell: process.platform === "win32" });
+if (result.error) {
+  console.error(`Could not run tsc: ${result.error.message}`);
+  process.exit(1);
 }
 
-if (errors.length) {
-  console.error(errors.join("\n"));
+const syntaxErrors = `${result.stdout}${result.stderr}`
+  .split("\n")
+  .filter((line) => /error TS1\d{3}:/.test(line));
+
+if (syntaxErrors.length) {
+  console.error(syntaxErrors.join("\n"));
   process.exit(1);
 }
 console.log(`PASS syntax/transpile parse for ${files.length} TypeScript/TSX files`);
