@@ -1,3 +1,4 @@
+import { extractPdfText } from "@/lib/documents/pdfText";
 import { transcribeScannedDocument } from "@/lib/documents/vision";
 
 export const MAX_EVIDENCE_BYTES = 15 * 1024 * 1024;
@@ -20,9 +21,8 @@ export async function extractDocument(file: File): Promise<DocumentExtraction> {
   const mime = file.type.toLowerCase();
 
   if (mime === "application/pdf" || ext === "pdf") {
-    const pdfParse = (await import("pdf-parse")).default;
     let text = "";
-    try { text = (await pdfParse(buffer)).text || ""; } catch { /* scanned/malformed PDF: vision fallback below */ }
+    try { text = await extractPdfText(buffer); } catch { /* scanned/malformed PDF: vision fallback below */ }
     if (useful(text)) return { text, method: "TEXT" };
     const visionText = await transcribeScannedDocument(buffer, "application/pdf");
     if (!useful(visionText)) throw new Error("SOUP could not read enough information from that scan. Try a clearer scan or another document.");

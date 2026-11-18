@@ -2,6 +2,9 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Loaded from node_modules at runtime instead of bundled — pdf-parse v2
+  // needs its PDF.js worker file next to it (see src/lib/documents/pdfText.ts).
+  serverExternalPackages: ["pdf-parse"],
   async headers() {
     return [
       {

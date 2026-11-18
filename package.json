@@ -57,7 +57,7 @@
     "next": "^16.4.6",
     "openai": "^7.60.0",
     "pdf-lib": "^1.17.1",
-    "pdf-parse": "^1.1.1",
+    "pdf-parse": "^2.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",

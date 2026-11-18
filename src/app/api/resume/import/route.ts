@@ -1,3 +1,4 @@
+import { extractPdfText } from "@/lib/documents/pdfText";
 import { AIConfigError, AIProviderError } from "@/lib/ai/types";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -21,9 +22,7 @@ async function extractText(file: File) {
   const mime = file.type.toLowerCase();
 
   if (mime === "application/pdf" || extension === "pdf") {
-    const pdfParse = (await import("pdf-parse")).default;
-    const result = await pdfParse(buffer);
-    return result.text;
+    return extractPdfText(buffer);
   }
 
   if (mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || extension === "docx") {
