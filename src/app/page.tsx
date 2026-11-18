@@ -183,7 +183,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen w-full bg-paper">
-      <StudyHeader current="home" signedIn={!!user} fullName={dashboardData?.profile.user.fullName}/>
+      <StudyHeader current="home" signedIn={!!user} fullName={dashboardData?.profile.user.fullName} role={dashboardData?.profile.user.role}/>
       <SupportLauncher signedIn={!!user} />
       <main className="mx-auto w-full max-w-[1600px] px-5 pb-16 pt-6 sm:px-6 xl:px-10">
         <HomeHero
