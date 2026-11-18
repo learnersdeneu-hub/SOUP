@@ -6,11 +6,11 @@ Status flow: `planned` → `researched` → `drafted` → `fact-checked` → `ap
 
 | # | File | Target URL | Category | Primary keyword | Status | Last reviewed |
 |---|---|---|---|---|---|---|
-| 1 | `about-soup.md` | `/about` | Company | SOUP student admissions platform | drafted, awaiting approval | 2026-11-17 |
-| 2 | `study-in-greece-english-taught-programmes.md` | `/guides/study-in-greece-english-taught-programmes` | B (Greece pillar) | study in Greece for international students | drafted, awaiting approval | 2026-11-17 |
-| 3 | `study-in-europe-after-a-levels.md` | `/guides/study-in-europe-after-a-levels` | A → B bridge | study in Europe after A-levels | drafted, awaiting approval | 2026-11-17 |
-| 4 | `university-application-document-checklist.md` | `/guides/university-application-document-checklist` | F | university application documents checklist | drafted, awaiting approval | 2026-11-17 |
-| 5 | `hospitality-tourism-degrees-europe-diploma-graduates.md` | `/guides/hospitality-tourism-degrees-europe-diploma-graduates` | B (vocational pathway) | hospitality management degree in Europe for international students | drafted, awaiting approval | 2026-11-17 |
+| 1 | `about-soup.md` | `/about` | Company | SOUP student admissions platform | **published 2026-11-18** | 2026-11-18 |
+| 2 | `study-in-greece-english-taught-programmes.md` | `/guides/study-in-greece-english-taught-programmes` | B (Greece pillar) | study in Greece for international students | **published 2026-11-18** | 2026-11-18 |
+| 3 | `study-in-europe-after-a-levels.md` | `/guides/study-in-europe-after-a-levels` | A → B bridge | study in Europe after A-levels | **published 2026-11-18** | 2026-11-18 |
+| 4 | `university-application-document-checklist.md` | `/guides/university-application-document-checklist` | F | university application documents checklist | **published 2026-11-18** | 2026-11-18 |
+| 5 | `hospitality-tourism-degrees-europe-diploma-graduates.md` | `/guides/hospitality-tourism-degrees-europe-diploma-graduates` | B (vocational pathway) | hospitality management degree in Europe for international students | **published 2026-11-18** | 2026-11-18 |
 | 6 | `reuse-information-across-university-application-portals.md` | `/guides/reuse-information-across-university-application-portals` | F (Companion) | university application autofill | drafted. **Blocked until the new Companion build ships** (see the file's review notes) | 2026-11-17 |
 
 ## Rules every article follows

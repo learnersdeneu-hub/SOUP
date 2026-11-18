@@ -18,7 +18,7 @@ function State({ ok, optional = false }: { ok: boolean; optional?: boolean }) {
 }
 
 export default async function AdminSettingsPage() {
-  await requireRole(ADMIN_ROLES);
+  const current = await requireRole(ADMIN_ROLES);
   const rows = [
     ["Supabase URL", Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL), false],
     ["Supabase publishable key", Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY), false],
@@ -37,7 +37,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn/>
+      <Header signedIn role={current.user.role}/>
       <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-mute">Internal operations</div>
         <h1 className="mt-1 text-2xl font-semibold text-ink">Runtime settings</h1>

@@ -17,9 +17,9 @@ long_tail_keywords:
   - "Greek public university tuition for non-EU students"
 search_intent: "Informational, moving towards application"
 audience: "Non-EU school leavers and graduates (South Asia, GCC, Africa) considering Greece"
-status: "draft — awaiting editorial approval"
-publication_date: "TBC on approval"
-last_reviewed: "2026-11-17"
+status: "published"
+publication_date: "2026-11-18"
+last_reviewed: "2026-11-18"
 featured_image: "Original photo or licensed image of a Greek university campus (to be sourced; do not use unlicensed images)"
 featured_image_alt: "Students walking across a university campus in Athens, Greece"
 review_notes:

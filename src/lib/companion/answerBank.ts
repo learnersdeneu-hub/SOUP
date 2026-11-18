@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeCoreProfileDetails } from "@/lib/applications/coreProfile";
+import { getLearnedAnswers, type LearnedAnswerMap } from "@/lib/companion/learnedAnswers";
 
 export type AnswerEntry = { value: string; source: string; confidence: "VERIFIED" | "PROFILE" | "STATED" };
 
@@ -8,6 +10,13 @@ export type AnswerBankResult = {
   documentFacts: Array<{ field: string; value: string; sourceDocumentType: string; verified: boolean }>;
   documents: Array<{ id: string; documentType: string; originalFileName: string | null; reviewStatus: string; uploadedAt: Date }>;
   applications: Array<{ id: string; university: string | null; program: string | null; level: string | null; intake: string | null; status: string }>;
+  // Free-form answers Companion collected directly from this student for
+  // questions outside the fixed answer-bank keys above (see
+  // src/lib/companion/learnedAnswers.ts) -- keyed by the same normalized
+  // question text the desktop panel computes client-side, so a field
+  // matching nothing in the dictionary still doesn't get re-asked once
+  // answered once.
+  learnedAnswers: LearnedAnswerMap;
 };
 
 type UserFacts = {
@@ -33,7 +42,7 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
 // honest signal both panels use to ask the student directly instead of
 // fabricating a value.
 export async function buildAnswerBank(profileId: string, user: UserFacts): Promise<AnswerBankResult> {
-  const [studentCase, applications, documents] = await Promise.all([
+  const [studentCase, applications, documents, learnedAnswers] = await Promise.all([
     prisma.studentCase.findUnique({ where: { profileId } }),
     prisma.studentApplication.findMany({
       where: { profileId, status: { notIn: ["WITHDRAWN", "REJECTED"] } },
@@ -47,6 +56,7 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
       take: 20,
       select: { id: true, documentType: true, originalFileName: true, reviewStatus: true, uploadedAt: true, aiAnalysis: true },
     }),
+    getLearnedAnswers(profileId),
   ]);
 
   const { firstName, lastName } = splitName(user.fullName || "");
@@ -63,6 +73,21 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
   if (studentCase?.preferredIntake) answerBank.preferredIntake = { value: studentCase.preferredIntake, source: "SOUP counselor profile", confidence: "STATED" };
   if (studentCase?.academicBackgroundSummary) answerBank.academicBackground = { value: studentCase.academicBackgroundSummary, source: "SOUP counselor profile", confidence: "STATED" };
   if (studentCase?.englishProficiencySummary) answerBank.englishProficiency = { value: studentCase.englishProficiencySummary, source: "SOUP counselor profile", confidence: "STATED" };
+
+  // The student's own "Profile & Details" form (src/components/profile/
+  // ProfileDetailsForm.tsx) already collects phone, address, passport and
+  // emergency-contact data — it just never reached the answer bank before,
+  // so field-dictionary.js's existing phone/address/passportNumber/
+  // passportExpiry/emergencyContactName patterns always fell through to
+  // "needs your input" regardless of how good the fill mechanics got.
+  const core = normalizeCoreProfileDetails(studentCase?.coreProfileDetails);
+  const phone = [core.phoneCountryCode, core.phone].filter(Boolean).join(" ").trim();
+  if (phone) answerBank.phone = { value: phone, source: "SOUP profile", confidence: "STATED" };
+  if (core.currentAddress) answerBank.address = { value: core.currentAddress, source: "SOUP profile", confidence: "STATED" };
+  if (core.passportNumber) answerBank.passportNumber = { value: core.passportNumber, source: "SOUP profile", confidence: "STATED" };
+  if (core.passportExpiry) answerBank.passportExpiry = { value: core.passportExpiry, source: "SOUP profile", confidence: "STATED" };
+  if (core.emergencyContactName) answerBank.emergencyContactName = { value: core.emergencyContactName, source: "SOUP profile", confidence: "STATED" };
+  if (core.emergencyContactRelationship) answerBank.emergencyContactRelationship = { value: core.emergencyContactRelationship, source: "SOUP profile", confidence: "STATED" };
 
   // Facts genuinely extracted from a processed document (e.g. a passport scan)
   // are surfaced separately from the core answer bank, tagged with their real
@@ -89,5 +114,6 @@ export async function buildAnswerBank(profileId: string, user: UserFacts): Promi
     documentFacts,
     documents: documents.map((d) => ({ id: d.id, documentType: d.documentType, originalFileName: d.originalFileName, reviewStatus: d.reviewStatus, uploadedAt: d.uploadedAt })),
     applications: applications.map((app) => ({ id: app.id, university: app.university?.name || null, program: app.program?.title || null, level: app.program?.level || null, intake: app.intake, status: app.status })),
+    learnedAnswers,
   };
 }

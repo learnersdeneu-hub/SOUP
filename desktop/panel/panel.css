@@ -177,6 +177,41 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .sc-activity-text { font-size: 12.5px; line-height: 1.5; color: var(--mute); }
 .sc-activity-item.active .sc-activity-text, .sc-activity-item.error .sc-activity-text { color: var(--ink); }
 
+/* ---------- Terminal-styled activity card — the same window-chrome/dark-
+   monospace feed Claude Code itself shows inside VS Code while it works,
+   so Companion "thinking" (scanning, filling, reviewing) reads the same
+   way. Scoped entirely under .sc-terminal so plain .sc-card usages
+   elsewhere are unaffected. ---------- */
+.sc-terminal { background: #0D1117; border-color: #30363D; padding: 0; overflow: hidden; }
+.sc-terminal-header {
+  display: flex; align-items: center; gap: 6px; padding: 9px 12px;
+  background: #161B22; border-bottom: 1px solid #30363D;
+}
+.sc-terminal-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.sc-terminal-dot.red { background: #FF5F56; }
+.sc-terminal-dot.yellow { background: #FFBD2E; }
+.sc-terminal-dot.green { background: #27C93F; }
+.sc-terminal-label { margin-left: 4px; font-size: 10.5px; font-weight: 700; color: #8B949E; font-family: "SF Mono", Menlo, Consolas, monospace; }
+.sc-terminal-body { padding: 12px; font-family: "SF Mono", Menlo, Consolas, monospace; }
+.sc-terminal .sc-activity-item.done .sc-activity-dot { background: transparent; color: #3FB950; }
+.sc-terminal .sc-activity-item.active .sc-activity-dot { background: transparent; color: #D29922; }
+.sc-terminal .sc-activity-item.error .sc-activity-dot { background: transparent; color: #F85149; }
+.sc-terminal .sc-activity-item.pending .sc-activity-dot { background: transparent; color: #6E7681; }
+.sc-terminal .sc-activity-text { color: #C9D1D9; font-size: 11.5px; }
+.sc-terminal .sc-activity-item.pending .sc-activity-text { color: #6E7681; }
+.sc-terminal-cursor { display: inline-block; width: 6px; height: 12px; margin-left: 2px; background: #C9D1D9; animation: sc-cursor-blink 1s step-end infinite; vertical-align: middle; }
+@keyframes sc-cursor-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* ---------- SOUP's review (readiness verdict shown after a fill or a PDF
+   review — see renderReviewResult()) ---------- */
+.sc-review-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 10px; font-size: 10px; font-weight: 800; }
+.sc-review-badge.strong { background: var(--teal-tint); color: var(--teal); }
+.sc-review-badge.needs-work { background: var(--amber-bg); color: var(--amber-text); }
+.sc-review-badge.not-ready { background: var(--danger-bg); color: var(--danger-text); }
+.sc-review-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-top: 10px; }
+.sc-review-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.sc-review-list li { font-size: 11.5px; line-height: 1.5; color: var(--ink); }
+
 /* ---------- Ask-when-unsure card — modeled on how Claude Code itself pauses
    with a bounded-choice question instead of guessing when blocked. ---------- */
 .sc-ask-card { border: 1.5px solid var(--navy); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }

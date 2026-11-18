@@ -17,9 +17,9 @@ long_tail_keywords:
   - "can I study in Europe with 3 A-levels from Pakistan"
 search_intent: "Informational, comparison"
 audience: "British-curriculum students in Pakistan, the GCC and elsewhere finishing A-levels (or Cambridge/Edexcel International A-levels)"
-status: "draft — awaiting editorial approval"
-publication_date: "TBC on approval"
-last_reviewed: "2026-11-17"
+status: "published"
+publication_date: "2026-11-18"
+last_reviewed: "2026-11-18"
 featured_image: "Original illustration: map of Europe marking Germany, the Netherlands, Italy and Greece with a short entry-rule summary for each"
 featured_image_alt: "Map of Europe highlighting Germany, the Netherlands, Italy and Greece, with a summary of A-level entry rules for each"
 review_notes:

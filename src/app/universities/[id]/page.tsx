@@ -13,7 +13,7 @@ import { MY_COLLEGES_CAP } from "@/lib/applications/lifecycle";
 import { effectiveCollegesCap } from "@/lib/applications/capacity";
 import { safeHttpUrl } from "@/lib/security/urls";
 import { SourceFreshnessBadge } from "@/components/SourceFreshnessBadge";
-import { summarizeUniversityPrograms } from "@/lib/universities/presentation";
+import { summarizeUniversityPrograms, extractApplicationFee } from "@/lib/universities/presentation";
 
 function metadataLogo(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -33,8 +33,15 @@ function SummaryCard({ label, value, note }: { label: string; value: string; not
 
 export default async function UniversityDetailPage({ params }: { params: { id: string } }) {
   const current = await getCurrentUser();
-  const university = await prisma.university.findUnique({
-    where: { id: params.id },
+  // findFirst (not findUnique) so the isPublic filter can ride along with the
+  // id lookup — a university staff have explicitly hidden 404s for a student
+  // the same way a missing id already does, rather than needing a second
+  // check after the fact. OR, not `{ not: false }` — see the matching
+  // comment in src/app/universities/page.tsx: NULL <> false is NULL in
+  // Postgres, which silently excludes every university that's never had
+  // isPublic touched rather than treating it as visible.
+  const university = await prisma.university.findFirst({
+    where: { id: params.id, OR: [{ isPublic: true }, { isPublic: null }] },
     include: {
       partner: true,
       programs: {
@@ -89,7 +96,10 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
   const website = safeHttpUrl(university.websiteUrl, 1500)
     || safeHttpUrl(university.partner?.websiteUrl, 1500)
     || safeHttpUrl(knownPartnerWebsite(university.name), 1500);
-  const summary = summarizeUniversityPrograms(university.programs);
+  const programFees = university.programs.map((program) => extractApplicationFee(program.requirements));
+  const summary = summarizeUniversityPrograms(
+    university.programs.map((program, index) => ({ ...program, applicationFeeAmount: programFees[index]?.amount, applicationFeeCurrency: programFees[index]?.currency })),
+  );
   const levelText = summary.levels.length ? summary.levels.join(" · ") : "Live verification";
   const intakeText = summary.intakes.length ? summary.intakes.join(" · ") : "Live verification";
   const feeText = summary.feeRange || "Live verification";
@@ -148,7 +158,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
               <UniversityApplyPanel
                 universityId={university.id}
                 universityName={university.name}
-                programs={university.programs.map((p) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake }))}
+                programs={university.programs.map((p, index) => ({ id: p.id, title: p.title, level: p.level, intake: p.intake, applicationFeeAmount: programFees[index]?.amount ?? null, applicationFeeCurrency: programFees[index]?.currency ?? null }))}
                 signedIn={!!current}
                 existingApplication={existingApplication}
                 prefill={applicantPrefill}
@@ -158,6 +168,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
 
           <div className="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard label="Fee range" value={feeText} note={summary.feeRange ? "From active catalog programs" : "Noodles can verify current tuition"}/>
+            {summary.applicationFeeRange ? <SummaryCard label="Application fee" value={summary.applicationFeeRange} note={`For ${university.name}`}/> : null}
             <SummaryCard label="Intakes" value={intakeText} note={summary.intakes.length ? "From active catalog programs" : "Current intake check required"}/>
             <SummaryCard label="Study levels" value={levelText} note={summary.levels.length ? undefined : "Program-level check required"}/>
             <SummaryCard label="Programs in SOUP" value={String(summary.programCount)} note={summary.programCount ? "Current active catalog rows" : "Use live program search"}/>
@@ -175,7 +186,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
           </div>
 
           <div className="mt-5 divide-y divide-hair">
-            {university.programs.map((program) => (
+            {university.programs.map((program, index) => (
               <div key={program.id} className="py-5 first:pt-0 last:pb-0">
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                   <div className="min-w-0">
@@ -185,6 +196,7 @@ export default async function UniversityDetailPage({ params }: { params: { id: s
                       {program.intake ? <span className="inline-flex items-center gap-1"><CalendarDays size={11}/>{program.intake}</span> : <span className="inline-flex items-center gap-1"><CalendarDays size={11}/>Intake: verify live</span>}
                       {program.tuitionAmount ? <span className="inline-flex items-center gap-1"><Coins size={11}/>{program.tuitionCurrency || ""} {Number(program.tuitionAmount).toLocaleString("en")} / year</span> : <span className="inline-flex items-center gap-1"><Coins size={11}/>Fee: verify live</span>}
                       {program.duration ? <span className="inline-flex items-center gap-1"><GraduationCap size={11}/>{program.duration} {/^\d+(\.\d+)?$/.test(program.duration) ? "years" : ""}</span> : null}
+                      {programFees[index] ? <span className="inline-flex items-center gap-1 font-semibold text-ink"><Coins size={11}/>{university.name} application fee: {programFees[index]!.currency} {programFees[index]!.amount.toLocaleString("en")}</span> : null}
                     </div>
                     {program.applicationDeadline ? <div className="mt-2 text-[11px] text-mute">Saved deadline: <strong className="font-semibold text-ink">{program.applicationDeadline}</strong></div> : null}
                     <div className="mt-2"><SourceFreshnessBadge checkedAt={program.sourceCheckedAt}/></div>

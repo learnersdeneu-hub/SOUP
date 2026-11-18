@@ -17,9 +17,9 @@ long_tail_keywords:
   - "hospitality management degree in Europe with low tuition"
 search_intent: "Informational / commercial investigation"
 audience: "Hospitality, culinary and tourism diploma holders (COTHM graduates in Pakistan and similar students), plus bachelor's graduates looking for a tourism master's"
-status: "draft — awaiting editorial approval"
-publication_date: "TBC on approval"
-last_reviewed: "2026-11-17"
+status: "published"
+publication_date: "2026-11-18"
+last_reviewed: "2026-11-18"
 featured_image: "Licensed or original photo of hospitality students in a training kitchen or hotel setting"
 featured_image_alt: "Hospitality students in chef's whites working in a professional training kitchen"
 review_notes:

@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import { findAbout, getPublishedGuides, isPublished, siteUrl } from "@/lib/guides/content";
+import { JOURNAL_ARTICLES } from "@/lib/landing/journal";
 
-// Only the public editorial surface is listed: every other route requires
+// Only the public surface is listed: the landing page (/sign-in), the
+// Journal, and published guides and About. Every other route requires
 // sign-in (see src/middleware.ts), so it can't be crawled anyway.
 export const revalidate = 3600;
 
@@ -9,7 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();
   const guides = getPublishedGuides();
   const about = findAbout();
-  const entries: MetadataRoute.Sitemap = [];
+  const entries: MetadataRoute.Sitemap = [
+    { url: `${base}/sign-in`, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/journal`, changeFrequency: "weekly", priority: 0.7 },
+    ...JOURNAL_ARTICLES.map((article) => ({ url: `${base}/journal/${article.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+  ];
   if (about && isPublished(about)) {
     entries.push({ url: `${base}${about.path}`, lastModified: about.lastReviewed || about.publicationDate || undefined, changeFrequency: "monthly", priority: 0.6 });
   }

@@ -51,7 +51,7 @@ export default async function AdminReferralsPage({ searchParams }: { searchParam
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn/>
+      <Header signedIn role={current.user.role}/>
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
         <Link href="/admin" className="inline-flex items-center gap-1 text-xs font-semibold text-navy"><ArrowLeft size={12}/>Admin</Link>
         <div className="mt-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">

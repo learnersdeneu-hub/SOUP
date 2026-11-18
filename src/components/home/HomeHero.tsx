@@ -16,6 +16,12 @@ const QUICK_PROMPTS: Array<[string, string]> = [
 
 const JOURNEY_STEPS = ["Discover", "Apply", "Documents", "Visa & funds", "Arrive"] as const;
 
+const EXPLORE_OPTIONS: Array<[string, string]> = [
+  ["Government Partner Network", "/universities?channel=GOVERNMENT"],
+  ["SOUP Direct Partner", "/universities?channel=DIRECT_SOUP"],
+  ["Browse the full catalogue", "/universities"],
+];
+
 function journeyIndex(stage: string | null): number {
   switch (stage) {
     case "APPLYING": return 1;
@@ -56,6 +62,13 @@ export function HomeHero({
   const router = useRouter();
   const [input, setInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [exploreQuery, setExploreQuery] = useState("");
+
+  function submitExploreSearch(event: FormEvent) {
+    event.preventDefault();
+    const trimmed = exploreQuery.trim();
+    router.push(trimmed ? `/universities?q=${encodeURIComponent(trimmed)}` : "/universities");
+  }
 
   function ask(prompt: string) {
     if (!prompt.trim() || submitting) return;
@@ -117,6 +130,25 @@ export function HomeHero({
             <Link href="/dashboard" className="text-center text-sm font-semibold text-navy no-underline">Open full dashboard</Link>
           </div>
         )}
+      </section>
+
+      <section aria-labelledby="explore-universities" className="mt-6 flex flex-col gap-[18px] rounded-3xl border border-hair bg-white p-7">
+        <h2 id="explore-universities" className="m-0 text-lg font-extrabold text-ink">Explore universities</h2>
+        <div className="flex flex-wrap gap-2">
+          {EXPLORE_OPTIONS.map(([label, href]) => (
+            <Link key={href} href={href} className="h-10 rounded-full border border-hair bg-paper px-4 text-sm font-semibold text-ink no-underline hover:border-navy/30 hover:bg-white">{label}</Link>
+          ))}
+        </div>
+        <form onSubmit={submitExploreSearch} className="relative">
+          <input
+            type="text"
+            value={exploreQuery}
+            onChange={(event) => setExploreQuery(event.target.value)}
+            placeholder="Or search by university, city or country..."
+            className="h-12 w-full rounded-full border border-hair bg-paper pl-5 pr-28 text-sm text-ink outline-none focus:border-navy/40"
+          />
+          <button type="submit" className="absolute right-1.5 top-1/2 h-9 -translate-y-1/2 rounded-full bg-navy px-5 text-sm font-bold text-white">Search</button>
+        </form>
       </section>
 
       {signedIn && (

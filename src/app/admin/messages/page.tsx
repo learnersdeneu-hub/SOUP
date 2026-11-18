@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 // nothing previously let staff see new messages without already knowing
 // which application to check.
 export default async function AdminMessagesPage() {
-  await requireRole(APPLICATION_ROLES);
+  const current = await requireRole(APPLICATION_ROLES);
 
   const messages = await prisma.applicationMessage.findMany({
     orderBy: { receivedAt: "desc" },
@@ -32,7 +32,7 @@ export default async function AdminMessagesPage() {
     },
   });
 
-  return <div className="min-h-screen bg-paper"><Header signedIn/><main className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
+  return <div className="min-h-screen bg-paper"><Header signedIn role={current.user.role}/><main className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
     <div className="text-xs font-semibold uppercase tracking-[.16em] text-mute">Internal operations</div>
     <h1 className="mt-1 text-2xl font-semibold text-ink">Application messages</h1>
     <p className="mt-2 text-sm leading-6 text-mute">Every email a student has sent to (or received from) SOUP through an application's own reply address, most recent first. Open an application to read the full thread and reply.</p>

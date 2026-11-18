@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CalendarDays, Coins, Search } from "lucide-react";
+import { ArrowRight, CalendarDays, Coins, Search, X } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { CHANNEL_LABELS, type CatalogChannel } from "@/lib/universities/catalogChannels";
 import { AddToMyCollegesButton, type AddToMyCollegesProgram, type AddToMyCollegesSelection } from "@/components/applications/AddToMyCollegesButton";
@@ -17,6 +17,7 @@ export type CatalogUniversity = {
   channel: CatalogChannel;
   programCount: number;
   feeRange: string | null;
+  minTuition: number | null;
   intakes: string[];
   levels: string[];
   fields: string[];
@@ -31,15 +32,27 @@ const PAGE_SIZE = 30;
 // sorted alphabetically after the known ones, rather than being hidden.
 const LEVEL_ORDER = ["Foundation", "Diploma", "Bachelors", "Masters", "MBA", "PhD"];
 
-export function UniversityCatalogBrowser({ universities, signedIn, capReached, initialChannel }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean; initialChannel?: CatalogChannel }) {
+// Coarse fee brackets, not currency-converted (see minTuition's own comment
+// in src/app/universities/page.tsx) — a discovery filter, not a precise
+// cross-currency comparison tool.
+const FEE_BUCKETS = [
+  { value: "FREE", label: "Tuition-free", test: (n: number) => n === 0 },
+  { value: "UNDER_10K", label: "Under 10,000 / year", test: (n: number) => n > 0 && n < 10000 },
+  { value: "10K_25K", label: "10,000 – 25,000 / year", test: (n: number) => n >= 10000 && n <= 25000 },
+  { value: "OVER_25K", label: "25,000+ / year", test: (n: number) => n > 25000 },
+] as const;
+type FeeBucket = (typeof FEE_BUCKETS)[number]["value"] | "ALL";
+
+export function UniversityCatalogBrowser({ universities, signedIn, capReached, initialChannel, initialQuery }: { universities: CatalogUniversity[]; signedIn: boolean; capReached: boolean; initialChannel?: CatalogChannel; initialQuery?: string }) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery || "");
   const [channel, setChannel] = useState<CatalogChannel | "ALL">(initialChannel && initialChannel in CHANNEL_LABELS ? initialChannel : "ALL");
   const [country, setCountry] = useState("ALL");
   const [level, setLevel] = useState("ALL");
   const [field, setField] = useState("ALL");
   const [intake, setIntake] = useState("ALL");
   const [language, setLanguage] = useState("ALL");
+  const [feeBucket, setFeeBucket] = useState<FeeBucket>("ALL");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const availableChannels = useMemo(() => {
@@ -96,6 +109,12 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
       if (field !== "ALL" && u.fields.length > 0 && !u.fields.includes(field)) return false;
       if (intake !== "ALL" && u.intakes.length > 0 && !u.intakes.includes(intake)) return false;
       if (language !== "ALL" && u.languages.length > 0 && !u.languages.includes(language)) return false;
+      // Same "unknown stays visible" rule as level/field/intake above — no
+      // recorded tuition means unverified, not necessarily out of range.
+      if (feeBucket !== "ALL" && u.minTuition != null) {
+        const bucket = FEE_BUCKETS.find((b) => b.value === feeBucket);
+        if (bucket && !bucket.test(u.minTuition)) return false;
+      }
       if (!needle) return true;
       return u.name.toLowerCase().includes(needle) || u.country.toLowerCase().includes(needle) || (u.city || "").toLowerCase().includes(needle);
     });
@@ -107,13 +126,30 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
         return rank !== 0 ? rank : a.index - b.index;
       })
       .map(({ u }) => u);
-  }, [universities, query, channel, country, level, field, intake, language]);
+  }, [universities, query, channel, country, level, field, intake, language, feeBucket]);
 
   const visible = filtered.slice(0, visibleCount);
-  const filtersActive = query || channel !== "ALL" || country !== "ALL" || level !== "ALL" || field !== "ALL" || intake !== "ALL" || language !== "ALL";
+  const filtersActive = query || channel !== "ALL" || country !== "ALL" || level !== "ALL" || field !== "ALL" || intake !== "ALL" || language !== "ALL" || feeBucket !== "ALL";
 
   function resetPage() {
     setVisibleCount(PAGE_SIZE);
+  }
+
+  // A student who picks several dropdown filters plus a typed phrase can
+  // easily land on a combination nothing matches (the search box only
+  // matches university/city/country text, not a free-form description) —
+  // with no visible way back to the full list, that reads as "the catalog
+  // is broken" rather than "these specific filters are too narrow."
+  function clearAllFilters() {
+    setQuery("");
+    setChannel("ALL");
+    setCountry("ALL");
+    setLevel("ALL");
+    setField("ALL");
+    setIntake("ALL");
+    setLanguage("ALL");
+    setFeeBucket("ALL");
+    resetPage();
   }
 
   // Goes to the university's own summary page (fees, intakes, levels,
@@ -129,7 +165,11 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
 
   return (
     <div>
-      <div className="rounded-2xl border border-hair bg-white p-4 sm:p-5">
+      <div className="rounded-2xl border-[1.5px] border-[#C7D4F0] bg-white p-4 shadow-[0_2px_12px_rgba(31,63,168,0.06)] sm:p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#E9EEFB]"><Search size={13} className="text-[#1F3FA8]" /></span>
+          <span className="text-[11px] font-bold uppercase tracking-[.12em] text-[#1F3FA8]">Search &amp; filters</span>
+        </div>
         <form
           role="search"
           onSubmit={(event) => { event.preventDefault(); resetPage(); (event.currentTarget.elements.namedItem("catalog-search") as HTMLInputElement | null)?.blur(); }}
@@ -141,8 +181,19 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
             value={query}
             onChange={(event) => { setQuery(event.target.value); resetPage(); }}
             placeholder="Search by university, city or country..."
-            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-11 text-sm text-ink outline-none focus:border-navy/40"
+            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-20 text-sm text-ink outline-none focus:border-navy/40"
           />
+          {query && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              title="Clear search"
+              onClick={() => { setQuery(""); resetPage(); }}
+              className="absolute right-11 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-mute hover:bg-paper hover:text-ink"
+            >
+              <X size={14} />
+            </button>
+          )}
           <button
             type="submit"
             aria-label="Search"
@@ -153,8 +204,8 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
           </button>
         </form>
 
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <select value={country} onChange={(event) => { setCountry(event.target.value); resetPage(); }} className={selectClass} aria-label="Filter by country">
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <select value={country} onChange={(event) => { setCountry(event.target.value); resetPage(); }} className={selectClass} aria-label="Filter by country (location)">
             <option value="ALL">All countries</option>
             {availableCountries.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -176,6 +227,10 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
               {availableLanguages.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
           )}
+          <select value={feeBucket} onChange={(event) => { setFeeBucket(event.target.value as FeeBucket); resetPage(); }} className={selectClass} aria-label="Filter by tuition fee range">
+            <option value="ALL">All tuition fees</option>
+            {FEE_BUCKETS.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
+          </select>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -231,7 +286,14 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
       </section>
 
       {!filtered.length ? (
-        <div className="mt-8 rounded-2xl border border-hair bg-white p-6 text-sm text-mute">No universities match that search.</div>
+        <div className="mt-8 rounded-2xl border border-hair bg-white p-6 text-center text-sm text-mute">
+          <p className="m-0">No universities match that search.</p>
+          {filtersActive && (
+            <button onClick={clearAllFilters} className="mt-3 inline-flex rounded-full border border-hair bg-white px-4 py-2 text-xs font-semibold text-navy hover:border-navy/30">
+              Clear search &amp; filters
+            </button>
+          )}
+        </div>
       ) : visibleCount < filtered.length ? (
         <div className="mt-6 flex justify-center">
           <button onClick={() => setVisibleCount((count) => count + PAGE_SIZE)} className="rounded-full border border-hair bg-white px-5 py-2.5 text-xs font-semibold text-ink hover:border-navy/30">

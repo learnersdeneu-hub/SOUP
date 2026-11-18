@@ -16,9 +16,9 @@ long_tail_keywords:
   - "bank statement for university application"
 search_intent: "Informational / practical checklist"
 audience: "Undergraduate and postgraduate applicants from any country"
-status: "draft — awaiting editorial approval"
-publication_date: "TBC on approval"
-last_reviewed: "2026-11-17"
+status: "published"
+publication_date: "2026-11-18"
+last_reviewed: "2026-11-18"
 featured_image: "Original graphic: printable checklist card (SOUP brand colours)"
 featured_image_alt: "A printable checklist of university application documents, including passport, transcripts, test scores and references"
 review_notes:
@@ -147,7 +147,7 @@ Once you accept an offer, a second checklist starts:
 
 SOUP gives you **one secure document vault** linked to your profile. You upload your passport, transcripts, test reports, bank statements and CV once, sorted into clear categories. SOUP shows which documents each shortlisted university needs, flags documents that are about to expire, and lets you invite recommenders by email and track whether they have submitted.
 
-When you fill in real application portals, **SOUP Companion** can attach the matching document from your vault to upload fields. If two documents could fit, such as an IELTS and a TOEFL report, it asks you which one to use. [See how Companion works →](/guides/reuse-information-across-university-application-portals)
+When you fill in real application portals, **SOUP Companion** can attach the matching document from your vault to upload fields. If two documents could fit, such as an IELTS and a TOEFL report, it asks you which one to use.
 
 **[Request access to SOUP](/sign-up)** and build your document vault before your deadlines arrive.
 

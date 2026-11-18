@@ -29,10 +29,11 @@
 // debugger exposes here), never achievable by a plain webpage or even a
 // content script — which is also exactly why the web-based (no-install)
 // Companion can only ever be a reference/copy-paste tool, never this.
-const { app, BrowserWindow, BrowserView, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, BrowserView, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { pathToFileURL } = require("url");
+const { autoUpdater } = require("electron-updater");
 
 const PANEL_WIDTH = 380;
 const CHROME_HEIGHT = 80;
@@ -99,9 +100,20 @@ function createTab(rawUrl) {
   if (!target) target = NEW_TAB_URL;
   else if (!/^https?:\/\/|^file:\/\//i.test(target)) target = `https://${target}`;
 
-  const view = new BrowserView({ webPreferences: { contextIsolation: true, sandbox: true } });
+  const view = new BrowserView({ webPreferences: { contextIsolation: true, sandbox: true, preload: path.join(__dirname, "preload-portal.js") } });
   const tab = { view, title: "New tab", url: target };
   tabs.set(id, tab);
+
+  // A real OAuth/SSO "Sign in with Google/Microsoft" button opens a popup
+  // via window.open() — with no handler, Electron denies it by default and
+  // the student simply cannot complete that sign-in at all. Allowing it
+  // (a real new window, same as any browser) plus notifying the panel is
+  // what makes that an "auth command" the run can pause and wait on,
+  // instead of a silent dead end.
+  view.webContents.setWindowOpenHandler(({ url }) => {
+    if (id === activeTabId) panelView?.webContents.send("portal-auth-popup", { url });
+    return { action: "allow" };
+  });
 
   view.webContents.on("dom-ready", () => injectBridge(view));
   view.webContents.on("page-title-updated", (_e, title) => { tab.title = title; notifyChrome(); });
@@ -185,8 +197,41 @@ function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+app.whenReady().then(initAutoUpdate);
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+
+// ---------- Auto-update ----------
+// Students install once and never need to uninstall/reinstall again: every
+// `npm run dist` release is copied to public/downloads/updates/ (see
+// desktop/README.md) alongside a latest.yml feed file electron-updater
+// polls. Silent no-op in dev (app.isPackaged is false when run via
+// `electron .`) — there's no installed app to update, and the generic
+// feed URL isn't reachable from a dev checkout anyway.
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+function initAutoUpdate() {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("update-downloaded", (info) => {
+    dialog.showMessageBox(mainWindow, {
+      type: "info",
+      title: "SOUP Companion update ready",
+      message: `Version ${info.version} has downloaded.`,
+      detail: "Restart now to finish installing it, or it will install automatically next time you close the app.",
+      buttons: ["Restart now", "Later"],
+      defaultId: 0,
+      cancelId: 1,
+    }).then(({ response }) => { if (response === 0) autoUpdater.quitAndInstall(); });
+  });
+  // Errors (offline, feed unreachable) are expected and non-fatal — the app
+  // keeps working on whatever version is already installed either way.
+  autoUpdater.on("error", (error) => console.error("[auto-update]", error && error.message));
+
+  autoUpdater.checkForUpdates().catch(() => {});
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), FOUR_HOURS_MS);
+}
 
 // ---------- Tabs (chrome <-> main) ----------
 ipcMain.handle("tab-list", () => listTabs());
@@ -231,6 +276,25 @@ ipcMain.handle("portal-fill", async (_e, assignments) => {
   catch { return []; }
 });
 ipcMain.handle("open-external", (_e, url) => shell.openExternal(url));
+// Clicking a page's own "Next/Continue" wizard control (Phase B) — only
+// ever invoked by the run orchestrator after it has confirmed every
+// required field on the current page already has an answer.
+ipcMain.handle("portal-click-control", async (_e, fieldId) => {
+  const view = activeView();
+  if (!view) return { ok: false, reason: "NO_ACTIVE_TAB" };
+  try { return await view.webContents.executeJavaScript(`(window.__soupClickControl ? window.__soupClickControl(${JSON.stringify(fieldId)}) : { ok: false, reason: "NOT_FOUND" })`); }
+  catch { return { ok: false, reason: "ERROR" }; }
+});
+
+// A portal tab's own MutationObserver (see inject/portal-bridge.js) signals
+// here when its form changes without a full navigation -- a wizard step,
+// a conditionally-revealed section. Only acted on when it's the tab the
+// student is actually looking at; a background tab's own page churn
+// shouldn't trigger a rescan of whatever tab happens to be active.
+ipcMain.on("portal-dom-changed", (event) => {
+  const active = activeView();
+  if (active && event.sender === active.webContents) panelView?.webContents.send("tab-changed");
+});
 
 // ---------- Document auto-attach (Chrome DevTools Protocol) ----------
 async function attachDocumentToField(fieldId, documentUrl, fileName) {

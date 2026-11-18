@@ -99,6 +99,15 @@ describe("content/guides", () => {
     }
   });
 
+  it("never links a published page to an unpublished guide (which would 404)", () => {
+    const published = new Set(guides.filter((guide) => guide.kind === "guide" && guide.status === "published").map((guide) => guide.slug));
+    for (const guide of guides.filter((item) => item.status === "published")) {
+      for (const [, slug] of guide.body.matchAll(/\]\(\/guides\/([a-z0-9-]+)\)/g)) {
+        expect(published.has(slug), `${guide.file} is published but links to unpublished guide ${slug}`).toBe(true);
+      }
+    }
+  });
+
   it("only marks a guide published with a real publication date", () => {
     for (const guide of guides.filter((item) => item.status === "published")) {
       expect(guide.publicationDate, `${guide.file} is published without an ISO publication_date`).not.toBeNull();

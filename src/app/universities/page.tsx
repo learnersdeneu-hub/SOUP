@@ -5,7 +5,6 @@ import { getCurrentUser } from "@/lib/auth/currentUser";
 import { normalizeField, summarizeUniversityPrograms } from "@/lib/universities/presentation";
 import { deriveCatalogChannel, networksFromMetadata } from "@/lib/universities/catalogChannels";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { PartnerLogo } from "@/components/partners/PartnerLogo";
 import { UniversityCatalogBrowser, type CatalogUniversity } from "@/components/universities/UniversityCatalogBrowser";
 import { effectiveCollegesCap } from "@/lib/applications/capacity";
@@ -18,12 +17,13 @@ function metadataLogo(value: unknown) {
   return /^https?:\/\//i.test(url) ? url : null;
 }
 
-export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string } }) {
+export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string; q?: string } }) {
   const current = await getCurrentUser();
   const user = current?.authUser || null;
   const initialChannel = searchParams.channel && ["GOVERNMENT", "DIRECT_SOUP", "AHZ", "GRANDLINK", "SOUP_CATALOGUE"].includes(searchParams.channel)
     ? (searchParams.channel as CatalogChannel)
     : undefined;
+  const initialQuery = searchParams.q?.trim().slice(0, 160) || undefined;
 
   // Only a light, bounded per-university payload is fetched even though the
   // full catalogue (300+) renders "as one list" to the student: each
@@ -34,6 +34,16 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
   // fixed elsewhere (that was about ids echoing back in a Noodles reply,
   // not about a client needing to reference a program it's choosing).
   const universityCatalog = await prisma.university.findMany({
+    // isPublic is only ever explicitly set to false by staff in
+    // /admin/universities/[id] to hide a university from students — null
+    // (never set) and true both mean "show it". `{ not: false }` looks
+    // equivalent but is a real Postgres trap: NULL <> false evaluates to
+    // NULL/unknown in SQL's three-valued logic, which excludes every NULL
+    // row from the result instead of including it — confirmed live,
+    // it silently hid 303 of 347 universities (everything that had never
+    // had isPublic touched) down to just the 44 explicitly marked true.
+    // An explicit OR is unambiguous regardless of null-handling semantics.
+    where: { OR: [{ isPublic: true }, { isPublic: null }] },
     orderBy: [{ country: "asc" }, { name: "asc" }],
     select: {
       id: true,
@@ -69,6 +79,14 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
     const networks = networksFromMetadata(university.publicMetadata);
     const fields = [...new Set(university.programs.map((program) => normalizeField(program.field)).filter((value): value is string => Boolean(value)))];
     const languages = [...new Set(university.programs.map((program) => String(program.language || "").trim()).filter(Boolean))].slice(0, 4);
+    // The cheapest active program's raw tuition number, regardless of
+    // currency — used only to bucket into a coarse "Fee range" filter
+    // (Free / Under 10,000 / 10,000-25,000 / 25,000+), the same
+    // no-FX-conversion approximation already used everywhere tuition is
+    // shown in this app (feeRange above displays each currency's raw
+    // number as-is too).
+    const tuitionAmounts = university.programs.map((p) => (p.tuitionAmount != null ? Number(p.tuitionAmount) : null)).filter((n): n is number => n != null && Number.isFinite(n));
+    const minTuition = tuitionAmounts.length ? Math.min(...tuitionAmounts) : null;
     return {
       id: university.id,
       name: university.name,
@@ -79,6 +97,7 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
       channel: deriveCatalogChannel(networks, Boolean(university.partnerId)),
       programCount: summary.programCount,
       feeRange: summary.feeRange,
+      minTuition,
       intakes: summary.intakes,
       levels: summary.levels,
       fields,
@@ -102,8 +121,17 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
           </div>
         </div>
 
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_280px]">
+          <div className="min-w-0">
+            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} initialQuery={initialQuery} />
+          </div>
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            <HomeAIEntry compact/>
+          </div>
+        </div>
+
         {governmentPartners.length > 0 && (
-          <section className="mt-6 rounded-2xl border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-5 sm:p-6">
+          <section className="mt-10 rounded-2xl border border-[#C9D8E6] bg-gradient-to-br from-[#EAF0F5] to-white p-5 sm:p-6">
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-navy">SOUP's first government partnership</div>
@@ -121,15 +149,6 @@ export default async function UniversitiesPage({ searchParams }: { searchParams:
             </div>
           </section>
         )}
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
-          <div className="min-w-0">
-            <UniversityCatalogBrowser universities={universities} signedIn={!!user} capReached={capReached} initialChannel={initialChannel} />
-          </div>
-          <div className="lg:sticky lg:top-8 lg:self-start">
-            <HomeAIEntry compact/>
-          </div>
-        </div>
       </main>
     </div>
   );

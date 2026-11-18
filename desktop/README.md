@@ -87,10 +87,41 @@ It's currently hosted as a static file at
 from `/companion/connect`), which is a real, working, verified-live link —
 but committing a ~78MB binary into git isn't scalable for every future
 release. Worth moving to dedicated release hosting (GitHub Releases on a
-separate repo, or a storage bucket) before this ships frequent updates. The
-binary there still reflects the earlier single-tab build — it needs a
-fresh `npm run dist` and re-upload before the multi-tab/auto-attach work
-above reaches real students.
+separate repo, or a storage bucket) before this ships frequent updates.
+
+## Releasing an update
+
+Once a student has installed any version from this point on, every later
+release reaches them automatically — `main.js`'s `initAutoUpdate()` polls
+`soupassist.com/downloads/updates/latest.yml` on launch and every 4 hours,
+downloads silently in the background, and prompts to restart once it's
+ready (or installs on next quit if they ignore the prompt). No code
+signing is involved — same unsigned posture as today, auto-update works
+either way.
+
+To ship a new build:
+
+```powershell
+cd desktop
+# bump "version" in desktop/package.json first (electron-updater compares
+# this against the feed — an unchanged version never updates anyone)
+npm run dist
+```
+
+Then copy the new artifacts from `desktop/dist/` into the main repo's
+`public/downloads/`:
+- `SOUP Companion Setup <version>.exe` → overwrite
+  `public/downloads/soup-companion-setup.exe` (the fresh-install link every
+  new student downloads)
+- `SOUP Companion Setup <version>.exe`,
+  `SOUP Companion Setup <version>.exe.blockmap`, and `latest.yml` → into
+  `public/downloads/updates/` (the feed existing installs poll — keep
+  every version's `.exe`/`.blockmap` there, electron-updater's
+  differential download needs the previous version's blockmap present,
+  not just the latest one)
+
+Commit and deploy the web app as usual; nothing further to do — installed
+apps pick up the new `latest.yml` on their own.
 
 ## Scoping notes
 
@@ -104,9 +135,28 @@ above reaches real students.
 - Document auto-attach only looks at the top-level frame of the active
   tab's page (same scope as the existing text-field scan) — a file input
   inside a cross-origin iframe won't be found.
-- No auto-update mechanism is wired up yet — a new build needs to be
-  manually re-distributed when the app changes.
+- Auto-update is wired up (`electron-updater`, generic feed hosted at
+  `soupassist.com/downloads/updates/`) — see "Releasing an update" below.
+  Already-installed students get new builds automatically; they never need
+  to uninstall/reinstall.
 - The backend is fully shared with the web app: same `/api/companion/*`
   routes, same pairing flow, same `/companion/connect` page. The new
   `GET /api/companion/documents/match` route is the one addition this pass
   made on the backend side, specifically to support auto-attach.
+- **Multi-application run** ("APPS" button → pick from My Colleges →
+  Start): Companion opens one application at a time, fills what it can,
+  reviews it, and auto-advances. It never creates or stores a password
+  for a third-party account — a password field pauses the run and waits
+  for the student to type their own. It never attempts to solve a CAPTCHA
+  or one-time code — same pause-and-wait posture, by design, not a gap to
+  close later. Page-gating (holding off a wizard's "Next" button until
+  every required field on that page is answered) only recognizes a
+  same-document multi-step form with a visible Next/Continue control —
+  a true multi-page navigation (separate URLs) is handled too (the normal
+  did-navigate rescan picks it up), but a cross-origin iframe-embedded
+  form is not scanned at all (same limitation as the original single-page
+  scan). An OAuth/SSO popup is allowed to open as a real separate Electron
+  window (`setWindowOpenHandler` with `action: "allow"`) so the student
+  can actually complete it — that popup has no Companion bridge injected
+  into it and is not tracked by the run beyond pausing until the student
+  says to continue.

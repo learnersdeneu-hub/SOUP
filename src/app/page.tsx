@@ -200,20 +200,24 @@ export default async function HomePage() {
           {WORKFLOWS.map((wf) => {
             const Icon = wf.icon;
             const universityPromo = wf.href === "/universities"
-              ? universityPartners.filter((university) => university.partner).slice(0, 2).map((university) => ({ id: university.id, name: university.name, country: university.country, websiteUrl: university.websiteUrl || university.partner?.websiteUrl || null, logoUrl: logoUrl(university.publicMetadata) || logoUrl(university.partner?.publicMetadata) }))
+              ? universityPartners.filter((university) => university.partner).slice(0, 4).map((university) => ({ id: university.id, name: university.name, country: university.country, websiteUrl: university.websiteUrl || university.partner?.websiteUrl || null, logoUrl: logoUrl(university.publicMetadata) || logoUrl(university.partner?.publicMetadata) }))
               : null;
+            const isFindUniversity = wf.href === "/universities";
             const partnerPreview = wf.href === "/services/accommodation"
               ? mergedServices.filter((partner) => partner.type === "ACCOMMODATION").slice(0, 2)
               : wf.href === "/services/insurance"
                 ? mergedServices.filter((partner) => partner.type === "INSURANCE").slice(0, 2)
                 : [];
             return (
-              <Link key={wf.href} href={wf.href} className="flex min-h-[150px] flex-col gap-2.5 rounded-[20px] p-[22px] no-underline text-ink transition hover:-translate-y-0.5" style={{ background: wf.bg }}>
-                <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-white"><Icon size={22} style={{ color: wf.fg }} /></span>
+              <Link key={wf.href} href={wf.href} className={`flex min-h-[150px] flex-col gap-2.5 rounded-[20px] p-[22px] no-underline text-ink transition hover:-translate-y-0.5 ${isFindUniversity ? "sm:col-span-2 border-[1.5px] border-[#C7D4F0] hover:border-[#1F3FA8]/40 hover:shadow-[0_8px_24px_rgba(31,63,168,0.12)]" : ""}`} style={{ background: wf.bg }}>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-white"><Icon size={22} style={{ color: wf.fg }} /></span>
+                  {isFindUniversity && universityPartners.length > 0 && <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-[#1F3FA8]">{universityPartners.length}+ direct partners</span>}
+                </div>
                 <span className="text-lg font-extrabold">{wf.title}</span>
                 <span className="text-sm leading-snug text-mute">{wf.short}</span>
                   {universityPromo && universityPromo.length > 0 && (
-                    <div className="mt-1 grid grid-cols-2 gap-2">
+                    <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {universityPromo.map((university) => (
                         <div key={university.id} className="min-w-0 rounded-lg bg-white/70 p-2">
                           <div className="flex items-center gap-1.5"><PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} size={20}/><span className="truncate text-[10px] font-semibold text-ink">{university.name}</span></div>

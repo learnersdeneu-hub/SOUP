@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BriefcaseBusiness, CreditCard, Download, FileUp, GraduationCap, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Search, X } from "lucide-react";
+import type { AppRole } from "@prisma/client";
+import { Bell, BriefcaseBusiness, CreditCard, Download, FileUp, GraduationCap, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Search, ShieldCheck, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const LINKS: Array<[string, string, LucideIcon]> = [
@@ -23,10 +24,17 @@ const LINKS: Array<[string, string, LucideIcon]> = [
 // the already-global Header so every student page gets it without per-page
 // wiring. Distinct from ConversationSidebar, which is scoped to chat history
 // inside Noodles/Resume — this is the app-wide nav, not a second competing one.
-export function StudentSidebar({ signedIn }: { signedIn: boolean }) {
+//
+// A staff viewer (role passed in by the admin page rendering Header) also
+// gets a single "Admin dashboard" entry here, on top of these student links
+// — not a duplicated/hardcoded list of every admin section, which would
+// drift out of sync with /admin's own already-correct, role-gated
+// operations list. One link in, the real list lives in exactly one place.
+export function StudentSidebar({ signedIn, role }: { signedIn: boolean; role?: AppRole | null }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   if (!signedIn) return null;
+  const isStaff = Boolean(role && role !== "CUSTOMER");
 
   return (
     <>
@@ -42,6 +50,14 @@ export function StudentSidebar({ signedIn }: { signedIn: boolean }) {
               <button onClick={() => setOpen(false)} aria-label="Close navigation" className="flex h-8 w-8 items-center justify-center rounded-full text-mute hover:bg-paper"><X size={15} /></button>
             </div>
             <div className="mt-4 flex-1 space-y-1 overflow-y-auto">
+              {isStaff && (
+                <>
+                  <Link href="/admin" onClick={() => setOpen(false)} className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname?.startsWith("/admin") ? "bg-[#EAF0F5] text-navy" : "text-navy hover:bg-paper"}`}>
+                    <ShieldCheck size={15} />Admin dashboard
+                  </Link>
+                  <div className="my-2 border-t border-hair" />
+                </>
+              )}
               {LINKS.map(([href, label, Icon]) => {
                 const active = pathname === href || (href !== "/dashboard" && Boolean(pathname?.startsWith(href)));
                 return (

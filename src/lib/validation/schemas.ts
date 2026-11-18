@@ -296,6 +296,57 @@ export const companionDocumentMatchQuerySchema = z.object({
   category: z.string().trim().min(1).max(64),
 }).strict();
 
+// Request body for starting a multi-application Companion run
+// (src/app/api/companion/applications/queue): an ordered list of the
+// student's own StudentApplication ids picked from My Colleges. Bounded
+// to 20 — a sanity limit, not a product decision; nothing about the run
+// logic itself assumes this number.
+export const companionApplicationQueueRequestSchema = z.object({
+  applicationIds: z.array(idSchema).min(1).max(20),
+}).strict();
+
+// A free-form answer Companion collected directly from a student for a
+// question outside SOUP's fixed field dictionary (src/lib/companion/
+// learnedAnswers.ts) — label is the field's own on-page text, not a
+// known answer-bank key.
+export const companionLearnedAnswerRequestSchema = z.object({
+  label: shortTextSchema(300),
+  value: shortTextSchema(2000),
+}).strict();
+
+// A staff-visible event from the multi-application run (src/app/admin/
+// companion/page.tsx) — a review verdict, an approval, or why a run
+// paused. applicationId is optional since a pause can happen before an
+// application is resolvable (e.g. no application in context yet).
+export const companionRunEventRequestSchema = z.object({
+  applicationId: optionalIdSchema,
+  universityName: shortTextSchema(300),
+  kind: z.enum(["REVIEW", "APPROVED", "PAUSED"]),
+  detail: shortTextSchema(2000),
+}).strict();
+
+// Request body for the AI application review (src/lib/companion/review.ts):
+// the client (desktop panel or the PDF filler) reports exactly what it
+// detected on the real form/PDF — field labels, whatever value will be
+// submitted, and which documents are attached — so the AI reviews the
+// application as it will actually be submitted, not a generic profile
+// check. Bounded generously but finitely since this is client-supplied
+// free text going straight into a prompt.
+export const companionReviewRequestSchema = z.object({
+  context: optionalShortTextSchema(300),
+  fields: z.array(z.object({
+    label: shortTextSchema(200),
+    value: shortTextSchema(2000).optional().default(""),
+    filled: z.boolean().optional().default(false),
+    source: optionalShortTextSchema(120),
+  })).max(80),
+  documents: z.array(z.object({
+    label: shortTextSchema(120),
+    attached: z.boolean().optional().default(false),
+    fileName: optionalShortTextSchema(300),
+  })).max(30).optional().default([]),
+}).strict();
+
 export const adminOfferUploadSchema = z.object({
   file: z.unknown(),
   conditional: z.string().optional().default("false"),

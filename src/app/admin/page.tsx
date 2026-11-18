@@ -51,6 +51,7 @@ export default async function AdminDashboardPage() {
     hasRole(role, APPLICATION_ROLES) && ["/admin/messages", "Application messages"],
     hasRole(role, DOCUMENT_ROLES) && ["/admin/documents", "Document operations"],
     ["COUNSELOR", "ADMISSIONS", "FINANCE", "ACCOMMODATION", "ADMIN", "SUPER_ADMIN"].includes(role) && ["/admin/partners", "Partner catalog"],
+    hasRole(role, ADMIN_ROLES) && ["/admin/universities", "University catalog"],
     hasRole(role, COMMERCIAL_ROLES) && ["/admin/referrals", "Partner referrals & revenue"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/support", "Support queue"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/audit", "Audit trail"],
@@ -76,7 +77,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <Header signedIn />
+      <Header signedIn role={current.user.role} />
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
         <section className="rounded-[28px] bg-navy px-6 py-7 text-white sm:px-8">
           <div className="flex items-end justify-between gap-4">
