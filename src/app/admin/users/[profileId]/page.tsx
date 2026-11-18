@@ -190,8 +190,8 @@ export default async function AdminUserDetailPage({ params: paramsPromise }: { p
               <h2 className="text-sm font-semibold text-ink">Add alert</h2>
               <p className="mt-1 text-xs leading-5 text-mute">Sent to the student — appears on their dashboard (and by email, if enabled). Never use this for internal-only commentary.</p>
               <form action={addStudentAlert.bind(null, profile.id)} className="mt-4 space-y-2">
-                <input name="title" required maxLength={200} placeholder="Alert title" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm outline-none focus:border-navy"/>
-                <textarea name="body" required rows={3} placeholder="What does the student need to know?" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm leading-6 outline-none focus:border-navy"/>
+                <input name="title" required maxLength={200} placeholder="Alert title" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm outline-hidden focus:border-navy"/>
+                <textarea name="body" required rows={3} placeholder="What does the student need to know?" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm leading-6 outline-hidden focus:border-navy"/>
                 <button className="rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white">Send alert to student</button>
               </form>
             </section>
@@ -199,7 +199,7 @@ export default async function AdminUserDetailPage({ params: paramsPromise }: { p
             <section className="rounded-2xl border border-hair bg-white p-5">
               <h2 className="text-sm font-semibold text-ink">Internal notes</h2>
               <p className="mt-1 text-xs leading-5 text-mute">Visible only to authorized SOUP staff.</p>
-              <form action={addInternalUserNote.bind(null, profile.id)} className="mt-4"><textarea name="body" required rows={4} placeholder="Add an admissions, support or operational note" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm leading-6 outline-none focus:border-navy"/><button className="mt-2 rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white">Add internal note</button></form>
+              <form action={addInternalUserNote.bind(null, profile.id)} className="mt-4"><textarea name="body" required rows={4} placeholder="Add an admissions, support or operational note" className="w-full rounded-xl border border-hair px-3 py-2.5 text-sm leading-6 outline-hidden focus:border-navy"/><button className="mt-2 rounded-xl bg-navy px-4 py-2 text-xs font-semibold text-white">Add internal note</button></form>
               <div className="mt-5 space-y-3">{profile.internalNotes.length === 0 ? <p className="text-xs text-mute">No internal notes.</p> : profile.internalNotes.map((note) => <div key={note.id} className="rounded-xl bg-[#F7F8F9] p-3"><p className="text-xs leading-5 text-ink">{note.body}</p><div className="mt-2 text-[10px] text-mute">{note.authoredBy.fullName} · {note.createdAt.toLocaleString()}</div></div>)}</div>
             </section>
           </div>

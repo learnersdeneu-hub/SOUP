@@ -261,11 +261,11 @@ export default async function HomePage() {
                 </div>
                 <div className="flex">
                   <div className="flex-1 space-y-2 p-3.5">
-                    <span className="block h-[7px] w-3/5 rounded bg-hair" />
+                    <span className="block h-[7px] w-3/5 rounded-sm bg-hair" />
                     <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
-                    <span className="mt-1 block h-[7px] w-2/5 rounded bg-hair" />
+                    <span className="mt-1 block h-[7px] w-2/5 rounded-sm bg-hair" />
                     <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
-                    <span className="mt-1 block h-[7px] w-1/2 rounded bg-hair" />
+                    <span className="mt-1 block h-[7px] w-1/2 rounded-sm bg-hair" />
                     <span className="block h-5 w-11/12 rounded-md border border-[#F1C564] bg-[#FFFBEF]" />
                   </div>
                   <div className="flex w-[118px] shrink-0 flex-col gap-1.5 border-l border-hair bg-white p-2.5">
@@ -292,7 +292,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {governmentPartners.slice(0, 8).map((university) => (
-                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
+                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-xs">
                   <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={logoUrl(university.publicMetadata)} size={34}/>
                   <div className="mt-2 truncate text-xs font-semibold text-ink">{university.name}</div>
                   <div className="mt-1 text-[10px] text-mute">{[university.city, "Greece"].filter(Boolean).join(", ")}</div>
@@ -315,7 +315,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {hospitalityPrograms.slice(0, 9).map((program) => (
-                <Link key={program.id} href={`/universities/${program.university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8A6A1E]/30 hover:shadow-sm">
+                <Link key={program.id} href={`/universities/${program.university.id}`} className="group rounded-xl border border-hair bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#8A6A1E]/30 hover:shadow-xs">
                   <div className="flex items-start gap-3">
                     <PartnerLogo name={program.university.name} websiteUrl={program.university.websiteUrl} logoUrl={logoUrl(program.university.publicMetadata)} size={30}/>
                     <div className="min-w-0 flex-1">
@@ -364,7 +364,7 @@ export default async function HomePage() {
         <section className="mt-14 rounded-[28px] border border-hair bg-white p-6 sm:p-8">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">Beyond admission</div><h2 className="mt-2 text-xl font-semibold text-ink">A connected partner ecosystem around the student.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-mute">Accommodation, insurance, banking and application management stay connected to the same student journey instead of becoming separate searches.</p></div><Link href="/dashboard" className="text-xs font-semibold text-navy">Open My SOUP <ArrowRight size={12} className="ml-1 inline"/></Link></div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {mergedServices.slice(0, 9).map((partner) => <Link key={partner.id} href={serviceHref(partner.type, partner.name)} className="group rounded-2xl border border-hair bg-paper/60 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm"><div className="flex items-start gap-3"><PartnerLogo name={partner.name} websiteUrl={partner.websiteUrl} logoUrl={partner.logoUrl}/><div className="min-w-0 flex-1"><div className="text-[9px] font-semibold uppercase tracking-[.12em] text-teal">{partner.role}</div><div className="mt-1 text-xs font-semibold text-ink">{partner.name}</div><div className="mt-1 text-[10px] text-mute">{partner.country}</div></div><ArrowRight size={12} className="mt-1 text-mute transition group-hover:translate-x-0.5 group-hover:text-navy"/></div></Link>)}
+            {mergedServices.slice(0, 9).map((partner) => <Link key={partner.id} href={serviceHref(partner.type, partner.name)} className="group rounded-2xl border border-hair bg-paper/60 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-xs"><div className="flex items-start gap-3"><PartnerLogo name={partner.name} websiteUrl={partner.websiteUrl} logoUrl={partner.logoUrl}/><div className="min-w-0 flex-1"><div className="text-[9px] font-semibold uppercase tracking-[.12em] text-teal">{partner.role}</div><div className="mt-1 text-xs font-semibold text-ink">{partner.name}</div><div className="mt-1 text-[10px] text-mute">{partner.country}</div></div><ArrowRight size={12} className="mt-1 text-mute transition group-hover:translate-x-0.5 group-hover:text-navy"/></div></Link>)}
           </div>
         </section>
 

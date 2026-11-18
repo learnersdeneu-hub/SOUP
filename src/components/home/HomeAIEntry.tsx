@@ -35,7 +35,7 @@ export function HomeAIEntry({ compact = false }: { compact?: boolean }) {
           onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event as unknown as FormEvent); } }}
           rows={compact ? 1 : 2}
           placeholder="Tell Noodles what you need help with..."
-          className={`flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-6 text-ink outline-none ${compact ? "min-h-[36px]" : "min-h-[58px]"}`}
+          className={`flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-6 text-ink outline-hidden ${compact ? "min-h-[36px]" : "min-h-[58px]"}`}
         />
         <button type="submit" disabled={!input.trim() || submitting} className="mb-1 flex h-9 w-9 items-center justify-center rounded-full bg-navy text-white disabled:bg-[#D8DDE2]" aria-label="Ask Noodles">{submitting ? <NoodlesLoader size={16} className="text-white"/> : <ArrowUp size={16}/>}</button>
       </div>

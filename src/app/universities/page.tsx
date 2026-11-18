@@ -141,7 +141,7 @@ export default async function UniversitiesPage({ searchParams: searchParamsPromi
             </div>
             <div className="mt-4 grid gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
               {governmentPartners.slice(0, 12).map((university) => (
-                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-3 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm">
+                <Link key={university.id} href={`/universities/${university.id}`} className="group rounded-xl border border-hair bg-white p-3 transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-xs">
                   <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} size={28}/>
                   <div className="mt-2 truncate text-[11px] font-semibold text-ink">{university.name}</div>
                   <div className="mt-0.5 text-[9px] text-mute">{university.city || "Greece"}</div>

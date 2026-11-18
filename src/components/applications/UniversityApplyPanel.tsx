@@ -232,19 +232,19 @@ export function UniversityApplyPanel({
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Full legal name</span>
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+              <input value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
             </label>
             <label className="block">
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Date of birth</span>
-              <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+              <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
             </label>
             <label className="block">
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Nationality</span>
-              <input value={nationality} onChange={(e) => setNationality(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+              <input value={nationality} onChange={(e) => setNationality(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
             </label>
             <label className="block">
               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Current country of residence</span>
-              <input value={currentCountry} onChange={(e) => setCurrentCountry(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+              <input value={currentCountry} onChange={(e) => setCurrentCountry(e.target.value)} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
             </label>
           </div>
 
@@ -253,20 +253,20 @@ export function UniversityApplyPanel({
             <div className="mt-2 grid gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1 block text-[10px] text-mute">Highest qualification / currently studying</span>
-                <input value={highestQualification} onChange={(e) => setHighestQualification(e.target.value)} placeholder="e.g. A-Levels, BBA, High School Diploma" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+                <input value={highestQualification} onChange={(e) => setHighestQualification(e.target.value)} placeholder="e.g. A-Levels, BBA, High School Diploma" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
               </label>
               <label className="block">
                 <span className="mb-1 block text-[10px] text-mute">Institution</span>
-                <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="e.g. LUMS, Aitchison College" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+                <input value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="e.g. LUMS, Aitchison College" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
               </label>
               <label className="block sm:col-span-2">
                 <span className="mb-1 block text-[10px] text-mute">Grades / GPA / results</span>
-                <input value={gradeResult} onChange={(e) => setGradeResult(e.target.value)} placeholder="e.g. 3.63 GPA, AAB predicted" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+                <input value={gradeResult} onChange={(e) => setGradeResult(e.target.value)} placeholder="e.g. 3.63 GPA, AAB predicted" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
               </label>
             </div>
             <label className="mt-3 block">
               <span className="mb-1 block text-[10px] text-mute">Anything else relevant (subjects, prior degrees, gaps)</span>
-              <textarea value={additionalAcademicDetails} onChange={(e) => setAdditionalAcademicDetails(e.target.value)} rows={2} placeholder="e.g. Also completed MSc Supply Chain (LUMS)" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs leading-5 text-ink outline-none focus:border-navy/40" />
+              <textarea value={additionalAcademicDetails} onChange={(e) => setAdditionalAcademicDetails(e.target.value)} rows={2} placeholder="e.g. Also completed MSc Supply Chain (LUMS)" className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs leading-5 text-ink outline-hidden focus:border-navy/40" />
             </label>
           </div>
 
@@ -278,7 +278,7 @@ export function UniversityApplyPanel({
                 value={programText}
                 onChange={(event) => setProgramText(event.target.value)}
                 placeholder="Start typing a program..."
-                className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+                className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40"
               />
               <datalist id="university-apply-programs">
                 {programs.map((p) => <option key={p.id} value={programLabel(p)} />)}

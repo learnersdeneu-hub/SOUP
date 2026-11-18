@@ -3,7 +3,7 @@
 import type { GeneratedResume, ResumeContent } from "@/lib/resume/types";
 
 function Field({ label, value, onChange, multiline = false }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean }) {
-  const cls = "w-full rounded-xl border border-hair bg-white px-3 py-2 text-sm text-ink outline-none focus:border-navy";
+  const cls = "w-full rounded-xl border border-hair bg-white px-3 py-2 text-sm text-ink outline-hidden focus:border-navy";
   return <label className="block"><span className="mb-1 block text-xs font-medium text-ink">{label}</span>{multiline ? <textarea rows={4} className={cls} value={value} onChange={(e) => onChange(e.target.value)} /> : <input className={cls} value={value} onChange={(e) => onChange(e.target.value)} />}</label>;
 }
 

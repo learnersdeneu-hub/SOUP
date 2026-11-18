@@ -100,7 +100,7 @@ export function HomeHero({
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder="e.g. Cheapest business master's in Europe with a Jan intake"
-              className="h-11 min-w-0 flex-1 border-0 bg-transparent font-sans text-base text-ink outline-none"
+              className="h-11 min-w-0 flex-1 border-0 bg-transparent font-sans text-base text-ink outline-hidden"
             />
             <button type="submit" disabled={!input.trim() || submitting} className="h-12 shrink-0 rounded-xl bg-teal px-[22px] text-[15px] font-bold text-white disabled:opacity-60">Ask Noodles</button>
           </form>
@@ -145,7 +145,7 @@ export function HomeHero({
             value={exploreQuery}
             onChange={(event) => setExploreQuery(event.target.value)}
             placeholder="Or search by university, city or country..."
-            className="h-12 w-full rounded-full border border-hair bg-paper pl-5 pr-28 text-sm text-ink outline-none focus:border-navy/40"
+            className="h-12 w-full rounded-full border border-hair bg-paper pl-5 pr-28 text-sm text-ink outline-hidden focus:border-navy/40"
           />
           <button type="submit" className="absolute right-1.5 top-1/2 h-9 -translate-y-1/2 rounded-full bg-navy px-5 text-sm font-bold text-white">Search</button>
         </form>

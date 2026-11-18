@@ -6,7 +6,7 @@ import { Loader2, Mail, Plus, Send, Trash2 } from "lucide-react";
 import type { Recommender } from "@prisma/client";
 import { addRecommender, removeRecommender, inviteRecommender, resendInvite, setRecommendersNotRequiredConfirmed } from "@/app/actions/recommenders";
 
-const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
+const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40";
 const RECOMMENDER_TYPES = [["TEACHER", "Teacher"], ["COUNSELOR", "Counselor"], ["OTHER", "Other"]] as const;
 
 const STATUS_LABEL: Record<string, string> = {

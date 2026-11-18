@@ -161,7 +161,7 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
     router.push(`/universities/${university.id}`);
   }
 
-  const selectClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-navy/40";
+  const selectClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-sm text-ink outline-hidden focus:border-navy/40";
 
   return (
     <div>
@@ -181,7 +181,7 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
             value={query}
             onChange={(event) => { setQuery(event.target.value); resetPage(); }}
             placeholder="Search by university, city or country..."
-            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-20 text-sm text-ink outline-none focus:border-navy/40"
+            className="w-full rounded-full border border-hair bg-white py-2.5 pl-9 pr-20 text-sm text-ink outline-hidden focus:border-navy/40"
           />
           {query && (
             <button
@@ -255,7 +255,7 @@ export function UniversityCatalogBrowser({ universities, signedIn, capReached, i
             tabIndex={0}
             onClick={() => openUniversity(university)}
             onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openUniversity(university); } }}
-            className="group min-w-0 cursor-pointer rounded-2xl border border-hair bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-sm"
+            className="group min-w-0 cursor-pointer rounded-2xl border border-hair bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-xs"
           >
             <div className="flex min-w-0 items-start gap-3">
               <PartnerLogo name={university.name} websiteUrl={university.websiteUrl} logoUrl={university.logoUrl} />

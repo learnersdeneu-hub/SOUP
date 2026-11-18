@@ -58,7 +58,7 @@ export function ChatSidebar({
           <select
             value={newWorkflow}
             onChange={(e) => setNewWorkflow(e.target.value as ChatWorkflow)}
-            className="flex-1 rounded-lg border border-hair px-2 py-2 text-xs outline-none"
+            className="flex-1 rounded-lg border border-hair px-2 py-2 text-xs outline-hidden"
           >
             {Object.entries(WORKFLOW_LABEL).map(([code, label]) => (
               <option key={code} value={code}>
@@ -79,7 +79,7 @@ export function ChatSidebar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search conversations..."
-            className="w-full rounded-lg border border-hair pl-7 pr-2 py-2 text-xs outline-none"
+            className="w-full rounded-lg border border-hair pl-7 pr-2 py-2 text-xs outline-hidden"
           />
         </div>
       </div>
@@ -114,7 +114,7 @@ export function ChatSidebar({
                     e.stopPropagation();
                     setRenameTarget(s);
                   }}
-                  className="p-1 rounded hover:bg-black/10"
+                  className="p-1 rounded-sm hover:bg-black/10"
                   title="Rename"
                 >
                   <Pencil size={12} className="text-mute" />
@@ -124,7 +124,7 @@ export function ChatSidebar({
                     e.stopPropagation();
                     setDeleteTarget(s);
                   }}
-                  className="p-1 rounded hover:bg-black/10"
+                  className="p-1 rounded-sm hover:bg-black/10"
                   title="Delete"
                 >
                   <Trash2 size={12} className="text-[#B3261E]" />
@@ -191,7 +191,7 @@ export function ChatSidebar({
           <div className="relative w-[85%] max-w-xs bg-white h-full flex flex-col">
             <div className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-hair">
               <span className="text-sm font-semibold text-ink">Conversations</span>
-              <button onClick={onCloseMobile} className="p-1 rounded hover:bg-black/5">
+              <button onClick={onCloseMobile} className="p-1 rounded-sm hover:bg-black/5">
                 <X size={16} className="text-mute" />
               </button>
             </div>

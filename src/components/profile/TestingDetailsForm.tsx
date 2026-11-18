@@ -11,7 +11,7 @@ import { UploadBox } from "@/components/documents/UploadBox";
 import { CATEGORY_CONFIG } from "@/lib/documents/categories";
 import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
-const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
+const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40";
 const ENGLISH_TESTS = ["NONE_YET", "IELTS", "TOEFL", "Duolingo", "PTE"];
 const REGISTRATION_STATUSES = [["NOT_REGISTERED", "Not registered"], ["REGISTERED", "Registered"], ["TAKEN", "Taken"], ["SCORE_PENDING", "Score pending"]] as const;
 

@@ -52,7 +52,7 @@ function FormShell({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-hair px-3 py-2 text-xs outline-none";
+  "w-full rounded-lg border border-hair px-3 py-2 text-xs outline-hidden";
 
 export function EducationForm() {
   return (

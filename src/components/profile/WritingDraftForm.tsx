@@ -65,7 +65,7 @@ function WritingBox({
         <span className={`text-[10px] font-semibold uppercase tracking-[.08em] ${required ? "text-[#B3261E]" : "text-mute"}`}>{required ? "Required" : "Optional"}</span>
       </div>
       <p className="mt-1 text-[11px] leading-5 text-mute">{helperText}</p>
-      <textarea value={text} onChange={(e) => handleChange(e.target.value)} rows={10} placeholder="Start writing…" className="mt-2 w-full rounded-xl border border-hair bg-white p-3 text-xs leading-6 text-ink outline-none focus:border-navy/40"/>
+      <textarea value={text} onChange={(e) => handleChange(e.target.value)} rows={10} placeholder="Start writing…" className="mt-2 w-full rounded-xl border border-hair bg-white p-3 text-xs leading-6 text-ink outline-hidden focus:border-navy/40"/>
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-mute">
         <span className={outOfRange ? "font-semibold text-[#9D3127]" : ""}>{wordCount} words{outOfRange ? ` (recommended ${range.min}–${range.max})` : ""}</span>
         <span className="flex items-center gap-1">

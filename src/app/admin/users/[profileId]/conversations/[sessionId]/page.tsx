@@ -48,7 +48,7 @@ export default async function AdminConversationPage({ params: paramsPromise }: {
             {session.humanHandoffActive ? (
               <form action={setCounselorHandoff.bind(null, profile.id, session.id, false)}><button className="rounded-full border border-hair px-3 py-2 text-xs font-semibold text-ink">Return conversation to AI</button></form>
             ) : (
-              <form action={setCounselorHandoff.bind(null, profile.id, session.id, true)} className="flex flex-wrap gap-2"><input name="reason" placeholder="Reason for handoff (optional)" className="rounded-full border border-hair px-3 py-2 text-xs outline-none"/><button className="rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white">Take over Counselor</button></form>
+              <form action={setCounselorHandoff.bind(null, profile.id, session.id, true)} className="flex flex-wrap gap-2"><input name="reason" placeholder="Reason for handoff (optional)" className="rounded-full border border-hair px-3 py-2 text-xs outline-hidden"/><button className="rounded-full bg-navy px-3 py-2 text-xs font-semibold text-white">Take over Counselor</button></form>
             )}
           </div>
         </section>
@@ -79,7 +79,7 @@ export default async function AdminConversationPage({ params: paramsPromise }: {
           <div className="flex items-center gap-2"><MessageSquareText size={15} className="text-navy"/><h2 className="text-sm font-semibold text-ink">Reply as SOUP team</h2></div>
           <p className="mt-2 text-xs leading-5 text-mute">Sending a staff reply activates handoff for this conversation only, so the AI does not answer over your team here. Other Counselor threads stay AI-enabled. Release the handoff above when AI should resume in this thread.</p>
           <form action={appendStaffCounselorReply.bind(null, profile.id, session.id)} className="mt-4">
-            <textarea name="message" required rows={4} placeholder="Write the student a reply..." className="w-full rounded-2xl border border-hair px-4 py-3 text-sm leading-6 outline-none"/>
+            <textarea name="message" required rows={4} placeholder="Write the student a reply..." className="w-full rounded-2xl border border-hair px-4 py-3 text-sm leading-6 outline-hidden"/>
             <button className="mt-3 rounded-full bg-navy px-4 py-2.5 text-xs font-semibold text-white">Send staff reply</button>
           </form>
         </section>

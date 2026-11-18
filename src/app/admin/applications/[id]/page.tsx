@@ -96,7 +96,7 @@ export default async function AdminApplicationDetailPage({ params: paramsPromise
         </div>;
       })}</div>}
       <form action={sendApplicationReply.bind(null, application.id)} className="mt-4 rounded-xl bg-paper p-4">
-        <textarea name="body" required rows={3} placeholder={`Reply to ${application.profile.user.fullName}…`} className="w-full resize-y rounded-lg border border-hair bg-white px-3 py-2 text-xs outline-none"/>
+        <textarea name="body" required rows={3} placeholder={`Reply to ${application.profile.user.fullName}…`} className="w-full resize-y rounded-lg border border-hair bg-white px-3 py-2 text-xs outline-hidden"/>
         <div className="mt-2 flex items-center justify-between"><span className="text-[10px] text-mute">Sent to {application.profile.user.email} · any reply lands back in this thread</span><button className="rounded-lg bg-navy px-4 py-2 text-xs font-semibold text-white">Send reply</button></div>
       </form>
     </section>}

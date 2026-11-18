@@ -63,11 +63,11 @@ export function CompanionHowItWorks() {
           </div>
           <div className="flex">
             <div className="flex-1 space-y-2 p-3.5">
-              <span className="block h-[7px] w-3/5 rounded bg-hair" />
+              <span className="block h-[7px] w-3/5 rounded-sm bg-hair" />
               <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
-              <span className="mt-1 block h-[7px] w-2/5 rounded bg-hair" />
+              <span className="mt-1 block h-[7px] w-2/5 rounded-sm bg-hair" />
               <span className="block h-5 w-11/12 rounded-md border border-[#C8E2D6] bg-[#F3F8F5]" />
-              <span className="mt-1 block h-[7px] w-1/2 rounded bg-hair" />
+              <span className="mt-1 block h-[7px] w-1/2 rounded-sm bg-hair" />
               <span className="block h-5 w-11/12 rounded-md border border-[#F1C564] bg-[#FFFBEF]" />
             </div>
             <div className="flex w-[108px] shrink-0 flex-col gap-1.5 border-l border-hair bg-white p-2.5">

@@ -29,7 +29,7 @@ const MARKDOWN_COMPONENTS: Components = {
   h1: ({ children }) => <p className="mb-2 mt-1 text-sm font-semibold text-ink first:mt-0">{children}</p>,
   h2: ({ children }) => <p className="mb-2 mt-1 text-sm font-semibold text-ink first:mt-0">{children}</p>,
   h3: ({ children }) => <p className="mb-2 mt-1 text-sm font-semibold text-ink first:mt-0">{children}</p>,
-  code: ({ children }) => <code className="rounded bg-paper px-1 py-0.5 text-[13px]">{children}</code>,
+  code: ({ children }) => <code className="rounded-sm bg-paper px-1 py-0.5 text-[13px]">{children}</code>,
   pre: ({ children }) => <pre className="mb-3 overflow-x-auto rounded-lg bg-paper p-3 text-[13px] last:mb-0">{children}</pre>,
   a: ({ href, children }) => {
     if (!isSafeHttpUrl(href)) return <>{children}</>;
@@ -419,7 +419,7 @@ export function ConversationWorkspace({ workflow, signedIn, title, subtitle, int
         {bottomAction ? <div className="px-1 pt-2 sm:px-8"><div className="mx-auto max-w-2xl">{bottomAction}</div></div> : null}
         <div className="px-1 pb-4 pt-2 sm:px-8 sm:pb-6">
           <div className="mx-auto max-w-2xl rounded-[28px] border-[1.5px] border-navy bg-white p-2.5 shadow-[0_8px_30px_rgba(20,32,48,0.07)]">
-            <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} rows={1} placeholder="Message SOUP..." className="max-h-36 min-h-[44px] w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 text-ink outline-none"/>
+            <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} rows={1} placeholder="Message SOUP..." className="max-h-36 min-h-[44px] w-full resize-none bg-transparent px-3 py-2 text-sm leading-6 text-ink outline-hidden"/>
             <div className="flex items-center justify-between gap-2 px-1 pb-0.5 pt-1.5">
               <div className="flex min-w-0 items-center gap-2">
                 {onAttach && <button onClick={onAttach} aria-label={attachLabel} title={attachLabel} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-hair text-mute hover:border-navy hover:text-navy"><Paperclip size={15}/></button>}

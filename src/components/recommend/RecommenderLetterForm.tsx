@@ -73,7 +73,7 @@ export function RecommenderLetterForm({ token, studentName }: { token: string; s
 
       {mode === "TEXT" ? (
         <div className="mt-4">
-          <textarea value={letterText} onChange={(e) => setLetterText(e.target.value)} rows={14} placeholder="Write your recommendation letter here…" className="w-full rounded-xl border border-hair bg-white p-3 text-sm leading-6 text-ink outline-none focus:border-navy/40"/>
+          <textarea value={letterText} onChange={(e) => setLetterText(e.target.value)} rows={14} placeholder="Write your recommendation letter here…" className="w-full rounded-xl border border-hair bg-white p-3 text-sm leading-6 text-ink outline-hidden focus:border-navy/40"/>
           <div className="mt-1 text-[11px] text-mute">{letterText.trim() ? letterText.trim().split(/\s+/).length : 0} words</div>
         </div>
       ) : (

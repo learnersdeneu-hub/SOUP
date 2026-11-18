@@ -126,7 +126,7 @@ export function DirectApplicationBox() {
         onChange={(event) => { setUniversityText(event.target.value); setProgramText(""); setError(null); }}
         placeholder={catalogLoading ? "Loading universities…" : "Start typing a university, city or country..."}
         disabled={catalogLoading}
-        className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40 disabled:bg-paper disabled:text-mute"
+        className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40 disabled:bg-paper disabled:text-mute"
       />
       <datalist id="direct-apply-universities">
         {sortedUniversities.map((u) => <option key={u.id} value={universityLabel(u)} />)}
@@ -140,7 +140,7 @@ export function DirectApplicationBox() {
             value={programText}
             onChange={(event) => setProgramText(event.target.value)}
             placeholder={hasVerifiedPrograms ? "Start typing a program..." : "e.g. Computer Science, Business..."}
-            className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+            className="mt-1 w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40"
           />
           <datalist id="direct-apply-programs">
             {hasVerifiedPrograms

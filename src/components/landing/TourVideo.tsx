@@ -44,7 +44,7 @@ export function TourVideo() {
         <button
           type="button"
           onClick={toggle}
-          className="absolute bottom-4 right-4 flex h-9 items-center gap-2 rounded-full bg-ink/85 px-3 sm:h-11 sm:px-4 text-xs font-bold text-white backdrop-blur transition hover:bg-ink sm:bottom-7 sm:right-7"
+          className="absolute bottom-4 right-4 flex h-9 items-center gap-2 rounded-full bg-ink/85 px-3 sm:h-11 sm:px-4 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-ink sm:bottom-7 sm:right-7"
           aria-label={playing ? "Pause video" : "Play video"}
         >
           {playing ? <Pause size={15} /> : <Play size={15} />}

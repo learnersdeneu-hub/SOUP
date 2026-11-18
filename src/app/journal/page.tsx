@@ -26,7 +26,7 @@ export default function JournalIndexPage() {
               <div className="relative flex h-44 items-end overflow-hidden" style={{ background: `linear-gradient(135deg, ${article.cover.from}, ${article.cover.to})`, color: article.cover.ink }}>
                 <div aria-hidden className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/15" />
                 <span aria-hidden className="absolute right-6 top-5 text-5xl transition duration-500 group-hover:-rotate-6 group-hover:scale-110">{article.emoji}</span>
-                <span className="relative m-5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] backdrop-blur">{article.category}</span>
+                <span className="relative m-5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] backdrop-blur-sm">{article.category}</span>
               </div>
               <div className="flex flex-1 flex-col p-6">
                 <span className="text-xs font-bold text-mute">{article.readMinutes} min read</span>

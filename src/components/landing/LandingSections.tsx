@@ -340,8 +340,8 @@ function ArticleCover({ article, large = false }: { article: JournalArticle; lar
     <div className={`relative flex items-end overflow-hidden ${large ? "h-64 sm:h-80" : "h-40"}`} style={{ background: `linear-gradient(135deg, ${article.cover.from}, ${article.cover.to})`, color: article.cover.ink }}>
       <div aria-hidden className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/15" />
       <div aria-hidden className="absolute bottom-[-40px] right-16 h-28 w-28 rounded-full bg-white/10" />
-      <span aria-hidden className={`absolute right-6 top-5 ${large ? "text-7xl" : "text-5xl"} drop-shadow-sm transition duration-500 group-hover:scale-110 group-hover:-rotate-6`}>{article.emoji}</span>
-      <span className="relative m-5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] backdrop-blur">{article.category}</span>
+      <span aria-hidden className={`absolute right-6 top-5 ${large ? "text-7xl" : "text-5xl"} drop-shadow-xs transition duration-500 group-hover:scale-110 group-hover:-rotate-6`}>{article.emoji}</span>
+      <span className="relative m-5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] backdrop-blur-sm">{article.category}</span>
     </div>
   );
 }

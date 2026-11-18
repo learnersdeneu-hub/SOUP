@@ -5,7 +5,7 @@ import Link from "next/link";
 import { signIn, startEmailOtp } from "@/app/actions/auth";
 import { CheckEmailStep } from "@/components/auth/CheckEmailStep";
 
-const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none";
+const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-hidden";
 const PENDING_STORAGE_KEY = "soup_signin_pending";
 
 // Email + sign-in link is the primary sign-in path; password stays

@@ -28,7 +28,7 @@ export function RenameDialog({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSave(value)}
-          className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none mb-4"
+          className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-hidden mb-4"
         />
         <div className="flex gap-2">
           <button

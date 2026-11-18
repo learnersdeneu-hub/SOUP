@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { submitAccessRequest } from "@/app/actions/accessRequests";
 
-const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none";
+const inputClass = "w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-hidden";
 
 // Students can no longer create their own account. This form only records a
 // request (name, email, institution) and emails SOUP's team — see

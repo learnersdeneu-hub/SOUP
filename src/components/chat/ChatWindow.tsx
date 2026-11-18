@@ -193,13 +193,13 @@ export function ChatWindow({
       </div>
 
       <div className="flex-shrink-0 px-4 sm:px-6 pb-6 pt-2">
-        <div className="max-w-xl mx-auto flex items-center gap-2 rounded-full border border-hair bg-white px-2 py-2 shadow-sm">
+        <div className="max-w-xl mx-auto flex items-center gap-2 rounded-full border border-hair bg-white px-2 py-2 shadow-xs">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message GCI..."
-            className="flex-1 bg-transparent text-sm px-3 outline-none text-ink"
+            className="flex-1 bg-transparent text-sm px-3 outline-hidden text-ink"
           />
           <button
             onClick={send}

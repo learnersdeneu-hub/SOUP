@@ -71,7 +71,7 @@ export function ApplicationWritingBox({
         onChange={(e) => handleChange(e.target.value)}
         rows={8}
         placeholder="Pre-filled from your base draft — edit freely, this copy is specific to this university."
-        className="mt-2 w-full rounded-xl border border-hair bg-white p-3 text-xs leading-6 text-ink outline-none focus:border-navy/40"
+        className="mt-2 w-full rounded-xl border border-hair bg-white p-3 text-xs leading-6 text-ink outline-hidden focus:border-navy/40"
       />
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-mute">
         <span className={outOfRange ? "font-semibold text-[#9D3127]" : ""}>{wordCount} words{outOfRange ? ` (recommended ${range.min}–${range.max})` : ""}</span>

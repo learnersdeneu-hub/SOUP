@@ -13,7 +13,7 @@ import { CATEGORY_CONFIG, type DocumentCategory } from "@/lib/documents/categori
 import { requiredEducationCategories } from "@/lib/applications/educationUploads";
 import type { CategoryDocument } from "@/lib/documents/categoryQuery";
 
-const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
+const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40";
 const DEGREE_LEVELS = ["Foundation / Pathway", "Bachelor's", "Master's", "PhD"];
 const EDUCATION_SYSTEMS = ["A-Levels", "International Baccalaureate (IB)", "American High School Diploma", "IGCSE / O-Levels", "National Curriculum / Matriculation", "Advanced Placement (AP)", "Cambridge International"];
 const OTHER_SYSTEM = "__other__";

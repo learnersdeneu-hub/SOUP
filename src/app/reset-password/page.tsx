@@ -18,8 +18,8 @@ export default async function ResetPasswordPage({ searchParams: searchParamsProm
           <p className="mt-2 text-sm leading-6 text-mute">Use at least 8 characters. After updating it, you&apos;ll sign in again with the new password.</p>
           {searchParams.error ? <div className="mt-4 rounded-lg bg-[#FBEAEA] px-3 py-2 text-xs leading-5 text-[#B3261E]">{searchParams.error}</div> : null}
           <form action={updatePassword} className="mt-5 space-y-3">
-            <input name="password" type="password" autoComplete="new-password" minLength={8} required placeholder="New password" className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none" />
-            <input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} required placeholder="Confirm password" className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-none" />
+            <input name="password" type="password" autoComplete="new-password" minLength={8} required placeholder="New password" className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-hidden" />
+            <input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} required placeholder="Confirm password" className="w-full rounded-xl border border-hair px-4 py-2.5 text-sm outline-hidden" />
             <button type="submit" className="w-full rounded-xl bg-navy py-2.5 text-sm font-medium text-white">Update password</button>
           </form>
         </div>

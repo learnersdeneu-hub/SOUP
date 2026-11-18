@@ -90,16 +90,16 @@ const EMPTY: ResumeQuestionnaire = {
 };
 
 function Input({ label, name, value, onChange, required, placeholder, type = "text" }: InputProps) {
-  return <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">{label}{required ? " *" : ""}</span><input type={type} name={name} value={value} required={required} onChange={onChange} placeholder={placeholder} className="w-full rounded-xl border border-hair bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-navy" /></label>;
+  return <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">{label}{required ? " *" : ""}</span><input type={type} name={name} value={value} required={required} onChange={onChange} placeholder={placeholder} className="w-full rounded-xl border border-hair bg-white px-3.5 py-2.5 text-sm text-ink outline-hidden transition focus:border-navy" /></label>;
 }
 
 function TextArea({ label, name, value, onChange, required, placeholder, rows = 4, hint }: TextAreaProps) {
-  return <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">{label}{required ? " *" : ""}</span>{hint && <span className="mb-2 block text-xs leading-5 text-mute">{hint}</span>}<textarea name={name} value={value} required={required} onChange={onChange} placeholder={placeholder} rows={rows} className="w-full resize-y rounded-xl border border-hair bg-white px-3.5 py-2.5 text-sm leading-6 text-ink outline-none transition focus:border-navy" /></label>;
+  return <label className="block"><span className="mb-1.5 block text-xs font-medium text-ink">{label}{required ? " *" : ""}</span>{hint && <span className="mb-2 block text-xs leading-5 text-mute">{hint}</span>}<textarea name={name} value={value} required={required} onChange={onChange} placeholder={placeholder} rows={rows} className="w-full resize-y rounded-xl border border-hair bg-white px-3.5 py-2.5 text-sm leading-6 text-ink outline-hidden transition focus:border-navy" /></label>;
 }
 
 function ResumePreview({ generated, photo }: { generated: GeneratedResume; photo?: string }) {
   const r = generated.content;
-  return <div className="overflow-hidden rounded-2xl border border-hair bg-white shadow-sm">
+  return <div className="overflow-hidden rounded-2xl border border-hair bg-white shadow-xs">
     <div className="border-b border-hair px-6 py-5">
       <div className="flex items-start gap-4">
         {photo ? <img src={photo} alt="Resume portrait" className="h-16 w-16 rounded-xl object-cover" /> : null}

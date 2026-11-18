@@ -1,6 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+/* Theme (brand colours, font) still lives in the JS config. */
+@config "../../tailwind.config.ts";
+
+/* Tailwind 4 changed a few defaults; these keep Tailwind 3's look. */
+@layer base {
+  /* v4 borders default to currentColor; v3 used gray-200. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  /* v4 placeholders are 50% of the text colour; v3 used gray-400. */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+  /* v4 makes form fields transparent; v3 kept the browser's own background
+     (white inputs, light-grey selects). Explicit bg-* classes still win. */
+  input,
+  select,
+  textarea {
+    background-color: revert;
+  }
+  /* v4 buttons use the default cursor; v3 showed a pointer. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 :root {
   color-scheme: light;
@@ -51,6 +80,23 @@ input:disabled,
 textarea:disabled,
 select:disabled {
   cursor: not-allowed;
+}
+
+/* Tailwind 4 changed space-y-* to put margin-bottom on every child but the
+   last (zero specificity), so a child's own top/bottom margin now adds to the gap.
+   These restore Tailwind 3's rule — margin-top on every child after the
+   first, overriding the child's own margin — for the values this app uses.
+   Add a line here if you start using a new space-y value. */
+@layer utilities {
+  .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 1); margin-bottom: 0; }
+  .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 1.5); margin-bottom: 0; }
+  .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 2); margin-bottom: 0; }
+  .space-y-2\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 2.5); margin-bottom: 0; }
+  .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 3); margin-bottom: 0; }
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 4); margin-bottom: 0; }
+  .space-y-5 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 5); margin-bottom: 0; }
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 6); margin-bottom: 0; }
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: calc(var(--spacing) * 8); margin-bottom: 0; }
 }
 
 /* Signed-out landing page (/sign-in) motion. All of it is decorative, so it

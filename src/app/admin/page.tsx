@@ -97,7 +97,7 @@ export default async function AdminDashboardPage() {
           <section className="mt-5">
             <div className="mb-3 flex items-end justify-between gap-3"><div><div className="text-[10px] font-semibold uppercase tracking-[.14em] text-teal">Today</div><h2 className="mt-1 text-base font-semibold text-ink">Priority work queues</h2></div><div className="text-xs text-mute">Click a queue to work the underlying cases</div></div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {queues.map(([label, value, href, note, Icon]) => <Link key={label} href={href} className="group rounded-2xl border border-hair bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-sm"><div className="flex items-start justify-between gap-4"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EAF0F5]"><Icon size={15} className="text-navy"/></div><div className="text-2xl font-semibold text-ink">{value}</div></div><div className="mt-4 text-sm font-semibold text-ink">{label}</div><p className="mt-1 text-xs leading-5 text-mute">{note}</p></Link>)}
+              {queues.map(([label, value, href, note, Icon]) => <Link key={label} href={href} className="group rounded-2xl border border-hair bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-xs"><div className="flex items-start justify-between gap-4"><div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EAF0F5]"><Icon size={15} className="text-navy"/></div><div className="text-2xl font-semibold text-ink">{value}</div></div><div className="mt-4 text-sm font-semibold text-ink">{label}</div><p className="mt-1 text-xs leading-5 text-mute">{note}</p></Link>)}
             </div>
           </section>
 

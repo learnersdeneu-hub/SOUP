@@ -58,7 +58,7 @@ export function InstitutionPromptBanner({ fullName }: { fullName: string }) {
               value={institutionName}
               onChange={(event) => { setInstitutionName(event.target.value); setError(null); }}
               placeholder="Institution name"
-              className="w-full min-w-0 flex-1 rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40"
+              className="w-full min-w-0 flex-1 rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40"
             />
             <button onClick={save} disabled={saving} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-navy px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-60">
               {saving && <Loader2 size={12} className="animate-spin" />}

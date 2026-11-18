@@ -58,19 +58,19 @@ export function ApplicantInfoForm({ prefill }: { prefill: ApplicantInfoPrefill }
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Full legal name</span>
-          <input value={fullName} onChange={(e) => { setFullName(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+          <input value={fullName} onChange={(e) => { setFullName(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
         </label>
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Date of birth</span>
-          <input type="date" value={dateOfBirth} onChange={(e) => { setDateOfBirth(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+          <input type="date" value={dateOfBirth} onChange={(e) => { setDateOfBirth(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
         </label>
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Nationality</span>
-          <input value={nationality} onChange={(e) => { setNationality(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+          <input value={nationality} onChange={(e) => { setNationality(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
         </label>
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[.1em] text-mute">Current country of residence</span>
-          <input value={currentCountry} onChange={(e) => { setCurrentCountry(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40" />
+          <input value={currentCountry} onChange={(e) => { setCurrentCountry(e.target.value); setSaved(false); }} className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40" />
         </label>
       </div>
       <label className="mt-3 block">
@@ -80,7 +80,7 @@ export function ApplicantInfoForm({ prefill }: { prefill: ApplicantInfoPrefill }
           onChange={(e) => { setAcademicBackgroundSummary(e.target.value); setSaved(false); }}
           rows={3}
           placeholder="e.g. A-Levels: Maths, Physics, Chemistry — predicted AAB at Aitchison College"
-          className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs leading-5 text-ink outline-none focus:border-navy/40"
+          className="w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs leading-5 text-ink outline-hidden focus:border-navy/40"
         />
         <span className="mt-1 block text-[10px] leading-4 text-mute">Add to this any time — new qualifications, updated grades, anything relevant. It saves here and reflects across your other applications and in Noodles, since it's the same saved profile everywhere.</span>
       </label>

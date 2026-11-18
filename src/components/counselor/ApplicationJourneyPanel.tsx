@@ -76,7 +76,7 @@ export function ApplicationJourneyPanel({ signedIn, refreshKey, onStatus }: { si
           {STAGES.map(([key], index) => {
             const done = index < currentIndex;
             const active = index === currentIndex;
-            return <span key={key} className={`h-1.5 rounded-sm ${done ? "bg-teal" : active ? "bg-navy" : "bg-hair"}`}/>;
+            return <span key={key} className={`h-1.5 rounded-xs ${done ? "bg-teal" : active ? "bg-navy" : "bg-hair"}`}/>;
           })}
         </div>
         <span className="text-[13px] text-mute">Stage {currentIndex + 1} of {STAGES.length}: <strong className="text-ink">{currentStage}</strong></span>

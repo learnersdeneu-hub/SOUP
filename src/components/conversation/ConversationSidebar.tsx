@@ -65,8 +65,8 @@ export function ConversationSidebar({ signedIn, workflow, sessions, activeSessio
               <div className="mt-0.5 text-[10px] text-mute">{LABEL[session.workflow] || "Conversation"} · {new Date(session.updatedAt).toLocaleDateString()}</div>
             </div>
             <div className="hidden items-center group-hover:flex">
-              <button onClick={(event) => { event.stopPropagation(); onRename(session); }} className="rounded p-1 hover:bg-white" aria-label="Rename conversation"><Pencil size={11} className="text-mute"/></button>
-              <button onClick={(event) => { event.stopPropagation(); onDelete(session); }} className="rounded p-1 hover:bg-white" aria-label="Delete conversation"><Trash2 size={11} className="text-[#9D3127]"/></button>
+              <button onClick={(event) => { event.stopPropagation(); onRename(session); }} className="rounded-sm p-1 hover:bg-white" aria-label="Rename conversation"><Pencil size={11} className="text-mute"/></button>
+              <button onClick={(event) => { event.stopPropagation(); onDelete(session); }} className="rounded-sm p-1 hover:bg-white" aria-label="Delete conversation"><Trash2 size={11} className="text-[#9D3127]"/></button>
             </div>
           </div>
         ))}

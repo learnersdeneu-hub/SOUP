@@ -24,7 +24,7 @@ function Field({ label, children, hint }: { label: string; children: React.React
   );
 }
 
-const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-none focus:border-navy/40";
+const inputClass = "w-full rounded-xl border border-hair bg-white px-3 py-2.5 text-xs text-ink outline-hidden focus:border-navy/40";
 
 export function ProfileDetailsForm({
   core,

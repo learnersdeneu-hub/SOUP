@@ -8,7 +8,7 @@ import { NoodlesLoader } from "@/components/ui/NoodlesLoader";
 // page is shown before anyone is signed in).
 function Floating({ children, className = "", delay = "0s" }: { children: ReactNode; className?: string; delay?: string }) {
   return (
-    <div className={`landing-float rounded-2xl border border-white/80 bg-white/85 p-4 shadow-[0_24px_50px_-24px_rgba(20,33,61,.35)] backdrop-blur ${className}`} style={{ animationDelay: delay }}>
+    <div className={`landing-float rounded-2xl border border-white/80 bg-white/85 p-4 shadow-[0_24px_50px_-24px_rgba(20,33,61,.35)] backdrop-blur-sm ${className}`} style={{ animationDelay: delay }}>
       {children}
     </div>
   );
@@ -40,7 +40,7 @@ function LeftCards() {
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E4E7E1]"><div className="h-full w-4/5 rounded-full bg-teal" /></div>
         <ul className="mt-3 space-y-1.5 text-[12.5px] font-semibold text-ink">
           {["Passport & photos", "Admission letter", "Proof of funds"].map((item) => (
-            <li key={item} className="flex items-center gap-2"><span className="flex h-4 w-4 items-center justify-center rounded bg-teal text-white"><Check size={11} strokeWidth={3.5} /></span>{item}</li>
+            <li key={item} className="flex items-center gap-2"><span className="flex h-4 w-4 items-center justify-center rounded-sm bg-teal text-white"><Check size={11} strokeWidth={3.5} /></span>{item}</li>
           ))}
         </ul>
       </Floating>
@@ -93,7 +93,7 @@ export function LandingHero({ next, errorMessage, resetNotice }: { next: string;
         <div aria-hidden className="hidden flex-col items-end gap-6 lg:flex"><LeftCards /></div>
 
         <div className="flex flex-col items-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-hair bg-white/80 px-3.5 py-1.5 text-xs font-bold text-mute backdrop-blur">
+          <span className="inline-flex items-center gap-2 rounded-full border border-hair bg-white/80 px-3.5 py-1.5 text-xs font-bold text-mute backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-[#5DBB46]" />Students Online University Portal
           </span>
           <p className="mt-4 text-center text-[34px] font-extrabold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[44px]">
