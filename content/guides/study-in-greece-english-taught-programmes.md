@@ -3,6 +3,8 @@ title: "Study in Greece as an International Student: English-Taught Programmes a
 meta_description: "How international students apply to English-taught bachelor's and master's programmes at Greek public universities: entry rules, fees, the Study in Greece portal and visas."
 h1: "Studying in Greece as an International Student: A Guide to English-Taught Programmes at Public Universities"
 slug: "/guides/study-in-greece-english-taught-programmes"
+topic: "destinations"
+order: "1"
 category: "B — European university admissions (Greece pillar)"
 primary_keyword: "study in Greece for international students"
 supporting_keywords:

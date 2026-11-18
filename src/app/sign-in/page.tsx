@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { LandingNav } from "@/components/landing/LandingNav";
+import { siteUrl } from "@/lib/guides/content";
+import { OrganizationJsonLd } from "@/lib/seo/organization";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { AboutSection, FaqSection, FinalCta, InsideSoupSection, JournalSection, LandingFooter, PartnersSection, VideoSection } from "@/components/landing/LandingSections";
 
@@ -15,11 +18,25 @@ function safeNext(next?: string) {
 // here), so it doubles as SOUP's public landing page: the sign-in card stays
 // front and centre in the hero, and the rest of the page explains what SOUP
 // is to students who don't have access yet.
+// The landing page is served at "/" for signed-out visitors (see
+// middleware.ts), so both URLs declare the homepage as canonical.
+export function generateMetadata(): Metadata {
+  const title = "SOUP (SoupAssist): AI-led university admissions for international students";
+  const description = "SOUP, the Students Online University Portal, helps international students choose universities, prepare applications and plan visas, insurance and housing, with the Noodles AI counsellor, human counsellors and SOUP Companion.";
+  return {
+    title,
+    description,
+    alternates: { canonical: `${siteUrl()}/` },
+    openGraph: { type: "website", url: `${siteUrl()}/`, title, description, siteName: "SOUP" },
+  };
+}
+
 export default function SignInPage({ searchParams }: { searchParams: { error?: string; next?: string; reset?: string } }) {
   const next = safeNext(searchParams.next);
   const signUpHref = next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up";
   return (
     <div className="min-h-screen bg-paper">
+      <OrganizationJsonLd />
       <LandingNav signUpHref={signUpHref} />
       <main>
         <LandingHero next={next} errorMessage={searchParams.error} resetNotice={searchParams.reset === "1"} />

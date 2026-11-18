@@ -3,6 +3,8 @@ title: "How to Stop Retyping Your University Applications: Reusing Your Informat
 meta_description: "Applying to several universities means filling the same details into every portal. How to keep one accurate master profile, avoid inconsistencies, and use SOUP Companion to fill forms and attach documents."
 h1: "Fill It Once: How to Reuse Your Information Across University Application Portals"
 slug: "/guides/reuse-information-across-university-application-portals"
+topic: "applications"
+order: "4"
 category: "F — Application documents and technology"
 primary_keyword: "university application autofill"
 supporting_keywords:

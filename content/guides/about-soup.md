@@ -30,7 +30,7 @@ We built SOUP because the study-abroad process is broken for most families. A st
 
 ## Where we come from
 
-SOUP did not start as an app. It grew out of **Learners Den**, a counselling practice that has guided students through university applications by hand since 2020. That work showed us where students actually get stuck, such as missing documents, wrong deadlines, inconsistent forms and unclear visa steps. Each version of the platform has been tested with real students:
+SOUP was founded by **Balaj Amjad**, who started the Learners Den counselling practice in 2020, together with co-founder **Rameen Ahmad**. Today the company is led by Chief Executive Officer **Agha Shahbaz Haider**. SOUP did not start as an app. It grew out of **Learners Den**, a counselling practice that has guided students through university applications by hand since 2020. That work showed us where students actually get stuck, such as missing documents, wrong deadlines, inconsistent forms and unclear visa steps. Each version of the platform has been tested with real students:
 
 - **Learners Den:** one-to-one counselling and application support.
 - **learnersden.eu:** our first online platform for students and applications.

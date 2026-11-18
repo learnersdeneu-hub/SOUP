@@ -22,6 +22,17 @@ export type Faq = { question: string; answer: string };
 export const GUIDE_SECTIONS = ["guides", "rankings"] as const;
 export type GuideSection = (typeof GUIDE_SECTIONS)[number];
 
+// Topics organise /guides into clear groups. Each topic belongs to one
+// section, and the order here is the order on the page.
+export const GUIDE_TOPICS = [
+  { id: "o-a-levels", section: "guides", title: "O-levels and A-levels", blurb: "Choosing subjects, routes and predicted grades with university in mind." },
+  { id: "destinations", section: "guides", title: "Study destinations", blurb: "Country and pathway guides for Greece, Europe, the GCC and beyond." },
+  { id: "applications", section: "guides", title: "Applications and SOUP Companion", blurb: "Documents, counsellors and the AI assistant that fills and reviews applications." },
+  { id: "scholarships", section: "rankings", title: "Scholarship rankings", blurb: "Fully funded and government scholarships, with who can apply and what they really pay." },
+  { id: "subjects", section: "rankings", title: "Subject rankings", blurb: "The world's top universities by subject, from a named, dated ranking edition." },
+] as const;
+export type GuideTopic = (typeof GUIDE_TOPICS)[number]["id"];
+
 export type Guide = {
   file: string;
   path: string;
@@ -32,6 +43,9 @@ export type Guide = {
   h1: string;
   category: string;
   section: GuideSection;
+  topic: GuideTopic | null;
+  // Reading order within a topic on /guides (lower first).
+  order: number;
   primaryKeyword: string;
   supportingKeywords: string[];
   status: string;
@@ -104,6 +118,10 @@ export function parseGuide(file: string, source: string): Guide {
   if (!(GUIDE_SECTIONS as readonly string[]).includes(section)) {
     throw new Error(`${file}: section must be one of ${GUIDE_SECTIONS.join(", ")}.`);
   }
+  const topicId = scalar(data, "topic", false);
+  const topic = topicId ? GUIDE_TOPICS.find((item) => item.id === topicId) : null;
+  if (topicId && !topic) throw new Error(`${file}: unknown topic "${topicId}".`);
+  if (topic && topic.section !== section) throw new Error(`${file}: topic "${topicId}" belongs to the ${topic.section} section.`);
   return {
     file,
     path: guidePath,
@@ -114,6 +132,8 @@ export function parseGuide(file: string, source: string): Guide {
     h1: scalar(data, "h1"),
     category: scalar(data, "category"),
     section: section as GuideSection,
+    topic: topic ? topic.id : null,
+    order: Number(scalar(data, "order", false)) || 100,
     primaryKeyword: scalar(data, "primary_keyword"),
     supportingKeywords: list(data, "supporting_keywords"),
     status: scalar(data, "status"),
@@ -155,5 +175,5 @@ export function findAbout() {
 }
 
 export function siteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://soupassist.com").replace(/\/$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://www.soupassist.com").replace(/\/$/, "");
 }

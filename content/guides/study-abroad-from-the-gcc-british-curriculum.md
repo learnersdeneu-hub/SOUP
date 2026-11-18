@@ -3,6 +3,8 @@ title: "Studying Abroad From the UAE, Saudi Arabia, Qatar and the Gulf: A Guide 
 meta_description: "A practical guide for IGCSE and A-level students in the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain and Oman: choosing between the UK, Europe, the US and home, equivalency, timelines and costs."
 h1: "Studying Abroad From the Gulf: A Guide for British-Curriculum Students and Their Families"
 slug: "/guides/study-abroad-from-the-gcc-british-curriculum"
+topic: "destinations"
+order: "2"
 category: "A/B — A-level guidance for GCC students"
 primary_keyword: "study abroad from UAE"
 supporting_keywords:

@@ -4,6 +4,8 @@ meta_description: "Ten government-funded scholarships for international students
 h1: "Top 10 Government Scholarships for International Students"
 slug: "/guides/top-10-government-scholarships-international-students"
 section: "rankings"
+topic: "scholarships"
+order: "2"
 category: "Ranking guides — scholarships"
 primary_keyword: "government scholarships for international students"
 supporting_keywords:

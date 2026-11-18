@@ -3,6 +3,8 @@ title: "Studying in Europe After A-Levels: Entry Requirements in Germany, the Ne
 meta_description: "Can you go to a European university with A-levels? How Germany, the Netherlands, Italy and Greece assess A-levels, which subjects count, and when you need a foundation year."
 h1: "Studying in Europe After A-Levels: What Universities Actually Require"
 slug: "/guides/study-in-europe-after-a-levels"
+topic: "o-a-levels"
+order: "4"
 category: "A — GCSE and A-level guidance (bridges to B — European admissions)"
 primary_keyword: "study in Europe after A-levels"
 supporting_keywords:

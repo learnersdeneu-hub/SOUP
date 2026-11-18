@@ -3,6 +3,8 @@ title: "A School Counsellor's Guide to Managing University Applications: UCAS, C
 meta_description: "For counsellors in British-curriculum schools in Pakistan and the GCC: managing UCAS references and predicted grades, Common App school forms and European applications for a whole cohort."
 h1: "A School Counsellor's Guide to Managing University Applications for a Whole Cohort"
 slug: "/guides/university-applications-guide-for-school-counsellors"
+topic: "applications"
+order: "3"
 category: "F — Applications (counsellors and schools)"
 primary_keyword: "university application guide for school counsellors"
 supporting_keywords:

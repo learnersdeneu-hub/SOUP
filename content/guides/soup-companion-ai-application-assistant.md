@@ -3,6 +3,8 @@ title: "SOUP Companion: The AI Application Assistant That Fills, Checks and Revi
 meta_description: "What SOUP Companion is, how it fills UCAS, Common App and university portal forms from one profile, attaches documents, reviews every application with AI, and why it changes admissions."
 h1: "SOUP Companion: The AI Application Assistant for University Applications"
 slug: "/guides/soup-companion-ai-application-assistant"
+topic: "applications"
+order: "1"
 category: "F — Application documents and technology (Companion pillar)"
 primary_keyword: "AI university application assistant"
 supporting_keywords:
