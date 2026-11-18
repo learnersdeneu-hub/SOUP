@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { assertSubmissionAccess } from "@/lib/payments/access";
 
 async function requireOwnedProfile(profileId?: string) {
   const supabase = createClient();
@@ -18,6 +19,7 @@ async function requireOwnedProfile(profileId?: string) {
 
 export async function uploadDocument(profileId: string, file: File, documentType: string) {
   const { user, profile } = await requireOwnedProfile(profileId);
+  await assertSubmissionAccess(profile.id);
   if (!file || file.size === 0) throw new Error("Please choose a document to upload.");
   if (file.size > 15 * 1024 * 1024) throw new Error("Documents must be 15 MB or smaller.");
 

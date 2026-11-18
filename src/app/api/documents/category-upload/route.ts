@@ -9,6 +9,7 @@ import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { categoryUploadFormSchema } from "@/lib/validation/schemas";
 import { isCategory, allowedMimeTypesForCategory, CATEGORY_CONFIG, CATEGORY_DOCUMENT_TYPE, MAX_CATEGORY_UPLOAD_BYTES } from "@/lib/documents/categories";
 import { normalizeWritingDetails, type WritingDetails } from "@/lib/applications/coreProfile";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -26,6 +27,8 @@ export const maxDuration = 30;
 export async function POST(request: Request) {
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
+  const gated = await paymentRequiredResponse(current.profile.id, current.user.role);
+  if (gated) return gated;
   const { user, profile } = current;
 
   let form: FormData;

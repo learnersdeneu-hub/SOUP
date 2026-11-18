@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import { PaymentRequiredWatcher } from "@/components/payments/PaymentRequiredWatcher";
 
 export const metadata: Metadata = {
   title: "SOUP — Students Online University Portal",
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
       </head>
-      <body><ToastProvider>{children}</ToastProvider></body>
+      <body><ToastProvider>{children}<PaymentRequiredWatcher /></ToastProvider></body>
     </html>
   );
 }

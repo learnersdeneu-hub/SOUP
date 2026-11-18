@@ -98,7 +98,7 @@ export default async function CollegesPage() {
             <p>You're tracking {cap} universities, the current limit for SOUP-managed applications. Withdraw one from an application page to free up a slot before adding another.</p>
             {!capacityUpgraded && (
               <form action="/api/payments/capacity/checkout" method="post" className="mt-3">
-                <button className="rounded-lg border border-[#E6D9A8] bg-white px-3 py-2 text-xs font-semibold text-[#80651A] hover:bg-[#FFFBF0]">Need to track more? Unlock up to {CAPACITY_UPGRADE_CAP} for €{CAPACITY_UPGRADE_PRICE_USD}</button>
+                <button className="rounded-lg border border-[#E6D9A8] bg-white px-3 py-2 text-xs font-semibold text-[#80651A] hover:bg-[#FFFBF0]">Need to track more? Unlock up to {CAPACITY_UPGRADE_CAP} for ${CAPACITY_UPGRADE_PRICE_USD}</button>
               </form>
             )}
           </div>

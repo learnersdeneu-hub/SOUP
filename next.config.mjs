@@ -10,6 +10,8 @@ const nextConfig = {
   experimental: {
     outputFileTracingIncludes: {
       "/**": ["./content/guides/**/*"],
+      // Optional partner logo embedded in bank-transfer invoice PDFs.
+      "/api/payments/invoice/*": ["./public/invoice/**/*"],
     },
   },
   async headers() {

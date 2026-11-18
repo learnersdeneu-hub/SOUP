@@ -14,6 +14,8 @@ import {
 } from "@/lib/landing/content";
 import { knownPartnerWebsite } from "@/lib/partners/knownWebsites";
 import { SOUP_SUPPORT_EMAIL } from "@/lib/support/config";
+import { PREMIUM_COUNSELING_PRICE_USD, PREMIUM_COUNSELING_TITLE, PREMIUM_PLUS_PRICE_USD, PREMIUM_PLUS_TITLE } from "@/lib/payments/config";
+import type { Guide } from "@/lib/guides/content";
 
 function SectionHead({ eyebrow, title, sub, center = false }: { eyebrow: string; title: ReactNode; sub?: ReactNode; center?: boolean }) {
   return (
@@ -334,7 +336,105 @@ function InsuranceCard() {
   );
 }
 
+/* -------------------------------------------------------------- packages */
+
+// Prices and names come from the same config the Stripe checkout uses, so the
+// landing page can never advertise a different price from the one charged.
+// Shown in USD, matching /premium and the Stripe charge.
+const PACKAGES = [
+  {
+    key: "free",
+    name: "Free",
+    price: "$0",
+    note: "Included with every approved account",
+    line: "Noodles, your AI counselor, helps you discover, compare and organise your university journey.",
+    features: ["Noodles AI guidance, any time", "University & program discovery", "Public and government university research", "Deadlines and applications tracked in one place"],
+    cta: "Request access",
+    tone: "plain",
+  },
+  {
+    key: "scholar",
+    name: PREMIUM_COUNSELING_TITLE,
+    price: `$${PREMIUM_COUNSELING_PRICE_USD}`,
+    note: "One-time payment",
+    line: "Add real human counsellors around Noodles, plus managed support for eligible partner applications.",
+    features: ["Everything in Free", "Document uploads & application submission", "Real-time human counselor access", "Managed eligible partner-university applications", "Priority document & deadline follow-up", "Offer, visa & pre-departure planning"],
+    cta: `Start with ${PREMIUM_COUNSELING_TITLE}`,
+    tone: "featured",
+  },
+  {
+    key: "concierge",
+    name: PREMIUM_PLUS_TITLE,
+    price: `$${PREMIUM_PLUS_PRICE_USD}`,
+    note: "One-time payment",
+    line: "Our high-touch service: a senior counselor runs your whole application journey with you.",
+    features: ["Everything in Scholar", "Weekly scheduled video sessions", "Senior counselor case oversight", "Private accommodation search support", "University-representative sessions, when available", "End-to-end case management"],
+    cta: `Choose ${PREMIUM_PLUS_TITLE}`,
+    tone: "dark",
+  },
+] as const;
+
+export function PackagesSection({ signUpHref }: { signUpHref: string }) {
+  return (
+    <section id="packages" className="scroll-mt-20 py-16 sm:py-24">
+      <div className={shell}>
+        <SectionHead center eyebrow="Packages" title="Start free. Add people when you want them." sub="Every student gets Noodles for free. Upgrade once — no subscriptions — when you'd like a real counsellor in your corner." />
+        <div className="mx-auto mt-12 grid max-w-[1180px] gap-5 lg:grid-cols-3 lg:items-stretch">
+          {PACKAGES.map((pkg) => {
+            const dark = pkg.tone === "dark";
+            const featured = pkg.tone === "featured";
+            return (
+              <div
+                key={pkg.key}
+                className={`relative flex flex-col rounded-[28px] p-7 transition hover:-translate-y-1 sm:p-8 ${
+                  dark
+                    ? "bg-ink text-white shadow-[0_30px_60px_-30px_rgba(20,33,61,.7)]"
+                    : featured
+                      ? "border-2 border-teal bg-white shadow-[0_30px_60px_-30px_rgba(11,107,80,.45)]"
+                      : "border border-hair bg-white hover:shadow-[0_24px_50px_-30px_rgba(20,33,61,.4)]"
+                }`}
+              >
+                {featured && (
+                  <span className="absolute -top-3.5 left-7 inline-flex items-center gap-1.5 rounded-full bg-teal px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-white">
+                    <Sparkles size={12} /> Most popular
+                  </span>
+                )}
+                <span className={`text-xs font-extrabold uppercase tracking-[0.16em] ${dark ? "text-[#FFE27A]" : featured ? "text-teal" : "text-mute"}`}>{pkg.name}</span>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="text-[44px] font-extrabold leading-none tracking-[-0.03em]">{pkg.price}</span>
+                  <span className={`text-sm ${dark ? "text-white/60" : "text-mute"}`}>{pkg.note}</span>
+                </div>
+                <p className={`m-0 mt-4 text-[15px] leading-relaxed ${dark ? "text-white/75" : "text-mute"}`}>{pkg.line}</p>
+                <ul className="m-0 mb-8 mt-6 grid list-none gap-2.5 p-0">
+                  {pkg.features.map((feature) => (
+                    <li key={feature} className="flex gap-2.5 text-[14px] leading-snug">
+                      <span className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ${dark ? "bg-[#5DBB46] text-ink" : "bg-teal/10 text-teal"}`}><Check size={11} strokeWidth={3.5} /></span>
+                      <span className={dark ? "text-white/90" : "text-ink"}>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={signUpHref}
+                  className={`mt-auto inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-extrabold no-underline transition hover:-translate-y-px ${
+                    dark ? "bg-white text-ink" : featured ? "bg-teal text-white" : "border border-hair bg-paper text-ink"
+                  }`}
+                >
+                  {pkg.cta} <ArrowRight size={15} />
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+        <p className="mx-auto m-0 mt-8 max-w-[760px] text-center text-[13px] leading-relaxed text-mute">
+          Packages are bought inside SOUP once your access is approved. University application fees, deposits, tuition, visa and government charges, tests, insurance and accommodation are paid separately to those providers and aren&apos;t included in any package.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /* --------------------------------------------------------------- journal */
+
 
 function ArticleCover({ article, large = false }: { article: JournalArticle; large?: boolean }) {
   return (
@@ -347,7 +447,14 @@ function ArticleCover({ article, large = false }: { article: JournalArticle; lar
   );
 }
 
-export function JournalSection() {
+// Guide front matter categories are editorial codes ("A — A-level guidance",
+// "F — Application documents and technology (Companion pillar)"); readers
+// only need the plain topic, so drop the code prefix and bracketed note.
+function guideLabel(category: string) {
+  return category.replace(/^[A-Z/]+\s+—\s+/, "").replace(/\s*\(.*\)\s*$/, "").trim() || "Guide";
+}
+
+export function JournalSection({ guides = [] }: { guides?: Guide[] }) {
   const [featured, ...rest] = JOURNAL_ARTICLES;
   return (
     <section id="journal" className="scroll-mt-20 py-16 sm:py-24">
@@ -383,6 +490,24 @@ export function JournalSection() {
             ))}
           </div>
         </div>
+        {guides.length > 0 && (
+          <div className="mt-12">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h3 className="m-0 text-xl font-extrabold text-ink">In-depth guides</h3>
+              <Link href="/guides" className="inline-flex items-center gap-1.5 text-sm font-bold text-ink no-underline hover:text-teal">All {guides.length} guides <ArrowRight size={15} /></Link>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {guides.slice(0, 6).map((guide) => (
+                <Link key={guide.slug} href={guide.path} className="group flex flex-col rounded-[22px] border border-hair bg-white p-5 no-underline transition hover:-translate-y-0.5 hover:shadow-[0_24px_50px_-30px_rgba(20,33,61,.45)]">
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-teal">{guideLabel(guide.category)}</span>
+                  <span className="mt-1.5 text-[16px] font-extrabold leading-snug text-ink">{guide.h1 || guide.title}</span>
+                  <span className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-mute">{guide.metaDescription}</span>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-[13px] font-bold text-ink">Read the guide <ArrowRight size={14} className="transition group-hover:translate-x-1" /></span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -446,12 +571,14 @@ export function LandingFooter({ anchorBase = "" }: { anchorBase?: string }) {
             <Link href="/about" className="text-mute no-underline hover:text-ink">About us &amp; team</Link>
             <a href={`${anchorBase}#inside`} className="text-mute no-underline hover:text-ink">How it works</a>
             <a href={`${anchorBase}#partners`} className="text-mute no-underline hover:text-ink">Partners</a>
+            <a href={`${anchorBase}#packages`} className="text-mute no-underline hover:text-ink">Packages</a>
           </div>
           <div className="flex flex-col gap-2">
             <span className="font-extrabold text-ink">Read</span>
             <Link href="/guides" className="text-mute no-underline hover:text-ink">Guides</Link>
             <Link href="/guides#ranking-guides" className="text-mute no-underline hover:text-ink">Ranking guides</Link>
             <Link href="/journal" className="text-mute no-underline hover:text-ink">The Journal</Link>
+            <Link href="/guides" className="text-mute no-underline hover:text-ink">Guides</Link>
             <a href={`${anchorBase}#insurance`} className="text-mute no-underline hover:text-ink">Student insurance</a>
             <a href={`mailto:${SOUP_SUPPORT_EMAIL}`} className="text-mute no-underline hover:text-ink">Contact us</a>
           </div>

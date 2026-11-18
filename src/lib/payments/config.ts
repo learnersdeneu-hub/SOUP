@@ -1,6 +1,6 @@
-// Pricing displays in EUR per product decision (not a currency change to
-// the underlying Stripe charge, which remains USD — see createStripeCheckoutSession
-// callers; the numeric amount is the same either way, only the shown symbol differs).
+// All SOUP prices are shown and charged in USD. Bank-transfer invoices add a
+// PKR conversion at the day's rate when the invoice is generated (see
+// lib/payments/bankTransfer.ts and lib/payments/fx.ts).
 export const PREMIUM_COUNSELING_PRICE_USD = 20;
 export const PREMIUM_COUNSELING_CENTS = PREMIUM_COUNSELING_PRICE_USD * 100;
 export const PREMIUM_COUNSELING_TITLE = "SOUP Scholar";

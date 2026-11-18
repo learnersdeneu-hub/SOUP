@@ -64,7 +64,9 @@ export async function updateReferralCommercials(referralId: string, formData: Fo
 export async function saveStudentServiceNeeds(type: "ACCOMMODATION" | "INSURANCE", formData: FormData) {
   const { requireProfile } = await import("@/lib/auth/currentUser");
   const { ensureStudentCase } = await import("@/lib/student/case");
-  const { profile } = await requireProfile();
+  const { profile, user } = await requireProfile();
+  const { assertSubmissionAccess } = await import("@/lib/payments/access");
+  await assertSubmissionAccess(profile.id, user.role);
   const studentCase = await ensureStudentCase(profile.id);
   const metadata: Record<string, string> = {};
   for (const [key, value] of formData.entries()) {

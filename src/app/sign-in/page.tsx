@@ -3,7 +3,8 @@ import { LandingNav } from "@/components/landing/LandingNav";
 import { siteUrl } from "@/lib/guides/content";
 import { OrganizationJsonLd } from "@/lib/seo/organization";
 import { LandingHero } from "@/components/landing/LandingHero";
-import { AboutSection, FaqSection, FinalCta, InsideSoupSection, JournalSection, LandingFooter, PartnersSection, VideoSection } from "@/components/landing/LandingSections";
+import { getPublishedGuides } from "@/lib/guides/content";
+import { AboutSection, FaqSection, FinalCta, InsideSoupSection, JournalSection, LandingFooter, PackagesSection, PartnersSection, VideoSection } from "@/components/landing/LandingSections";
 
 // Empty (not "/dashboard") when nothing specific was requested — a
 // still-exploring student's default landing is the home page, decided
@@ -44,7 +45,8 @@ export default function SignInPage({ searchParams }: { searchParams: { error?: s
         <InsideSoupSection signUpHref={signUpHref} />
         <AboutSection />
         <PartnersSection />
-        <JournalSection />
+        <PackagesSection signUpHref={signUpHref} />
+        <JournalSection guides={getPublishedGuides()} />
         <FaqSection />
         <FinalCta signUpHref={signUpHref} />
       </main>

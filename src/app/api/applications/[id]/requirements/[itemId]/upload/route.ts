@@ -9,6 +9,7 @@ import { escapeHtml, sendTransactionalEmail } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
 import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
 import { requirementUploadFormSchema } from "@/lib/validation/schemas";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 // No AI call happens on this path at all, unlike /api/evidence/process
@@ -36,6 +37,8 @@ const ALLOWED_EXTENSIONS = new Set(["pdf", "png", "jpg", "jpeg", "docx"]);
 export async function POST(request: Request, { params }: { params: { id: string; itemId: string } }) {
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
+  const gated = await paymentRequiredResponse(current.profile.id, current.user.role);
+  if (gated) return gated;
   const { user, profile } = current;
 
   const item = await prisma.journeyChecklistItem.findFirst({
