@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="t d">
+  <title id="t">How SOUP Companion works</title>
+  <desc id="d">A student's SOUP profile and document vault feed SOUP Companion, which scans, fills, attaches documents and reviews each application on UCAS, the Common App, university portals and PDF forms. The student reviews and submits.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#3D4A63"/></marker>
+  </defs>
+  <rect width="1200" height="560" rx="28" fill="#F6F7F4"/>
+  <g font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif">
+    <text x="48" y="64" font-size="15" font-weight="700" letter-spacing="2.5" fill="#0B6B50">HOW COMPANION WORKS</text>
+    <text x="48" y="100" font-size="28" font-weight="700" fill="#14213D">One profile in. Every application filled, checked and reviewed.</text>
+
+    <!-- Profile -->
+    <rect x="48" y="150" width="270" height="330" rx="20" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+    <text x="72" y="190" font-size="13" font-weight="700" letter-spacing="2" fill="#3D4A63">1 · YOUR SOUP PROFILE</text>
+    <g font-size="17" fill="#14213D">
+      <rect x="72" y="212" width="222" height="40" rx="10" fill="#EEF3F1"/><text x="88" y="238">Personal &amp; passport</text>
+      <rect x="72" y="262" width="222" height="40" rx="10" fill="#EEF3F1"/><text x="88" y="288">Education &amp; grades</text>
+      <rect x="72" y="312" width="222" height="40" rx="10" fill="#EEF3F1"/><text x="88" y="338">Tests &amp; activities</text>
+      <rect x="72" y="362" width="222" height="40" rx="10" fill="#EEF3F1"/><text x="88" y="388">Essays &amp; references</text>
+      <rect x="72" y="412" width="222" height="40" rx="10" fill="#E3EEF9"/><text x="88" y="438">Document vault</text>
+    </g>
+
+    <line x1="328" y1="315" x2="388" y2="315" stroke="#3D4A63" stroke-width="3" marker-end="url(#a)"/>
+
+    <!-- Companion -->
+    <rect x="398" y="150" width="404" height="330" rx="20" fill="#14213D"/>
+    <text x="424" y="190" font-size="13" font-weight="700" letter-spacing="2" fill="#9FD9C3">2 · SOUP COMPANION</text>
+    <g font-size="17">
+      <rect x="424" y="212" width="352" height="52" rx="12" fill="#22335A"/>
+      <text x="444" y="235" font-weight="700" fill="#FFFFFF">Scan</text><text x="444" y="255" font-size="14" fill="#C9D3E6">Recognises the form's fields</text>
+      <rect x="424" y="274" width="352" height="52" rx="12" fill="#22335A"/>
+      <text x="444" y="297" font-weight="700" fill="#FFFFFF">Fill</text><text x="444" y="317" font-size="14" fill="#C9D3E6">Enters your answers, then checks each one</text>
+      <rect x="424" y="336" width="352" height="52" rx="12" fill="#22335A"/>
+      <text x="444" y="359" font-weight="700" fill="#FFFFFF">Attach</text><text x="444" y="379" font-size="14" fill="#C9D3E6">Uploads the right document, asks if unsure</text>
+      <rect x="424" y="398" width="352" height="52" rx="12" fill="#0B6B50"/>
+      <text x="444" y="421" font-weight="700" fill="#FFFFFF">Review</text><text x="444" y="441" font-size="14" fill="#D8F0E6">Flags gaps, mismatches and weak answers</text>
+    </g>
+
+    <line x1="812" y1="315" x2="872" y2="315" stroke="#3D4A63" stroke-width="3" marker-end="url(#a)"/>
+
+    <!-- Portals -->
+    <rect x="882" y="150" width="270" height="330" rx="20" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+    <text x="906" y="190" font-size="13" font-weight="700" letter-spacing="2" fill="#3D4A63">3 · REAL APPLICATIONS</text>
+    <g font-size="17" fill="#14213D">
+      <rect x="906" y="212" width="222" height="40" rx="10" fill="#F6F7F4" stroke="#E4E7E1"/><text x="922" y="238">UCAS</text>
+      <rect x="906" y="262" width="222" height="40" rx="10" fill="#F6F7F4" stroke="#E4E7E1"/><text x="922" y="288">Common App</text>
+      <rect x="906" y="312" width="222" height="40" rx="10" fill="#F6F7F4" stroke="#E4E7E1"/><text x="922" y="338">University portals</text>
+      <rect x="906" y="362" width="222" height="40" rx="10" fill="#F6F7F4" stroke="#E4E7E1"/><text x="922" y="388">PDF and visa forms</text>
+      <rect x="906" y="412" width="222" height="40" rx="10" fill="#FFF6D6" stroke="#E3B505"/><text x="922" y="438" font-weight="700">You submit</text>
+    </g>
+
+    <text x="48" y="530" font-size="15" fill="#3D4A63">Companion never presses submit. Every application is reviewed and sent by the student.</text>
+  </g>
+</svg>

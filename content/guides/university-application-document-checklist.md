@@ -147,7 +147,7 @@ Once you accept an offer, a second checklist starts:
 
 SOUP gives you **one secure document vault** linked to your profile. You upload your passport, transcripts, test reports, bank statements and CV once, sorted into clear categories. SOUP shows which documents each shortlisted university needs, flags documents that are about to expire, and lets you invite recommenders by email and track whether they have submitted.
 
-When you fill in real application portals, **SOUP Companion** can attach the matching document from your vault to upload fields. If two documents could fit, such as an IELTS and a TOEFL report, it asks you which one to use.
+When you fill in real application portals, **SOUP Companion** can attach the matching document from your vault to upload fields. If two documents could fit, such as an IELTS and a TOEFL report, it asks you which one to use. [See how Companion works →](/guides/soup-companion-ai-application-assistant)
 
 **[Request access to SOUP](/sign-up)** and build your document vault before your deadlines arrive.
 

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-labelledby="t d">
+  <title id="t">A Companion multi-application run</title>
+  <desc id="d">The student picks applications from My Colleges. For each one Companion opens the official form, fills each page and moves to the next, pausing for anything that needs the student such as a CAPTCHA, a one-time code or a missing answer. An AI review and SOUP's checklist decide readiness, the student approves, and Companion moves to the next application. The student submits each one.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#3D4A63"/></marker>
+  </defs>
+  <rect width="1200" height="500" rx="28" fill="#F6F7F4"/>
+  <g font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif">
+    <text x="48" y="64" font-size="15" font-weight="700" letter-spacing="2.5" fill="#0B6B50">MULTI-APPLICATION RUN</text>
+    <text x="48" y="100" font-size="28" font-weight="700" fill="#14213D">Several applications in one sitting, with you in control</text>
+
+    <g font-size="16">
+      <rect x="48" y="150" width="196" height="120" rx="16" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+      <text x="68" y="184" font-size="12" font-weight="700" letter-spacing="1.5" fill="#3D4A63">STEP 1</text>
+      <text x="68" y="212" font-weight="700" fill="#14213D">Pick applications</text>
+      <text x="68" y="238" font-size="14" fill="#3D4A63">from My Colleges</text>
+
+      <rect x="278" y="150" width="196" height="120" rx="16" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+      <text x="298" y="184" font-size="12" font-weight="700" letter-spacing="1.5" fill="#3D4A63">STEP 2</text>
+      <text x="298" y="212" font-weight="700" fill="#14213D">Open the official</text>
+      <text x="298" y="236" font-weight="700" fill="#14213D">application form</text>
+
+      <rect x="508" y="150" width="196" height="120" rx="16" fill="#14213D"/>
+      <text x="528" y="184" font-size="12" font-weight="700" letter-spacing="1.5" fill="#9FD9C3">STEP 3</text>
+      <text x="528" y="212" font-weight="700" fill="#FFFFFF">Fill each page,</text>
+      <text x="528" y="236" font-weight="700" fill="#FFFFFF">then click Next</text>
+
+      <rect x="738" y="150" width="196" height="120" rx="16" fill="#0B6B50"/>
+      <text x="758" y="184" font-size="12" font-weight="700" letter-spacing="1.5" fill="#D8F0E6">STEP 4</text>
+      <text x="758" y="212" font-weight="700" fill="#FFFFFF">AI review +</text>
+      <text x="758" y="236" font-weight="700" fill="#FFFFFF">SOUP checklist</text>
+
+      <rect x="968" y="150" width="184" height="120" rx="16" fill="#FFF6D6" stroke="#E3B505" stroke-width="2"/>
+      <text x="988" y="184" font-size="12" font-weight="700" letter-spacing="1.5" fill="#6B5400">STEP 5</text>
+      <text x="988" y="212" font-weight="700" fill="#14213D">You approve</text>
+      <text x="988" y="236" font-weight="700" fill="#14213D">and submit</text>
+    </g>
+    <g stroke="#3D4A63" stroke-width="3" marker-end="url(#a)">
+      <line x1="248" y1="210" x2="272" y2="210"/>
+      <line x1="478" y1="210" x2="502" y2="210"/>
+      <line x1="708" y1="210" x2="732" y2="210"/>
+      <line x1="938" y1="210" x2="962" y2="210"/>
+    </g>
+    <path d="M1060 276 V330 H156 V276" fill="none" stroke="#3D4A63" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#a)"/>
+    <text x="440" y="356" font-size="15" fill="#3D4A63">Next application in the queue</text>
+
+    <rect x="48" y="390" width="1104" height="72" rx="16" fill="#FFFFFF" stroke="#C9D3E6" stroke-width="2"/>
+    <text x="72" y="422" font-size="15" font-weight="700" fill="#14213D">Companion pauses and asks you first when it meets:</text>
+    <text x="72" y="446" font-size="15" fill="#3D4A63">a CAPTCHA · a one-time code · a password · a question SOUP has no answer for · a page that isn't an application form</text>
+  </g>
+</svg>
