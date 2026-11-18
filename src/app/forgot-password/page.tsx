@@ -2,7 +2,8 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 import { requestPasswordReset } from "@/app/actions/auth";
 
-export default function ForgotPasswordPage({ searchParams }: { searchParams: { error?: string; sent?: string } }) {
+export default async function ForgotPasswordPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ error?: string; sent?: string }> }) {
+  const searchParams = await searchParamsPromise;
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-10">
       <section className="w-full max-w-sm">

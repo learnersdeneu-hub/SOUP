@@ -23,7 +23,7 @@ function partnerMetadata(value: unknown): PartnerPublicMetadata {
 }
 
 export async function ServicePartnerDirectory({ type, title, intro, counselorIntent, source }: { type: "ACCOMMODATION" | "STUDENT_FINANCE" | "SCHOLARSHIP"; title: string; intro: string; counselorIntent: string; source?: string }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id }, select: { id: true } }) : null;
   const [partners, studentCase, latestDestination] = await Promise.all([

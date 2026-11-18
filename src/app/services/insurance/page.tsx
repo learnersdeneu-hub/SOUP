@@ -17,8 +17,9 @@ function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 3).map((part) => part[0]?.toUpperCase()).join("");
 }
 
-export default async function InsuranceServicePage({ searchParams }: { searchParams: { source?: string } }) {
-  const supabase = createClient();
+export default async function InsuranceServicePage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ source?: string }> }) {
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } }) : null;
   const partner = await prisma.partner.findFirst({ where: { type: "INSURANCE", status: "ACTIVE", slug: "hellenic-sun-insuremart" }, orderBy: { internalPriority: "asc" } });

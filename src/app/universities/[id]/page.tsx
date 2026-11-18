@@ -31,7 +31,8 @@ function SummaryCard({ label, value, note }: { label: string; value: string; not
   );
 }
 
-export default async function UniversityDetailPage({ params }: { params: { id: string } }) {
+export default async function UniversityDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await getCurrentUser();
   // findFirst (not findUnique) so the isPublic filter can ride along with the
   // id lookup — a university staff have explicitly hidden 404s for a student

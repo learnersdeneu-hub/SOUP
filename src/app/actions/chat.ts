@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import type { ChatWorkflow } from "@prisma/client";
 
 async function requireProfileId() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

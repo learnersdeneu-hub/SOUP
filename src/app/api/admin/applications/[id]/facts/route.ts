@@ -12,7 +12,8 @@ import { logServerError } from "@/lib/logging/safe";
 const FEES = new Set(["UNKNOWN", "NOT_REQUIRED", "REQUIRED", "STUDENT_PAYING", "SOUP_PAYING", "PENDING", "PAID", "WAIVED", "REFUNDED"]);
 const ELIGIBILITY = new Set(["NOT_CHECKED", "LIKELY_ELIGIBLE", "NEEDS_REVIEW", "NOT_ELIGIBLE"]);
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const staff = await getApiStaff(APPLICATION_OPERATIONS_ROLES);
   if (!staff) return Response.json({ error: "Admissions access required." }, { status: 403 });
   const parsed = await parseJsonBody(request, adminApplicationFactsSchema);

@@ -3,7 +3,8 @@ import { requireApiProfile } from "@/lib/auth/apiUser";
 import { parseJsonBody } from "@/lib/validation/http";
 import { applicationWithdrawSchema } from "@/lib/validation/schemas";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
   const { authUser: user, profile } = current;

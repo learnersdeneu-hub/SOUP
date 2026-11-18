@@ -20,7 +20,9 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-export async function middleware(request: NextRequest) {
+// Next 16 renamed the "middleware" file convention to "proxy"; it still runs
+// before every matched request, now on the Node.js runtime.
+export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 

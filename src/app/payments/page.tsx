@@ -17,7 +17,8 @@ export const dynamic = "force-dynamic";
 
 function money(value: unknown, currency = "USD") { const n = Number(value || 0); return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n); }
 
-export default async function PaymentsPage({ searchParams }: { searchParams: { success?: string; cancelled?: string; error?: string; premium?: string } }) {
+export default async function PaymentsPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ success?: string; cancelled?: string; error?: string; premium?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const { profile } = await requireProfile();
   const [payments, applications] = await Promise.all([
     prisma.payment.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: "desc" }, take: 100 }),

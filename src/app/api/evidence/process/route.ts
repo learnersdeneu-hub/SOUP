@@ -41,7 +41,7 @@ const ANALYSIS_PROMPT = `You are SOUP's document-reading layer for an internatio
 Capture names, institutions, qualifications, subjects, grades, dates, identifiers, currency/amounts and other admissions/visa-relevant facts when visibly present. Never invent unreadable or absent values. Keep sensitive identifiers out of the customer-facing summary unless necessary.`;
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Create or sign in to your SOUP account before uploading private documents." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } });

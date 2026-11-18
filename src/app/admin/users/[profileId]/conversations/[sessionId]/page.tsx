@@ -16,7 +16,8 @@ import { prisma } from "@/lib/prisma";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function AdminConversationPage({ params }: { params: { profileId: string; sessionId: string } }) {
+export default async function AdminConversationPage({ params: paramsPromise }: { params: Promise<{ profileId: string; sessionId: string }> }) {
+  const params = await paramsPromise;
   const current = await requireRole(CASE_ROLES);
   if (current.user.role === "SUPPORT") {
     const assigned = await prisma.supportTicket.findFirst({ where: { profileId: params.profileId, assignedToUserId: current.user.id }, select: { id: true } });

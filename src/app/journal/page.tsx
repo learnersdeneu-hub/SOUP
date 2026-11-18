@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Practical articles on applications, money, visas, insurance and student housing.",
 };
 
-// Public (see PUBLIC_PATHS in middleware.ts): linked from the signed-out
+// Public (see PUBLIC_PATHS in proxy.ts): linked from the signed-out
 // landing page, readable without an account.
 export default function JournalIndexPage() {
   return (

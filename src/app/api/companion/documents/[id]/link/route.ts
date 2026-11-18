@@ -8,7 +8,8 @@ export const runtime = "nodejs";
 // application code (profileId must match) before ever touching storage, so
 // this uses the admin storage client the same way the staff document-review
 // signed-URL route does — never a raw storage path handed back to the client.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireCompanionAuth(request);
   if (!current.ok) return current.response;
   const document = await prisma.document.findFirst({ where: { id: params.id, profileId: current.profile.id } });

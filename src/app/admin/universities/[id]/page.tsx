@@ -28,7 +28,8 @@ function feeFromRequirements(value: unknown) {
 const inputClass = "rounded-xl border border-hair px-3 py-2.5 text-sm";
 const labelClass = "block text-sm font-medium text-ink";
 
-export default async function AdminUniversityDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminUniversityDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireRole(ADMIN_ROLES);
   const university = await prisma.university.findUnique({
     where: { id: params.id },

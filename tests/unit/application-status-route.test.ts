@@ -72,7 +72,7 @@ describe("application status API transition behavior", () => {
       const valid = APPLICATION_TRANSITIONS[from].has(to);
       it(`${from} -> ${to} ${valid ? "succeeds" : "returns 409"}`, async () => {
         prismaMock.studentApplication.findUnique.mockResolvedValue(application(from));
-        const response = await POST(request(to), { params: { id: "app-1" } });
+        const response = await POST(request(to), { params: Promise.resolve({ id: "app-1" }) });
         expect(response.status).toBe(valid ? 200 : 409);
       });
     }

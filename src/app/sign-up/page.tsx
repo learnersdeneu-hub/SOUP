@@ -12,7 +12,8 @@ const REASON_COPY: Record<string, string> = {
   "attach-document": "Request access to securely attach and save your application documents in My SOUP.",
 };
 
-export default function SignUpPage({ searchParams }: { searchParams: { next?: string; reason?: string } }) {
+export default async function SignUpPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ next?: string; reason?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const next = safeNext(searchParams.next);
   const subtitle = (searchParams.reason && REASON_COPY[searchParams.reason]) || "Tell us who you are and we'll email you a sign-in link once your access is approved.";
   return (

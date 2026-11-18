@@ -87,7 +87,7 @@ async function buildEntryUniversityContext(universityId: string): Promise<string
   }).slice(0, 4000);
 }
 
-async function loadRequestIdentity(supabase: ReturnType<typeof createClient>) {
+async function loadRequestIdentity(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser();
   const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id } }) : null;
   return { user, profile };
@@ -107,7 +107,7 @@ const MIN_FALLBACK_BUDGET_MS = 8_000;
 export async function POST(request: Request) {
   const requestStartedAt = Date.now();
   const remainingAiBudgetMs = () => AI_TOTAL_BUDGET_MS - (Date.now() - requestStartedAt);
-  const supabase = createClient();
+  const supabase = await createClient();
   let identity: Awaited<ReturnType<typeof loadRequestIdentity>>;
   try {
     identity = await loadRequestIdentity(supabase);

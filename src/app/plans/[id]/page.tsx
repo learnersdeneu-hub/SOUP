@@ -22,7 +22,8 @@ function groundingSources(value: unknown) {
   return safeResearchSources((value as Record<string, unknown>).groundingSources, 12);
 }
 
-export default async function ApplicationPlanPage({ params }: { params: { id: string } }) {
+export default async function ApplicationPlanPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const { profile } = await requireProfile();
   const plan = await prisma.universityShortlist.findFirst({
     where: { id: params.id, profileId: profile.id },

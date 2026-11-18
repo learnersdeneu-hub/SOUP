@@ -24,7 +24,8 @@ function pretty(value: string) {
   return value.replaceAll("_", " ");
 }
 
-export default async function AdminReferralsPage({ searchParams }: { searchParams: { type?: string; status?: string } }) {
+export default async function AdminReferralsPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ type?: string; status?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(COMMERCIAL_ROLES);
   const rawType = String(searchParams.type || "").trim();
   const rawStatus = String(searchParams.status || "").trim();

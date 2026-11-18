@@ -62,7 +62,7 @@ export async function approveAccessRequest(id: string) {
   // never used SOUP yet, so determinePostLoginLanding will correctly land
   // them on the home page on this first click, same as any other
   // first-time sign-in — not forced onto an empty dashboard.
-  const supabase = createClient({ flowType: "implicit" });
+  const supabase = await createClient({ flowType: "implicit" });
   await supabase.auth.signInWithOtp({
     email: request.email,
     options: {
@@ -92,7 +92,7 @@ export async function resendAccessInvite(id: string) {
   const request = await prisma.accessRequest.findUniqueOrThrow({ where: { id } });
   if (request.status !== "APPROVED") return;
 
-  const supabase = createClient({ flowType: "implicit" });
+  const supabase = await createClient({ flowType: "implicit" });
   await supabase.auth.signInWithOtp({
     email: request.email,
     options: {

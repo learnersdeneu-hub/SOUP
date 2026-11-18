@@ -7,8 +7,9 @@ import { aiRateLimitResponse } from "@/lib/ai/httpRateLimit";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Sign in to prepare application requirements." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });

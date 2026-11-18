@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       where: { id: { in: attachDocumentIds }, profileId: profile.id },
       select: { id: true, storageRef: true, originalFileName: true, documentType: true },
     });
-    const supabase = createClient();
+    const supabase = await createClient();
     const attachments: PdfAttachment[] = [];
     for (const document of documents) {
       const { data, error } = await supabase.storage.from("documents").download(document.storageRef);

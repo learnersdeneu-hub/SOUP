@@ -16,7 +16,8 @@ import type { DocumentReviewStatus } from "@prisma/client";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function AdminDocumentsPage({ searchParams }: { searchParams: { status?: string; q?: string } }) {
+export default async function AdminDocumentsPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ status?: string; q?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(DOCUMENT_ROLES);
   const q = searchParams.q?.trim();
   const allowedStatuses = new Set<DocumentReviewStatus>(["UPLOADED","PENDING_REVIEW","MORE_INFO_REQUIRED","APPROVED","REJECTED","EXPIRED"]);

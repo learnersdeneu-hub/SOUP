@@ -8,7 +8,7 @@ import { uploadDocument } from "@/app/actions/documents";
 import { submitForVerification } from "@/app/actions/verification";
 
 async function requireProfileId() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

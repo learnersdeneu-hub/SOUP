@@ -28,7 +28,8 @@ export const dynamic = "force-dynamic";
 
 function nice(value: string) { return value.toLowerCase().split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
 
-export default async function AdminApplicationDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminApplicationDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireRole(APPLICATION_ROLES);
   const canOperate = APPLICATION_OPERATIONS_ROLES.includes(current.user.role);
   const application = await prisma.studentApplication.findUnique({

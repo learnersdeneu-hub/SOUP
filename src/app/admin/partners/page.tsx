@@ -20,7 +20,8 @@ const PAGE_SIZE = 100;
 const PARTNER_TYPES = ["UNIVERSITY","ACCOMMODATION","INSURANCE","STUDENT_FINANCE","SCHOLARSHIP","TRAVEL","OTHER"] as const satisfies readonly PartnerType[];
 const PARTNER_STATUSES = ["ACTIVE","PAUSED","INACTIVE"] as const satisfies readonly PartnershipStatus[];
 
-export default async function AdminPartnersPage({ searchParams }: { searchParams: { q?: string; type?: string; status?: string; page?: string } }) {
+export default async function AdminPartnersPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ q?: string; type?: string; status?: string; page?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(STAFF_ROLES as AppRole[]);
   const q = searchParams.q?.trim();
   const requestedType = searchParams.type?.trim();

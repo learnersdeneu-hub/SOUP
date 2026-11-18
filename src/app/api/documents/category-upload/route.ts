@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     return Response.json({ error: `Unsupported file type. Use ${config.extensions.join("/").toUpperCase()}.` }, { status: 415 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const storageRef = `${user.id}/${randomUUID()}.${ext}`;
   const { error: storageError } = await supabase.storage.from("documents").upload(storageRef, file, { contentType: file.type || "application/octet-stream", upsert: false });
   if (storageError) return Response.json({ error: `Secure upload failed: ${storageError.message}` }, { status: 502 });

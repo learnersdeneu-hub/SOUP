@@ -18,7 +18,8 @@ function stage(value?: string | null) {
   return value ? value.replaceAll("_", " ") : "EXPLORING";
 }
 
-export default async function AdminUsersPage({ searchParams }: { searchParams: { q?: string } }) {
+export default async function AdminUsersPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ q?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(CASE_ROLES);
   const q = searchParams.q?.trim();
   const supportScope = current.user.role === "SUPPORT"

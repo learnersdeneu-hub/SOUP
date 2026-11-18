@@ -11,7 +11,8 @@ export const runtime = "nodejs";
 // This still only moves SOUP's own record to READY_TO_SUBMIT — it never
 // clicks anything on the university's own site, which stays the
 // student's action regardless.
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireCompanionAuth(request);
   if (!current.ok) return current.response;
 

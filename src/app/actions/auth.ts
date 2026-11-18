@@ -15,7 +15,7 @@ const ACCESS_NOT_APPROVED_MESSAGE = "This email hasn't been approved for SOUP ac
 // Supabase already created/authenticated an auth session for this email,
 // but SOUP has no approved AccessRequest for it. Signing that session back
 // out immediately prevents an orphaned, profile-less "logged in" state.
-async function handleAccessNotApproved(supabase: ReturnType<typeof createClient>) {
+async function handleAccessNotApproved(supabase: Awaited<ReturnType<typeof createClient>>) {
   await supabase.auth.signOut().catch(() => undefined);
 }
 
@@ -37,10 +37,10 @@ function invalidateAuthenticatedPages() {
   revalidatePath("/", "layout");
 }
 
-function baseUrl() {
+async function baseUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
   if (configured) return configured;
-  const h = headers();
+  const h = await headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
   return host ? `${proto}://${host}` : "http://localhost:3001";
@@ -65,7 +65,7 @@ export async function signIn(formData: FormData) {
     redirect("/sign-in?error=" + encodeURIComponent("Email and password are required."));
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
@@ -145,12 +145,12 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
   const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "";
 
   try {
-    const supabase = createClient({ flowType: "implicit" });
+    const supabase = await createClient({ flowType: "implicit" });
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${baseUrl()}/auth/magic-link?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: `${await baseUrl()}/auth/magic-link?next=${encodeURIComponent(next)}`,
         ...(fullName || institutionName ? { data: { ...(fullName ? { full_name: fullName } : {}), ...(institutionName ? { institution_name: institutionName } : {}) } } : {}),
       },
     });
@@ -174,7 +174,7 @@ export async function startEmailOtp(params: { email: string; fullName?: string; 
 // /auth/callback does for the PKCE-based flows (OAuth, password
 // signup/reset).
 export async function completeEmailLinkSignIn(params: { next?: string }): Promise<{ ok: false; error: string } | void> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) {
     return { ok: false, error: "That sign-in link is invalid or expired. Please try again." };
@@ -210,7 +210,7 @@ export async function completeEmailLinkSignIn(params: { next?: string }): Promis
 // different browser than the one that requested it — but it will succeed
 // for same-browser clicks and never leaves the page silently broken.
 export async function completeEmailLinkCode(params: { code: string; next?: string }): Promise<{ ok: false; error: string } | void> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(params.code);
   if (error || !data.user) {
     const mismatch = /code verifier|code challenge/i.test(error?.message || "");
@@ -242,10 +242,10 @@ export async function completeEmailLinkCode(params: { code: string; next?: strin
 
 export async function signInWithGoogle(formData: FormData) {
   const explicit = explicitNext(formData);
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${baseUrl()}/auth/callback${explicit ? `?next=${encodeURIComponent(explicit)}` : ""}` },
+    options: { redirectTo: `${await baseUrl()}/auth/callback${explicit ? `?next=${encodeURIComponent(explicit)}` : ""}` },
   });
   if (error || !data.url) redirect(`/sign-in?error=${encodeURIComponent("Google sign-in could not be started. Please try again or use email and password.")}`);
   redirect(data.url);
@@ -255,9 +255,9 @@ export async function requestPasswordReset(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   if (!email) redirect("/forgot-password?error=" + encodeURIComponent("Email is required."));
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${baseUrl()}/auth/callback?next=/reset-password`,
+    redirectTo: `${await baseUrl()}/auth/callback?next=/reset-password`,
   });
 
   // Keep the response deliberately generic so the reset form cannot be used to
@@ -279,7 +279,7 @@ export async function updatePassword(formData: FormData) {
     redirect("/reset-password?error=" + encodeURIComponent("Passwords do not match."));
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect("/reset-password?error=" + encodeURIComponent("Your password could not be updated. The reset link may have expired; request a new one and try again."));
 
@@ -292,7 +292,7 @@ export async function updatePassword(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   invalidateAuthenticatedPages();
   redirect("/");

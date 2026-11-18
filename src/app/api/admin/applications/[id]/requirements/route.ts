@@ -10,7 +10,8 @@ import { adminRequirementsRefreshSchema } from "@/lib/validation/schemas";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const staff = await getApiStaff(APPLICATION_OPERATIONS_ROLES);
   if (!staff) return Response.json({ error: "Admissions access required." }, { status: 403 });
   const limited = await aiRateLimitResponse(request, `staff:${staff.user.id}`);

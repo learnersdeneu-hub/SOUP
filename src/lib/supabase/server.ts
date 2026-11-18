@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 // Server-side Supabase client for use in Server Components, Server Actions,
@@ -15,8 +15,10 @@ import { cookies } from "next/headers";
 // tokens directly in the redirect URL's fragment rather than requiring a
 // matching stored code_verifier. See src/app/auth/magic-link/page.tsx for
 // the corresponding client-side handler.
-export function createClient(options?: { flowType?: "pkce" | "implicit" }) {
-  const cookieStore = cookies();
+// Async since Next 15+: cookies() returns a Promise, so callers must
+// `await createClient()`.
+export async function createClient(options?: { flowType?: "pkce" | "implicit" }) {
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,22 +26,15 @@ export function createClient(options?: { flowType?: "pkce" | "implicit" }) {
     {
       auth: options?.flowType ? { flowType: options.flowType } : undefined,
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ name, value, ...options });
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
             // Called from a Server Component with no request context — safe to
             // ignore because the middleware refreshes the session on navigation.
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch {
-            // Same as above.
           }
         },
       },

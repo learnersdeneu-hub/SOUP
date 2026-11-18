@@ -6,9 +6,9 @@ name: CI
 # the required repository secrets.
 "on":
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -36,23 +36,15 @@ jobs:
     name: Lint, test, and build gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
-          # No package-lock.json exists in this repo yet, so npm's cache
-          # can't key off it. Once a lockfile is committed, switch this back
-          # to `cache: "npm"` and the install step below to `npm ci` for a
-          # faster, fully reproducible install. See README note this
-          # workflow links to.
+          node-version: "22"
+          cache: "npm"
 
       - name: Install dependencies
-        # TEMPORARY: using `npm install` because no package-lock.json is
-        # committed yet. `npm ci` would fail immediately without one. Run
-        # `npm install` locally once, commit the generated package-lock.json,
-        # then change this back to `npm ci` for reproducible, faster builds.
-        run: npm install
+        run: npm ci
 
       - name: Unit + security tests
         run: npm run test
@@ -76,17 +68,21 @@ jobs:
         run: npm run typecheck
 
       - name: Production build
-        run: npm run build
+        # `next build` directly, not `npm run build`: that script also runs
+        # `prisma migrate deploy`, which needs a real database. Migrations
+        # are applied by the Vercel deploy, not by CI.
+        run: npx next build
 
   dependency-audit:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "22"
+          cache: "npm"
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: npm audit (fail on high/critical)
         run: npm audit --audit-level=high

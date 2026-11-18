@@ -15,7 +15,8 @@ function safeNext(next?: string) {
 // here), so it doubles as SOUP's public landing page: the sign-in card stays
 // front and centre in the hero, and the rest of the page explains what SOUP
 // is to students who don't have access yet.
-export default function SignInPage({ searchParams }: { searchParams: { error?: string; next?: string; reset?: string } }) {
+export default async function SignInPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ error?: string; next?: string; reset?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const next = safeNext(searchParams.next);
   const signUpHref = next ? `/sign-up?next=${encodeURIComponent(next)}` : "/sign-up";
   return (

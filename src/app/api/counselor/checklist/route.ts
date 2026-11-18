@@ -40,7 +40,7 @@ Rules: Make each item trackable and specific. Do not mark anything complete just
 function clean(value: unknown, max = 3000) { const text = String(value ?? "").trim(); return text ? text.slice(0, max) : null; }
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Sign in to save a journey checklist." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });

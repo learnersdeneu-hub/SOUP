@@ -16,7 +16,8 @@ import type { StudentApplicationStatus } from "@prisma/client";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function AdminApplicationsPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
+export default async function AdminApplicationsPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ q?: string; status?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(APPLICATION_ROLES);
   const q = searchParams.q?.trim();
   const rawStatus = searchParams.status?.trim();

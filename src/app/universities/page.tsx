@@ -17,7 +17,8 @@ function metadataLogo(value: unknown) {
   return /^https?:\/\//i.test(url) ? url : null;
 }
 
-export default async function UniversitiesPage({ searchParams }: { searchParams: { channel?: string; q?: string } }) {
+export default async function UniversitiesPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ channel?: string; q?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await getCurrentUser();
   const user = current?.authUser || null;
   const initialChannel = searchParams.channel && ["GOVERNMENT", "DIRECT_SOUP", "AHZ", "GRANDLINK", "SOUP_CATALOGUE"].includes(searchParams.channel)

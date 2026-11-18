@@ -1,5 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 
+// Next.js loads this file in the browser before the app starts (it replaced
+// sentry.client.config.ts, which Turbopack builds no longer pick up).
+
 // Client bundle: only ever reads NEXT_PUBLIC_* env vars. Never add a
 // server-only secret to this file — see tests/security/secrets.test.mjs,
 // which scans every "use client" file for exactly this mistake.
@@ -25,3 +28,6 @@ if (dsn) {
     },
   });
 }
+
+// Lets Sentry trace client-side navigations.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

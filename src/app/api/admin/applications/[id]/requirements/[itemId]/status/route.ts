@@ -8,7 +8,8 @@ import type { ChecklistItemStatus, StudentApplicationStatus } from "@prisma/clie
 
 const ALLOWED = new Set(["WAITING_FOR_DOCUMENT", "DOCUMENT_UPLOADED", "COMPLETE", "NOT_APPLICABLE", "BLOCKED", "ACTION_REQUIRED"]);
 
-export async function POST(request: Request, { params }: { params: { id: string; itemId: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string; itemId: string }> }) {
+  const params = await paramsPromise;
   const staff = await getApiStaff(APPLICATION_OPERATIONS_ROLES);
   if (!staff) return Response.json({ error: "Admissions access required." }, { status: 403 });
 

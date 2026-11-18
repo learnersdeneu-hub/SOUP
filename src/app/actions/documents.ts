@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 
 async function requireOwnedProfile(profileId?: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -26,7 +26,7 @@ export async function uploadDocument(profileId: string, file: File, documentType
 
   const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
   const path = `${user.id}/${randomUUID()}.${ext}`;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error: uploadError } = await supabase.storage
     .from("documents")
@@ -75,7 +75,7 @@ export async function getDocumentSignedUrl(documentId: string) {
   const document = await prisma.document.findUniqueOrThrow({ where: { id: documentId } });
   if (document.profileId !== profile.id) throw new Error("You do not have access to this document.");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.storage.from("documents").createSignedUrl(document.storageRef, 60 * 5);
   if (error) throw new Error(`Could not create signed URL: ${error.message}`);
   return data.signedUrl;

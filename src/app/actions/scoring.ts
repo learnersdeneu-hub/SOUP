@@ -10,7 +10,7 @@ import { recomputeScores } from "@/lib/scoring/recompute";
 // verification approval. In production this should run as a side effect
 // of resolveVerification(), not on user demand.
 export async function recomputeMyScores() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

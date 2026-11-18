@@ -3,8 +3,9 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { updatePassword } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function ResetPasswordPage({ searchParams }: { searchParams: { error?: string } }) {
-  const supabase = createClient();
+export default async function ResetPasswordPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ error?: string }> }) {
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/forgot-password?error=" + encodeURIComponent("That reset link is invalid or expired. Request a new password reset email."));
 

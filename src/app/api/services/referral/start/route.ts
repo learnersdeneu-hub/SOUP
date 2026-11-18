@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const destination = safeHttpUrl(partner.transactionUrl || partner.websiteUrl, 1200);
   if (!destination) return Response.json({ error: "This partner does not yet have a safe authorized online transaction/referral route configured." }, { status: 409 });
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ url: destination, tracked: false });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });

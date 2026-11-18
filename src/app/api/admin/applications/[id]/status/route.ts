@@ -11,7 +11,8 @@ import { canTransitionApplication, submissionGuardError } from "@/lib/applicatio
 import { getOrCreateInboundReplyToken, inboundReplyAddress, REPLY_NOTICE_HTML } from "@/lib/applications/inboundReply";
 import { logServerError } from "@/lib/logging/safe";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const staff = await getApiStaff(APPLICATION_OPERATIONS_ROLES);
   if (!staff) return Response.json({ error: "Staff access required." }, { status: 403 });
   const parsed = await parseJsonBody(request, adminApplicationStatusSchema);

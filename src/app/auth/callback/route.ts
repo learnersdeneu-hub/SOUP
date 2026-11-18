@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/sign-in?error=${encodeURIComponent("The confirmation link is invalid or expired.")}`);
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.user) {

@@ -10,12 +10,14 @@ export function generateStaticParams() {
   return JOURNAL_ARTICLES.map((article) => ({ slug: article.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await paramsPromise;
   const article = getJournalArticle(params.slug);
   return article ? { title: `${article.title} — The SOUP Journal`, description: article.dek } : {};
 }
 
-export default function JournalArticlePage({ params }: { params: { slug: string } }) {
+export default async function JournalArticlePage({ params: paramsPromise }: { params: Promise<{ slug: string }> }) {
+  const params = await paramsPromise;
   const article = getJournalArticle(params.slug);
   if (!article) notFound();
   const more = JOURNAL_ARTICLES.filter((other) => other.slug !== article.slug).slice(0, 3);

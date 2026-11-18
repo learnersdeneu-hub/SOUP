@@ -11,7 +11,7 @@ import { createStripeCheckoutSession } from "@/lib/payments/stripe";
 // matches by paymentId/profile, nothing premium-plan-specific) rather than
 // duplicating that confirmation logic.
 export async function POST() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${paymentBaseUrl()}/sign-in?next=${encodeURIComponent("/colleges")}`, 303);
   const profile = await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } });

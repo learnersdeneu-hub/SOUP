@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata = { title: "SOUP Companion — Privacy notice" };
 
 export default async function CompanionPrivacyPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   return (
     <div className="min-h-screen bg-paper">

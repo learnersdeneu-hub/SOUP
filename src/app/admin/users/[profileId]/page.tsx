@@ -22,7 +22,8 @@ function pretty(value?: string | null) {
   return value ? value.replaceAll("_", " ") : "—";
 }
 
-export default async function AdminUserDetailPage({ params }: { params: { profileId: string } }) {
+export default async function AdminUserDetailPage({ params: paramsPromise }: { params: Promise<{ profileId: string }> }) {
+  const params = await paramsPromise;
   const current = await requireRole(CASE_ROLES);
   if (current.user.role === "SUPPORT") {
     const allowed = await prisma.supportTicket.findFirst({

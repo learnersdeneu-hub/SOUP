@@ -15,7 +15,8 @@ import type { SupportTicketStatus } from "@prisma/client";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function AdminSupportPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function AdminSupportPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ status?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(SUPPORT_ROLES);
   const allowedStatuses = new Set<SupportTicketStatus>(["OPEN","IN_PROGRESS","WAITING_FOR_CUSTOMER","RESOLVED","CLOSED"]);
   const requestedStatus = searchParams.status && allowedStatuses.has(searchParams.status as SupportTicketStatus)

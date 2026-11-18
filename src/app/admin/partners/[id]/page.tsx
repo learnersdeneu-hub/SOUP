@@ -16,7 +16,8 @@ import { prisma } from "@/lib/prisma";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function PartnerDetailPage({ params }: { params: { id: string } }) {
+export default async function PartnerDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireRole(ADMIN_ROLES);
   const partner = await prisma.partner.findUnique({
     where: { id: params.id },

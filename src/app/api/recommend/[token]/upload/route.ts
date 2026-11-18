@@ -17,7 +17,8 @@ const MAX_BYTES = 10 * 1024 * 1024;
 // Supabase client (bypasses RLS) for the same reason the staff-only
 // offer-letter route does — there is no signed-in user here for RLS to
 // scope the upload to.
-export async function POST(request: Request, { params }: { params: { token: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ token: string }> }) {
+  const params = await paramsPromise;
   const recommender = await prisma.recommender.findFirst({ where: { inviteToken: params.token }, select: { id: true, profileId: true, status: true, inviteTokenExpiresAt: true, profile: { select: { userId: true } } } });
   if (!recommender) return Response.json({ error: "This link is invalid." }, { status: 404 });
   if (recommender.inviteTokenExpiresAt && recommender.inviteTokenExpiresAt.getTime() < Date.now()) {

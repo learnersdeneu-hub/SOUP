@@ -20,7 +20,8 @@ function money(value: unknown, currency?: string | null) {
   return `${currency || ""} ${Number.isFinite(n) ? n.toLocaleString() : String(value)}`.trim();
 }
 
-export default async function ComparePlanPage({ params }: { params: { id: string } }) {
+export default async function ComparePlanPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const { profile } = await requireProfile();
   const plan = await prisma.universityShortlist.findFirst({
     where: { id: params.id, profileId: profile.id },

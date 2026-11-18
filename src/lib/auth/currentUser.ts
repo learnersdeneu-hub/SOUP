@@ -5,7 +5,7 @@ import { ensureUserAndProfile, AccessNotApprovedError } from "@/lib/auth/provisi
 import type { AppRole } from "@prisma/client";
 
 export async function getCurrentUser() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();

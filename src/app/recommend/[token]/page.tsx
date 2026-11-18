@@ -16,9 +16,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 // Public, token-authenticated page — the recommender has no SOUP account
-// and no session (see PUBLIC_PATHS in src/middleware.ts). Everything here
+// and no session (see PUBLIC_PATHS in src/proxy.ts). Everything here
 // is scoped by the token in the URL itself, never by auth state.
-export default async function RecommendTokenPage({ params }: { params: { token: string } }) {
+export default async function RecommendTokenPage({ params: paramsPromise }: { params: Promise<{ token: string }> }) {
+  const params = await paramsPromise;
   const recommender = await prisma.recommender.findFirst({
     where: { inviteToken: params.token },
     include: {

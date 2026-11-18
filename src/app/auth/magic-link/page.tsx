@@ -10,7 +10,8 @@ function safeNext(next?: string) {
 
 export const dynamic = "force-dynamic";
 
-export default function MagicLinkPage({ searchParams }: { searchParams: { next?: string } }) {
+export default async function MagicLinkPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ next?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const next = safeNext(searchParams.next);
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-paper">

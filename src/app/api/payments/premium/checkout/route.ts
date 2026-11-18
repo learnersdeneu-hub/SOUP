@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const parsedForm = premiumCheckoutFormSchema.safeParse(form ? Object.fromEntries(form.entries()) : {});
   const plan: PremiumPlan = parsedForm.success ? parsedForm.data.plan : "premium";
   const selected = premiumPlanConfig(plan);
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${paymentBaseUrl()}/sign-in?next=${encodeURIComponent("/premium")}`, 303);
   const profile = await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } });

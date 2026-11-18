@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const destination = safeHttpUrl(partner.transactionUrl, 1200);
   if (!destination) return Response.json({ error: "The SOUP insurance purchase channel is not configured with a safe online route right now." }, { status: 503 });
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ url: destination, tracked: false });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });

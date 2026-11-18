@@ -99,7 +99,7 @@ const COTHM_PARTNER = {
 };
 
 export default async function HomePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const dashboardData = user ? await getCustomerDashboardData(user.id) : null;
   // The homepage only ever displays 8 universities. The previous version

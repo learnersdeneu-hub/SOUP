@@ -45,7 +45,7 @@ async function extractText(file: File) {
 }
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Create or sign in to your SOUP account before uploading a private resume." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });

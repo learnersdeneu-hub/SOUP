@@ -67,7 +67,7 @@ async function trustedEvent(profileId: string, workflow: string, metadata: Recor
 }
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: "Not authenticated." }, { status: 401 });
 

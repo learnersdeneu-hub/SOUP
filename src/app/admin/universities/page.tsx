@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 100;
 
-export default async function AdminUniversitiesPage({ searchParams }: { searchParams: { q?: string; page?: string } }) {
+export default async function AdminUniversitiesPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ q?: string; page?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const current = await requireRole(ADMIN_ROLES);
   const q = searchParams.q?.trim();
   const requestedPage = Math.max(1, Number(searchParams.page || "1") || 1);

@@ -13,7 +13,8 @@ import { prisma } from "@/lib/prisma";
 // break; this makes it explicit and impossible to regress unnoticed.
 export const dynamic = "force-dynamic";
 
-export default async function ManageResumePage({ searchParams }: { searchParams: { id?: string } }) {
+export default async function ManageResumePage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ id?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const { profile } = await requireProfile();
   const resumes = await prisma.resume.findMany({
     where: { profileId: profile.id, status: { not: "ARCHIVED" } },

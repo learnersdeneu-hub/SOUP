@@ -33,7 +33,8 @@ const ALLOWED_EXTENSIONS = new Set(["pdf", "png", "jpg", "jpeg", "docx"]);
 // metadata.documentClass (set when the requirements checklist was
 // generated), and attachDocumentToChecklistItem (shared with the Noodles
 // attach flow) does the actual binding deterministically.
-export async function POST(request: Request, { params }: { params: { id: string; itemId: string } }) {
+export async function POST(request: Request, { params: paramsPromise }: { params: Promise<{ id: string; itemId: string }> }) {
+  const params = await paramsPromise;
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
   const { user, profile } = current;
@@ -57,7 +58,7 @@ export async function POST(request: Request, { params }: { params: { id: string;
   const ext = file.name.split(".").pop()?.toLowerCase() || "";
   if ((file.type && !ALLOWED_TYPES.has(file.type)) || !ALLOWED_EXTENSIONS.has(ext)) return Response.json({ error: "Unsupported document type. Use PDF, PNG, JPG or DOCX." }, { status: 415 });
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const storageRef = `${user.id}/${randomUUID()}.${ext}`;
   const { error: storageError } = await supabase.storage.from("documents").upload(storageRef, file, { contentType: file.type || "application/octet-stream", upsert: false });
   if (storageError) return Response.json({ error: `Secure upload failed: ${storageError.message}` }, { status: 502 });

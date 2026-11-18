@@ -13,7 +13,8 @@ export const runtime = "nodejs";
 // attached to a checklist item, an application, a submitted recommendation
 // letter or a writing override, deleting it would silently break that
 // link, so those cases are rejected in favor of Replace instead.
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
   const { profile } = current;
@@ -41,7 +42,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
     return Response.json({ error: "This document is attached to a requirement or application — use Replace instead of Delete." }, { status: 409 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   try {
     await prisma.$transaction([
       prisma.documentReviewEvent.deleteMany({ where: { documentId: document.id } }),

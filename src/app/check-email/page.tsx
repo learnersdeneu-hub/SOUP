@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 
-export default function CheckEmailPage({ searchParams }: { searchParams: { email?: string; next?: string } }) {
+export default async function CheckEmailPage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ email?: string; next?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const next = searchParams.next?.startsWith("/") && !searchParams.next.startsWith("//") ? searchParams.next : "/dashboard";
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-5 py-10">

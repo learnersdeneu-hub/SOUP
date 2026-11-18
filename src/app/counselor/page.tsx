@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 const ALLOWED_INTENTS = new Set(["universities", "accommodation", "insurance", "scholarships", "finance"]);
 
-export default async function CounselorPage({ searchParams }: { searchParams?: { intent?: string; requestItem?: string; requestLabel?: string; applicationId?: string; prompt?: string; universityId?: string } }) {
-  const supabase = createClient();
+export default async function CounselorPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ intent?: string; requestItem?: string; requestLabel?: string; applicationId?: string; prompt?: string; universityId?: string }> }) {
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const profile = user ? await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } }) : null;
   const rawIntent = String(searchParams?.intent || "").toLowerCase();

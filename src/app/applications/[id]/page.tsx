@@ -27,7 +27,8 @@ export const dynamic = "force-dynamic";
 
 function nice(value: string) { return value.toLowerCase().split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
 
-export default async function ApplicationDetailPage({ params }: { params: { id: string } }) {
+export default async function ApplicationDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const { profile } = await requireProfile();
   const application = await prisma.studentApplication.findFirst({
     where: { id: params.id, profileId: profile.id },
