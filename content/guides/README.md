@@ -41,3 +41,7 @@ Each article's slug must equal its file name (the tests in `tests/unit/guides-co
 3. ⏳ **Set `NEXT_PUBLIC_SITE_URL`** in production. Canonical URLs and the sitemap use it, and fall back to `https://soupassist.com`.
 4. ⏳ **Search Console and analytics:** verify the domain in Google Search Console and submit `https://soupassist.com/sitemap.xml`. No analytics or conversion-event tooling exists in the codebase yet.
 5. ⏳ **Featured images:** each article has an image brief and alt text in its front matter, but no images have been produced yet.
+
+## Deployment note
+
+Vercel production deploys automatically from `master`, but only for commits whose **author** is the project owner's git identity (Balaj Amjad). Merge commits created by GitHub's "Merge pull request" button are authored by the `learnersdeneu-hub` account, and Vercel did not deploy them (PRs #17 and #18 stayed undeployed). Until that account's email is linked to the Vercel account, merge locally as the owner and push, or use **Create Deployment** in Vercel after merging.
