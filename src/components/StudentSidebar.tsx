@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { AppRole } from "@prisma/client";
-import { Bell, BriefcaseBusiness, CreditCard, Download, FileUp, GraduationCap, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Search, ShieldCheck, X } from "lucide-react";
+import { Bell, BriefcaseBusiness, CreditCard, Download, FileUp, GraduationCap, Home, LayoutDashboard, LifeBuoy, Menu, PlaneTakeoff, Search, ShieldCheck, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const LINKS: Array<[string, string, LucideIcon]> = [
+  ["/", "Home", Home],
   ["/dashboard", "My SOUP", LayoutDashboard],
   ["/counselor", "Noodles", GraduationCap],
   ["/universities", "Universities & Programs", Search],
@@ -30,7 +31,7 @@ const LINKS: Array<[string, string, LucideIcon]> = [
 // — not a duplicated/hardcoded list of every admin section, which would
 // drift out of sync with /admin's own already-correct, role-gated
 // operations list. One link in, the real list lives in exactly one place.
-export function StudentSidebar({ signedIn, role }: { signedIn: boolean; role?: AppRole | null }) {
+export function StudentSidebar({ signedIn, role, buttonClassName }: { signedIn: boolean; role?: AppRole | null; buttonClassName?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   if (!signedIn) return null;
@@ -38,7 +39,7 @@ export function StudentSidebar({ signedIn, role }: { signedIn: boolean; role?: A
 
   return (
     <>
-      <button onClick={() => setOpen(true)} aria-label="Open navigation" title="Menu" className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-ink hover:bg-white">
+      <button onClick={() => setOpen(true)} aria-label="Open navigation" title="Menu" className={buttonClassName || "inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-ink hover:bg-white"}>
         <Menu size={17} />
       </button>
       {open && (
@@ -59,7 +60,7 @@ export function StudentSidebar({ signedIn, role }: { signedIn: boolean; role?: A
                 </>
               )}
               {LINKS.map(([href, label, Icon]) => {
-                const active = pathname === href || (href !== "/dashboard" && Boolean(pathname?.startsWith(href)));
+                const active = pathname === href || (href !== "/dashboard" && href !== "/" && Boolean(pathname?.startsWith(href)));
                 return (
                   <Link key={href} href={href} onClick={() => setOpen(false)} className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition ${active ? "bg-[#EAF0F5] text-navy" : "text-ink hover:bg-paper"}`}>
                     <Icon size={15} />{label}

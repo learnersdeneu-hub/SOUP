@@ -37,7 +37,7 @@ export default async function CompanionConnectPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <StudyHeader current="companion" signedIn fullName={user.fullName} />
+      <StudyHeader current="companion" signedIn fullName={user.fullName} role={user.role} />
       <main className="mx-auto max-w-[1180px] px-5 py-10 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP Companion</div>
         <h1 className="mt-2 text-[28px] font-extrabold leading-tight text-ink">Fill out applications without leaving the page</h1>
