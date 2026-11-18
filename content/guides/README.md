@@ -44,4 +44,4 @@ Each article's slug must equal its file name (the tests in `tests/unit/guides-co
 
 ## Deployment note
 
-Vercel production deploys automatically from `master`, but only for commits whose **author** is the project owner's git identity (Balaj Amjad). Merge commits created by GitHub's "Merge pull request" button are authored by the `learnersdeneu-hub` account, and Vercel did not deploy them (PRs #17 and #18 stayed undeployed). Until that account's email is linked to the Vercel account, merge locally as the owner and push, or use **Create Deployment** in Vercel after merging.
+Until 2026-11-18, production was deployed by hand with the Vercel CLI (`vercel --prod`), and the Vercel project wasn't connected to GitHub. That's why merging PRs #17 and #18 didn't deploy anything. The project is now connected to `learnersdeneu-hub/SOUP` with `master` as the production branch, so a merge to `master` deploys production. If a merge doesn't appear under Deployments, check whether it shows as "Blocked": Vercel's Hobby plan only deploys commits by authors on the account.
