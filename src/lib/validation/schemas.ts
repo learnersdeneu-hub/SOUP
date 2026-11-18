@@ -172,7 +172,7 @@ export const counselorChecklistSchema = z.object({
 
 export const conversationPersistMessageSchema = z.object({
   sessionId: idSchema,
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 }).strict();
 
 export const counselorConversationStreamSchema = z.object({
@@ -413,7 +413,7 @@ export const stripeSignatureSchema = z.string().trim().min(1).max(4096);
 
 export const stripeWebhookEventSchema = z.object({
   type: z.string().trim().min(1).max(160),
-  data: z.object({ object: z.record(z.unknown()) }).passthrough(),
+  data: z.object({ object: z.record(z.string(), z.unknown()) }).passthrough(),
 }).passthrough();
 
 export const resendSignatureHeadersSchema = z.object({
@@ -445,7 +445,7 @@ export const resendInboundEventSchema = z.object({
     bcc: z.union([z.string(), z.array(z.string())]).optional(),
     subject: z.string().max(998).optional(),
     message_id: z.string().max(998).optional(),
-    attachments: z.array(z.record(z.unknown())).optional(),
+    attachments: z.array(z.record(z.string(), z.unknown())).optional(),
     created_at: z.string().optional(),
   }).passthrough(),
 }).passthrough();
@@ -459,5 +459,5 @@ export const resendReceivedEmailSchema = z.object({
   text: z.string().nullable().optional(),
   html: z.string().nullable().optional(),
   message_id: z.string().optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
 }).passthrough();
