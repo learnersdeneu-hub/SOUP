@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { PrismaClient } from '@prisma/client';
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const root = process.cwd();
 const universityFile = path.resolve(root, 'data/soup-university-master-catalog.csv');
 const programFile = path.resolve(root, 'data/soup-program-master-catalog.csv');

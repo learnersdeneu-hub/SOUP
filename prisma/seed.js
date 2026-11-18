@@ -1,6 +1,6 @@
-const { PrismaClient } = require('@prisma/client');
+const { createPrismaClient } = require('./client.cjs');
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function seedCredentialTypes() {
   const rows = [

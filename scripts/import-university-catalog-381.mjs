@@ -26,9 +26,10 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const ROOT = process.cwd();
 
 function parseCsv(text) {

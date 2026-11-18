@@ -46,7 +46,8 @@
   },
   "dependencies": {
     "@next/env": "^16.4.6",
-    "@prisma/client": "5.22.0",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "@react-pdf/renderer": "^4.9.0",
     "@sentry/nextjs": "^10.78.0",
     "@supabase/ssr": "^0.12.7",
@@ -71,14 +72,11 @@
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.6.2",
     "postcss": "^8.5.33",
-    "prisma": "5.22.0",
+    "prisma": "7.10.1",
     "tailwindcss": "^3.4.7",
     "typescript": "^7.0.2",
     "vite": "^7.3.8",
     "vitest": "^4.1.12"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   },
   "overrides": {
     "vite": "$vite"

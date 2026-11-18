@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
+const prisma = createPrismaClient();
 const file = path.resolve(process.cwd(), "data/soup-network-universities.csv");
 function slugify(v){return v.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,110)}
 function parse(text){const [h,...ls]=text.trim().split(/\r?\n/);const heads=h.split(',');return ls.map(line=>{let a=[],v='',q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(q&&line[i+1]==='"'){v+='"';i++}else q=!q}else if(c===','&&!q){a.push(v);v=''}else v+=c}a.push(v);return Object.fromEntries(heads.map((x,i)=>[x,a[i]||'']))})}

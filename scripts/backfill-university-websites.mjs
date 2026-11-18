@@ -10,9 +10,10 @@
 // Idempotent: only ever fills a currently-null websiteUrl; never overwrites
 // an existing value.
 
-import { PrismaClient } from "@prisma/client";
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 const KNOWN_WEBSITES = {
   "Abertay University": "https://www.abertay.ac.uk/",

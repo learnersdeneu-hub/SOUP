@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const file = path.resolve(process.cwd(), "data/replit-partnered-university-programs.csv");
 
 function slugify(value) {

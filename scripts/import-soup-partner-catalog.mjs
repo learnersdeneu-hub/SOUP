@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
+import prismaClientFactory from "../prisma/client.cjs";
+const { createPrismaClient } = prismaClientFactory;
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const supplied = process.argv[2];
 if (!supplied) {
   console.error("Usage: node scripts/import-soup-partner-catalog.mjs <catalog.csv>");
