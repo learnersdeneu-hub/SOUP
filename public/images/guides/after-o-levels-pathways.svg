@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 540" role="img" aria-labelledby="t d">
+  <title id="t">Pathways after O-levels or IGCSEs</title>
+  <desc id="d">After O-levels or IGCSEs, students usually choose A-levels, the IB Diploma, a national qualification such as FSc or a local secondary certificate, or a foundation route. A-levels and the IB lead directly to UK, European, US and GCC universities. National qualifications suit home-country universities and some international ones. A foundation year bridges gaps in qualifications.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#3D4A63"/></marker>
+  </defs>
+  <rect width="1200" height="540" rx="28" fill="#F6F7F4"/>
+  <g font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif">
+    <text x="48" y="64" font-size="15" font-weight="700" letter-spacing="2.5" fill="#0B6B50">AFTER O-LEVELS / IGCSEs</text>
+    <text x="48" y="100" font-size="28" font-weight="700" fill="#14213D">Four common routes, and where each one usually leads</text>
+
+    <rect x="48" y="226" width="220" height="110" rx="18" fill="#14213D"/>
+    <text x="72" y="270" font-size="20" font-weight="800" fill="#FFFFFF">O-levels /</text>
+    <text x="72" y="298" font-size="20" font-weight="800" fill="#FFFFFF">IGCSEs</text>
+
+    <g stroke="#3D4A63" stroke-width="3" fill="none" marker-end="url(#a)">
+      <path d="M272 262 C320 262 320 172 372 172"/>
+      <path d="M272 274 C330 274 330 262 372 262"/>
+      <path d="M272 288 C330 288 330 352 372 352"/>
+      <path d="M272 300 C320 300 320 442 372 442"/>
+    </g>
+
+    <g font-size="17">
+      <rect x="380" y="140" width="300" height="64" rx="14" fill="#FFFFFF" stroke="#0B6B50" stroke-width="2"/>
+      <text x="402" y="168" font-weight="800" fill="#14213D">A-levels</text><text x="402" y="190" font-size="14" fill="#3D4A63">3 subjects is the usual benchmark</text>
+      <rect x="380" y="230" width="300" height="64" rx="14" fill="#FFFFFF" stroke="#0B6B50" stroke-width="2"/>
+      <text x="402" y="258" font-weight="800" fill="#14213D">IB Diploma</text><text x="402" y="280" font-size="14" fill="#3D4A63">6 subjects plus core</text>
+      <rect x="380" y="320" width="300" height="64" rx="14" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+      <text x="402" y="348" font-weight="800" fill="#14213D">National route</text><text x="402" y="370" font-size="14" fill="#3D4A63">e.g. FSc / local secondary certificate</text>
+      <rect x="380" y="410" width="300" height="64" rx="14" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+      <text x="402" y="438" font-weight="800" fill="#14213D">Foundation route</text><text x="402" y="460" font-size="14" fill="#3D4A63">bridges gaps after school</text>
+    </g>
+
+    <g stroke="#3D4A63" stroke-width="3" fill="none" marker-end="url(#a)">
+      <line x1="684" y1="172" x2="760" y2="200"/>
+      <line x1="684" y1="262" x2="760" y2="240"/>
+      <line x1="684" y1="352" x2="760" y2="352"/>
+      <line x1="684" y1="442" x2="760" y2="442"/>
+    </g>
+
+    <g font-size="16">
+      <rect x="768" y="160" width="384" height="120" rx="16" fill="#0B6B50"/>
+      <text x="792" y="196" font-weight="800" fill="#FFFFFF">Direct entry widely possible</text>
+      <text x="792" y="224" font-size="14" fill="#D8F0E6">UK · Europe · US · GCC · Pakistan (with IBCC</text>
+      <text x="792" y="246" font-size="14" fill="#D8F0E6">equivalence) · subject rules apply</text>
+      <rect x="768" y="320" width="384" height="64" rx="14" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+      <text x="792" y="348" font-weight="800" fill="#14213D">Home-country universities</text>
+      <text x="792" y="370" font-size="14" fill="#3D4A63">some international ones; others need a bridge</text>
+      <rect x="768" y="410" width="384" height="64" rx="14" fill="#FFF6D6" stroke="#E3B505" stroke-width="2"/>
+      <text x="792" y="438" font-weight="800" fill="#14213D">Year 1 of a bachelor's degree</text>
+      <text x="792" y="460" font-size="14" fill="#3D4A63">at the partner university, if you pass</text>
+    </g>
+    <text x="48" y="514" font-size="13" fill="#3D4A63">General guidance. Each university and country sets its own entry rules: always check the official admissions page.</text>
+  </g>
+</svg>

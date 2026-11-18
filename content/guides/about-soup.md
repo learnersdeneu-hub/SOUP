@@ -75,7 +75,7 @@ Students enter their information once. They can invite recommenders by email, dr
 
 ### SOUP Companion
 
-SOUP Companion is our Windows desktop app for filling in application forms. Students sign in, open an application website inside Companion, and Companion recognises the form's fields. It fills in what it can from their SOUP profile, attaches matching documents from their vault, and flags anything missing or inconsistent. If it is unsure which document to use, it asks. **The student always reviews and submits the application themselves.**
+SOUP Companion is our Windows desktop app for filling in application forms. Students sign in, open an application website inside Companion, and Companion recognises the form's fields. It fills in what it can from their SOUP profile, attaches matching documents from their vault, and flags anything missing or inconsistent. If it is unsure which document to use, it asks. **The student always reviews and submits the application themselves.** [Read the full guide to SOUP Companion →](/guides/soup-companion-ai-application-assistant)
 
 A browser-based, reference-only version is available on paid plans for students who can't install the desktop app.
 

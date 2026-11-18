@@ -11,7 +11,13 @@ Status flow: `planned` → `researched` → `drafted` → `fact-checked` → `ap
 | 3 | `study-in-europe-after-a-levels.md` | `/guides/study-in-europe-after-a-levels` | A → B bridge | study in Europe after A-levels | **published 2026-11-18** | 2026-11-18 |
 | 4 | `university-application-document-checklist.md` | `/guides/university-application-document-checklist` | F | university application documents checklist | **published 2026-11-18** | 2026-11-18 |
 | 5 | `hospitality-tourism-degrees-europe-diploma-graduates.md` | `/guides/hospitality-tourism-degrees-europe-diploma-graduates` | B (vocational pathway) | hospitality management degree in Europe for international students | **published 2026-11-18** | 2026-11-18 |
-| 6 | `reuse-information-across-university-application-portals.md` | `/guides/reuse-information-across-university-application-portals` | F (Companion) | university application autofill | drafted. **Blocked until the new Companion build ships** (see the file's review notes) | 2026-11-17 |
+| 6 | `reuse-information-across-university-application-portals.md` | `/guides/reuse-information-across-university-application-portals` | F (Companion) | university application autofill | draft (overlaps #7; keep as a how-to or merge into #7 before publishing) | 2026-11-17 |
+| 7 | `soup-companion-ai-application-assistant.md` | `/guides/soup-companion-ai-application-assistant` | F (Companion pillar, with graphics) | AI university application assistant | **published 2026-11-18** | 2026-11-18 |
+| 8 | `what-to-do-after-o-levels.md` | `/guides/what-to-do-after-o-levels` | A (O-level, with graphic) | what to do after O levels | **published 2026-11-18** | 2026-11-18 |
+| 9 | `a-level-subjects-for-medicine-engineering-business-law.md` | `/guides/a-level-subjects-for-medicine-engineering-business-law` | A | A level subjects for medicine | **published 2026-11-18** | 2026-11-18 |
+| 10 | `applying-to-university-with-predicted-grades.md` | `/guides/applying-to-university-with-predicted-grades` | A | applying to university with predicted grades | **published 2026-11-18** | 2026-11-18 |
+| 11 | `study-abroad-from-the-gcc-british-curriculum.md` | `/guides/study-abroad-from-the-gcc-british-curriculum` | A/B (GCC) | study abroad from UAE | **published 2026-11-18** | 2026-11-18 |
+| 12 | `university-applications-guide-for-school-counsellors.md` | `/guides/university-applications-guide-for-school-counsellors` | F (counsellors) | university application guide for school counsellors | **published 2026-11-18** | 2026-11-18 |
 
 ## Rules every article follows
 

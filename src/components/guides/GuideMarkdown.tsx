@@ -14,6 +14,10 @@ const components: Components = {
   strong: ({ children }) => <strong className="font-semibold text-ink">{children}</strong>,
   blockquote: ({ children }) => <blockquote className="mt-6 rounded-2xl border border-hair bg-white px-5 py-1 [&_p]:text-sm [&_p]:leading-6">{children}</blockquote>,
   hr: () => <hr className="my-10 border-hair" />,
+  // Guide graphics are our own SVGs in public/images/guides, drawn on a
+  // 1200px-wide canvas, so they scale down to phone width with no art direction.
+  // eslint-disable-next-line @next/next/no-img-element
+  img: ({ src = "", alt = "" }) => <img src={typeof src === "string" ? src : ""} alt={alt} loading="lazy" className="my-6 block h-auto w-full rounded-2xl border border-hair" />,
   table: ({ children }) => <div className="mt-5 overflow-x-auto rounded-2xl border border-hair bg-white"><table className="w-full min-w-[520px] border-collapse text-left text-sm">{children}</table></div>,
   th: ({ children }) => <th className="border-b border-hair bg-paper/60 px-4 py-3 text-xs font-semibold text-ink">{children}</th>,
   td: ({ children }) => <td className="border-b border-hair px-4 py-3 align-top text-[13px] leading-6 text-mute">{children}</td>,

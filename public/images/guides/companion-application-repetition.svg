@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="t d">
+  <title id="t">The repetition problem in university applications</title>
+  <desc id="d">In the 2025 to 2026 Common App season, 1.53 million first-year applicants submitted 10.8 million applications, an average of 7.06 each. UNESCO counts about 7.3 million internationally mobile students in 2023.</desc>
+  <rect width="1200" height="520" rx="28" fill="#F6F7F4"/>
+  <g font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif">
+    <text x="48" y="64" font-size="15" font-weight="700" letter-spacing="2.5" fill="#0B6B50">THE MARKET PROBLEM</text>
+    <text x="48" y="100" font-size="28" font-weight="700" fill="#14213D">Students don't apply once. They apply seven times or more.</text>
+
+    <!-- Bars: scale 10.8M = 760px -->
+    <text x="48" y="170" font-size="16" font-weight="700" fill="#14213D">Common App, 2025–26 season</text>
+    <text x="48" y="214" font-size="15" fill="#3D4A63">Applicants</text>
+    <rect x="200" y="194" width="108" height="30" rx="6" fill="#14213D"/>
+    <text x="320" y="216" font-size="17" font-weight="700" fill="#14213D">1.53 million</text>
+    <text x="48" y="264" font-size="15" fill="#3D4A63">Applications</text>
+    <rect x="200" y="244" width="760" height="30" rx="6" fill="#0B6B50"/>
+    <text x="972" y="266" font-size="17" font-weight="700" fill="#14213D">10.8 million</text>
+
+    <!-- Stat tiles -->
+    <rect x="48" y="320" width="340" height="140" rx="18" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+    <text x="72" y="380" font-size="44" font-weight="800" fill="#0B6B50">7.06</text>
+    <text x="72" y="414" font-size="15" fill="#3D4A63">applications per Common App</text>
+    <text x="72" y="436" font-size="15" fill="#3D4A63">applicant, on average</text>
+
+    <rect x="430" y="320" width="340" height="140" rx="18" fill="#FFFFFF" stroke="#E4E7E1" stroke-width="2"/>
+    <text x="454" y="380" font-size="44" font-weight="800" fill="#14213D">7.3M</text>
+    <text x="454" y="414" font-size="15" fill="#3D4A63">internationally mobile students</text>
+    <text x="454" y="436" font-size="15" fill="#3D4A63">worldwide in 2023 (UNESCO)</text>
+
+    <rect x="812" y="320" width="340" height="140" rx="18" fill="#14213D"/>
+    <text x="836" y="372" font-size="22" font-weight="800" fill="#FFFFFF">Different portal,</text>
+    <text x="836" y="402" font-size="22" font-weight="800" fill="#FFFFFF">same questions</text>
+    <text x="836" y="436" font-size="15" fill="#C9D3E6">UCAS, Common App, Europe, visas</text>
+
+    <text x="48" y="496" font-size="13" fill="#3D4A63">Sources: Common App End-of-Season Report 2025–26; UNESCO Higher Education Global Trends (2023 data). Bars drawn to scale.</text>
+  </g>
+</svg>
