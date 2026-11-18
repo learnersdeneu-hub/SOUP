@@ -121,7 +121,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <StudyHeader current="dashboard" signedIn fullName={user.fullName} unreadCount={data.notifications.filter((item) => !item.readAt).length}/>
+      <StudyHeader current="dashboard" signedIn fullName={user.fullName} role={user.role} unreadCount={data.notifications.filter((item) => !item.readAt).length}/>
       <SupportLauncher signedIn />
       <main className="mx-auto max-w-[1600px] px-5 pb-16 pt-6 sm:px-6 xl:px-10">
         {!user.institutionName && <InstitutionPromptBanner fullName={user.fullName} />}

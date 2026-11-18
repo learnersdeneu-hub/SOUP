@@ -30,5 +30,5 @@ export default async function CounselorPage({ searchParams }: { searchParams?: {
   // old instance (and its state) rather than silently keep appending new,
   // correctly-scoped server responses onto a thread that still shows a
   // previous account's messages.
-  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><StudyHeader current="noodles" signedIn={!!user} fullName={profile?.user.fullName}/><CounselorConversation key={user?.id || "guest"} signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
+  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-paper"><StudyHeader current="noodles" signedIn={!!user} fullName={profile?.user.fullName} role={profile?.user.role}/><CounselorConversation key={user?.id || "guest"} signedIn={!!user} intent={intent} requestedItemId={requestedItemId} requestedLabel={requestedLabel} applicationId={applicationId} initialPrompt={initialPrompt} entryUniversityId={entryUniversityId}/></div>;
 }

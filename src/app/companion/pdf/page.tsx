@@ -18,7 +18,7 @@ export default async function CompanionPdfPage() {
 
   return (
     <div className="min-h-screen bg-paper">
-      <StudyHeader current="companion" signedIn fullName={user.fullName} />
+      <StudyHeader current="companion" signedIn fullName={user.fullName} role={user.role} />
       <main className="mx-auto max-w-[760px] px-5 py-10 sm:px-8">
         <div className="text-xs font-semibold uppercase tracking-[.16em] text-teal">SOUP Companion · PDF forms</div>
         <h1 className="mt-2 text-[26px] font-extrabold leading-tight text-ink">Fill any PDF application form</h1>
