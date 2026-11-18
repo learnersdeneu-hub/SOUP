@@ -4,6 +4,8 @@ meta_description: "The world's top 10 law schools in the QS World University Ran
 h1: "Top 10 Universities in the World for Law"
 slug: "/guides/top-10-universities-world-law"
 section: "rankings"
+topic: "subjects"
+order: "2"
 category: "Ranking guides — subjects"
 primary_keyword: "top universities in the world for law"
 supporting_keywords:

@@ -3,6 +3,8 @@ title: "University Application Document Checklist for International Students (UK
 meta_description: "The documents international students need for UK, US and European university applications, from passport and transcripts to test scores, references and financial proof, plus common mistakes."
 h1: "The University Application Document Checklist for International Students"
 slug: "/guides/university-application-document-checklist"
+topic: "applications"
+order: "2"
 category: "F — Application documents and technology"
 primary_keyword: "university application documents checklist"
 supporting_keywords:

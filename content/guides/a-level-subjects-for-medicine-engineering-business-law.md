@@ -3,6 +3,8 @@ title: "A-Level Subjects for Medicine, Engineering, Computer Science, Business a
 meta_description: "Which A-levels do you need for medicine, engineering, computer science, business, economics and law? Subject requirements, admissions tests and deadlines for the UK, Europe, the US and Pakistan."
 h1: "Which A-Levels Do You Need? Subject Requirements for Medicine, Engineering, Computer Science, Business and Law"
 slug: "/guides/a-level-subjects-for-medicine-engineering-business-law"
+topic: "o-a-levels"
+order: "2"
 category: "A — GCSE / O-level and A-level guidance"
 primary_keyword: "A level subjects for medicine"
 supporting_keywords:

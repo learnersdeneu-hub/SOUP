@@ -4,6 +4,8 @@ meta_description: "Ten scholarships in Europe that cover tuition and living cost
 h1: "Top 10 Fully Funded Scholarships in Europe for International Students"
 slug: "/guides/top-10-fully-funded-scholarships-europe"
 section: "rankings"
+topic: "scholarships"
+order: "1"
 category: "Ranking guides — scholarships"
 primary_keyword: "fully funded scholarships in Europe"
 supporting_keywords:

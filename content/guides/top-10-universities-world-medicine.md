@@ -4,6 +4,8 @@ meta_description: "The world's top 10 universities for medicine in the QS World 
 h1: "Top 10 Universities in the World for Medicine"
 slug: "/guides/top-10-universities-world-medicine"
 section: "rankings"
+topic: "subjects"
+order: "1"
 category: "Ranking guides — subjects"
 primary_keyword: "top universities in the world for medicine"
 supporting_keywords:

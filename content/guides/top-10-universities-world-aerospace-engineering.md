@@ -4,6 +4,8 @@ meta_description: "The world's top universities for aerospace engineering in Sha
 h1: "Top 10 Universities in the World for Aerospace Engineering"
 slug: "/guides/top-10-universities-world-aerospace-engineering"
 section: "rankings"
+topic: "subjects"
+order: "3"
 category: "Ranking guides — subjects"
 primary_keyword: "top universities for aerospace engineering in the world"
 supporting_keywords:

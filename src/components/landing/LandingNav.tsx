@@ -20,8 +20,10 @@ export function LandingNav({ signUpHref, anchorBase = "" }: { signUpHref: string
           {LINKS.map(([label, href]) => (
             <a key={href} href={`${anchorBase}${href}`} className="rounded-full px-3.5 py-2 text-sm font-semibold text-mute no-underline transition hover:bg-white hover:text-ink">{label}</a>
           ))}
+          <Link href="/guides" className="rounded-full px-3.5 py-2 text-sm font-semibold text-mute no-underline transition hover:bg-white hover:text-ink">Guides</Link>
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <Link href="/guides" className="rounded-full px-3 py-2 text-sm font-bold text-ink no-underline hover:bg-white lg:hidden">Guides</Link>
           <a href={`${anchorBase}#signin`} className="rounded-full px-4 py-2 text-sm font-bold text-ink no-underline hover:bg-white">Sign in</a>
           <Link href={signUpHref} className="rounded-full bg-ink px-4 py-2 text-sm font-bold text-white no-underline shadow-[0_8px_20px_-8px_rgba(20,33,61,.6)] transition hover:-translate-y-px">Request access</Link>
         </div>
