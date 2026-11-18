@@ -14,7 +14,11 @@ import { updateSession } from "@/lib/supabase/middleware";
 // src/app/recommend/[token]/page.tsx).
 // /journal is the SOUP Journal linked from the signed-out landing page —
 // public articles meant to be read before anyone has an account.
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/journal"];
+// /guides, /about, /robots.txt and /sitemap.xml are the public, indexable
+// editorial surface: search engines and signed-out readers must reach them
+// without a session. Draft guides never render there (they 404); staff
+// preview them under /admin/guides instead.
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/journal", "/guides", "/about", "/robots.txt", "/sitemap.xml"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
