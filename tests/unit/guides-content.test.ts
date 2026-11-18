@@ -55,6 +55,18 @@ describe("publication gate", () => {
     expect(isPublished(undated, now)).toBe(false);
   });
 
+  it("defaults to the guides section and rejects unknown sections", () => {
+    expect(parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nstatus: "draft"`)).section).toBe("guides");
+    expect(parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nsection: "rankings"\nstatus: "draft"`)).section).toBe("rankings");
+    expect(() => parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nsection: "news"\nstatus: "draft"`))).toThrow();
+  });
+
+  it("rejects unknown topics and topics from another section", () => {
+    expect(() => parseGuide("x.md", MINIMAL(`slug: "/guides/x"\ntopic: "nope"\nstatus: "draft"`))).toThrow();
+    expect(() => parseGuide("x.md", MINIMAL(`slug: "/guides/x"\ntopic: "subjects"\nstatus: "draft"`))).toThrow();
+    expect(parseGuide("x.md", MINIMAL(`slug: "/guides/x"\nsection: "rankings"\ntopic: "subjects"\nstatus: "draft"`)).topic).toBe("subjects");
+  });
+
   it("rejects slugs outside /guides/ and /about", () => {
     expect(() => parseGuide("x.md", MINIMAL(`slug: "/universities/x"\nstatus: "published"`))).toThrow();
     expect(parseGuide("a.md", MINIMAL(`slug: "/about"\nstatus: "published"`)).kind).toBe("about");
@@ -105,6 +117,12 @@ describe("content/guides", () => {
       for (const [, slug] of guide.body.matchAll(/\]\(\/guides\/([a-z0-9-]+)\)/g)) {
         expect(published.has(slug), `${guide.file} is published but links to unpublished guide ${slug}`).toBe(true);
       }
+    }
+  });
+
+  it("gives every guide a topic in its own section, so /guides never shows it loose", () => {
+    for (const guide of guides.filter((item) => item.kind === "guide")) {
+      expect(guide.topic, `${guide.file} has no topic`).not.toBeNull();
     }
   });
 

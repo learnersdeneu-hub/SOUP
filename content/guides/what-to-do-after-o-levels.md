@@ -3,6 +3,8 @@ title: "What to Do After O-Levels or IGCSEs: A-Levels, IB, FSc or Foundation? (2
 meta_description: "Finished O-levels or IGCSEs? Compare A-levels, the IB, FSc and foundation routes, and see what each means for university in the UK, Europe, the US, the GCC and Pakistan."
 h1: "What to Do After O-Levels or IGCSEs: Choosing the Right Route to University"
 slug: "/guides/what-to-do-after-o-levels"
+topic: "o-a-levels"
+order: "1"
 category: "A — GCSE / O-level and A-level guidance"
 primary_keyword: "what to do after O levels"
 supporting_keywords:

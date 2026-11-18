@@ -3,6 +3,8 @@ title: "Applying to University With Predicted A-Level Grades: UK, US and Europe 
 meta_description: "How predicted A-level grades work for UCAS, the Common App and European universities: conditional offers, what to do if you miss your grades, and key 2027-entry dates."
 h1: "Applying to University With Predicted Grades: How It Works and What Happens Next"
 slug: "/guides/applying-to-university-with-predicted-grades"
+topic: "o-a-levels"
+order: "3"
 category: "A — A-level guidance"
 primary_keyword: "applying to university with predicted grades"
 supporting_keywords:

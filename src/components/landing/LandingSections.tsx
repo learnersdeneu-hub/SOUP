@@ -205,6 +205,7 @@ export function AboutSection() {
           <div className="mt-6 space-y-4 text-[16px] leading-relaxed text-mute">
             <p className="m-0">Going abroad to study is one of the biggest decisions you&apos;ll make — and it usually means juggling a dozen websites, agents, spreadsheets and WhatsApp groups. <b className="text-ink">SOUP — the Students Online University Portal — puts all of it in one place.</b></p>
             <p className="m-0">We combine an AI counselor that&apos;s available any time with real counsellors and trusted partners: universities across Europe and beyond, verified student housing, visa-ready insurance and student banking. You stay in control of every choice; we make sure you never miss a step.</p>
+            <p className="m-0">SOUP was founded by <b className="text-ink">Balaj Amjad</b>, who started the Learners Den counselling practice in 2020, with co-founder <b className="text-ink">Rameen Ahmad</b>, and is led by CEO <b className="text-ink">Agha Shahbaz Haider</b>. <Link href="/about" className="font-bold text-teal">Meet the team and read our story →</Link></p>
           </div>
           <div className="mt-7 inline-flex items-center gap-3 rounded-2xl border border-hair bg-white px-4 py-3">
             <PartnerLogo name="LearnersDen.eu" websiteUrl="https://learnersden.eu/" size={34} />
@@ -460,7 +461,10 @@ export function JournalSection({ guides = [] }: { guides?: Guide[] }) {
       <div className={shell}>
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead eyebrow="The SOUP Journal" title="Articles & guides for students on the move." sub="Practical reads on applications, money, visas, housing and life abroad. Free, no account needed." />
-          <Link href="/journal" className="inline-flex items-center gap-2 rounded-full border border-hair bg-white px-5 py-2.5 text-sm font-bold text-ink no-underline transition hover:-translate-y-px">Browse all articles <ArrowRight size={15} /></Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/guides" className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white no-underline transition hover:-translate-y-px">Explore all guides &amp; rankings <ArrowRight size={15} /></Link>
+            <Link href="/journal" className="inline-flex items-center gap-2 rounded-full border border-hair bg-white px-5 py-2.5 text-sm font-bold text-ink no-underline transition hover:-translate-y-px">Browse the Journal <ArrowRight size={15} /></Link>
+          </div>
         </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-[1.3fr_1fr]">
           <Link href={`/journal/${featured.slug}`} className="group flex flex-col overflow-hidden rounded-[28px] border border-hair bg-white no-underline transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgba(20,33,61,.45)]">
@@ -564,13 +568,15 @@ export function LandingFooter({ anchorBase = "" }: { anchorBase?: string }) {
         <div className="grid grid-cols-2 gap-10 text-sm sm:grid-cols-3">
           <div className="flex flex-col gap-2">
             <span className="font-extrabold text-ink">SOUP</span>
-            <a href={`${anchorBase}#about`} className="text-mute no-underline hover:text-ink">About us</a>
+            <Link href="/about" className="text-mute no-underline hover:text-ink">About us &amp; team</Link>
             <a href={`${anchorBase}#inside`} className="text-mute no-underline hover:text-ink">How it works</a>
             <a href={`${anchorBase}#partners`} className="text-mute no-underline hover:text-ink">Partners</a>
             <a href={`${anchorBase}#packages`} className="text-mute no-underline hover:text-ink">Packages</a>
           </div>
           <div className="flex flex-col gap-2">
             <span className="font-extrabold text-ink">Read</span>
+            <Link href="/guides" className="text-mute no-underline hover:text-ink">Guides</Link>
+            <Link href="/guides#ranking-guides" className="text-mute no-underline hover:text-ink">Ranking guides</Link>
             <Link href="/journal" className="text-mute no-underline hover:text-ink">The Journal</Link>
             <Link href="/guides" className="text-mute no-underline hover:text-ink">Guides</Link>
             <a href={`${anchorBase}#insurance`} className="text-mute no-underline hover:text-ink">Student insurance</a>

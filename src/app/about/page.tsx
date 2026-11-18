@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { GuideArticle } from "@/components/guides/GuideArticle";
 import { findAbout, isPublished, siteUrl } from "@/lib/guides/content";
+import { OrganizationJsonLd } from "@/lib/seo/organization";
 
 // The About page is written and approved through the same editorial
 // workflow as the guides (content/guides/about-soup.md). Until an editor
@@ -33,6 +34,7 @@ export default function AboutPage() {
   if (!about) notFound();
   return (
     <div className="min-h-screen bg-paper">
+      <OrganizationJsonLd />
       <Header signedIn={false} />
       <main><GuideArticle guide={about} /></main>
     </div>

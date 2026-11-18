@@ -18,7 +18,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 // editorial surface: search engines and signed-out readers must reach them
 // without a session. Draft guides never render there (they 404); staff
 // preview them under /admin/guides instead.
-const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/journal", "/guides", "/about", "/robots.txt", "/sitemap.xml"];
+const PUBLIC_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/check-email", "/auth/callback", "/auth/magic-link", "/companion/privacy", "/recommend", "/journal", "/guides", "/about", "/robots.txt", "/sitemap.xml", "/llms.txt"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -27,6 +27,16 @@ function isPublicPath(pathname: string) {
 export async function middleware(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
+
+  // Signed-out visitors (and crawlers) see the public landing page at the
+  // homepage itself, rather than a temporary redirect to /sign-in?next=/,
+  // so the site's most important URL carries the landing content. Signed-in
+  // students still get the app's own home page at "/".
+  if (!user && pathname === "/") {
+    const rewrite = NextResponse.rewrite(new URL("/sign-in", request.url));
+    response.cookies.getAll().forEach((cookie) => rewrite.cookies.set(cookie));
+    return rewrite;
+  }
 
   if (!user && !pathname.startsWith("/api/") && !isPublicPath(pathname)) {
     const redirectUrl = new URL("/sign-in", request.url);

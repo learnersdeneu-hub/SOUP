@@ -3,6 +3,8 @@ title: "Hospitality & Tourism Degrees in Europe for Diploma Graduates: English-T
 meta_description: "Finished a hospitality or culinary diploma? English-taught tourism and hospitality bachelor's and master's programmes at public universities in Greece, Italy, Germany and Portugal, and how to qualify."
 h1: "From Hospitality Diploma to European Degree: English-Taught Tourism and Hospitality Programmes at Public Universities"
 slug: "/guides/hospitality-tourism-degrees-europe-diploma-graduates"
+topic: "destinations"
+order: "3"
 category: "B — European university admissions (vocational pathway)"
 primary_keyword: "hospitality management degree in Europe for international students"
 supporting_keywords:
