@@ -5,7 +5,7 @@ const LINKS = [
   ["About", "#about"],
   ["Inside SOUP", "#inside"],
   ["Partners", "#partners"],
-  ["Insurance", "#insurance"],
+  ["Packages", "#packages"],
   ["Journal", "#journal"],
 ] as const;
 
