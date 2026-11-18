@@ -12,6 +12,7 @@ import { reconcileDocumentWithJourney } from "@/lib/journey/reconcile";
 import { aiRateLimitResponse } from "@/lib/ai/httpRateLimit";
 import { escapeHtml, sendTransactionalEmail } from "@/lib/notifications/email";
 import { shouldSendStudentEmail } from "@/lib/notifications/preferences";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -46,6 +47,8 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "Create or sign in to your SOUP account before uploading private documents." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id }, include: { user: true } });
   if (!profile) return Response.json({ error: "Your SOUP profile is not ready yet." }, { status: 409 });
+  const gated = await paymentRequiredResponse(profile.id, profile.user.role);
+  if (gated) return gated;
   const limited = await aiRateLimitResponse(request, profile.id);
   if (limited) return limited;
 

@@ -6,6 +6,7 @@ import type { ResumeTemplateKey } from "@/lib/resume/types";
 import { aiRateLimitResponse } from "@/lib/ai/httpRateLimit";
 import { resumeImportFormSchema } from "@/lib/validation/schemas";
 import { transcribeScannedDocument } from "@/lib/documents/vision";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -50,6 +51,8 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "Create or sign in to your SOUP account before uploading a private resume." }, { status: 401 });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });
   if (!profile) return Response.json({ error: "Your SOUP profile is not ready yet." }, { status: 409 });
+  const gated = await paymentRequiredResponse(profile.id);
+  if (gated) return gated;
 
   const limited = await aiRateLimitResponse(request, profile.id);
   if (limited) return limited;

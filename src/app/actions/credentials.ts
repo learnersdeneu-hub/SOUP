@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getCredentialTypeId } from "@/lib/queries/credentialTypes";
 import { uploadDocument } from "@/app/actions/documents";
 import { submitForVerification } from "@/app/actions/verification";
+import { assertSubmissionAccess } from "@/lib/payments/access";
 
 async function requireProfileId() {
   const supabase = createClient();
@@ -27,6 +28,8 @@ export async function createEducationCredential(formData: FormData) {
   const fieldOfStudy = String(formData.get("fieldOfStudy") || "").trim() || null;
   const graduationDateRaw = String(formData.get("graduationDate") || "");
   const file = formData.get("file") as File | null;
+  // Check before creating the credential so an unpaid upload leaves nothing half-saved.
+  if (file && file.size > 0) await assertSubmissionAccess(profileId);
 
   if (!institutionName || !degreeType) {
     throw new Error("Institution name and degree type are required.");
@@ -68,6 +71,8 @@ export async function createEmploymentCredential(formData: FormData) {
   const jobTitle = String(formData.get("jobTitle") || "").trim();
   const startDateRaw = String(formData.get("startDate") || "");
   const file = formData.get("file") as File | null;
+  // Check before creating the credential so an unpaid upload leaves nothing half-saved.
+  if (file && file.size > 0) await assertSubmissionAccess(profileId);
 
   if (!employerName || !jobTitle || !startDateRaw) {
     throw new Error("Employer, job title, and start date are required.");
@@ -107,6 +112,8 @@ export async function createIdentityCredential(formData: FormData) {
   const documentType = String(formData.get("documentType") || "").trim();
   const documentCountry = String(formData.get("documentCountry") || "").trim();
   const file = formData.get("file") as File | null;
+  // Check before creating the credential so an unpaid upload leaves nothing half-saved.
+  if (file && file.size > 0) await assertSubmissionAccess(profileId);
 
   if (!documentType || !documentCountry || !file || file.size === 0) {
     throw new Error("Document type, issuing country, and a file upload are required.");
@@ -146,6 +153,8 @@ export async function createFinancialCredential(formData: FormData) {
   const attestingInstitutionName = String(formData.get("attestingInstitutionName") || "").trim();
   const attestationCategory = String(formData.get("attestationCategory") || "").trim();
   const file = formData.get("file") as File | null;
+  // Check before creating the credential so an unpaid upload leaves nothing half-saved.
+  if (file && file.size > 0) await assertSubmissionAccess(profileId);
 
   if (!attestingInstitutionName || !attestationCategory) {
     throw new Error("Institution name and attestation category are required.");

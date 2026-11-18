@@ -1,5 +1,6 @@
 import { requireCompanionAuth } from "@/lib/companion/auth";
 import { approveApplicationForSubmission } from "@/lib/applications/approve";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,8 @@ export const runtime = "nodejs";
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const current = await requireCompanionAuth(request);
   if (!current.ok) return current.response;
+  const gated = await paymentRequiredResponse(current.profile.id, current.profile.user.role);
+  if (gated) return gated;
 
   const result = await approveApplicationForSubmission(current.profile.id, current.profile.user.id, params.id);
   if (!result.ok) return Response.json({ error: result.error }, { status: result.status });

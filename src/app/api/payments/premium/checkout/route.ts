@@ -21,6 +21,13 @@ export async function POST(request: Request) {
   const hasPremium = paid.length > 0;
   if (hasPlus || (plan === "premium" && hasPremium)) return NextResponse.redirect(`${paymentBaseUrl()}/payments?premium=active`, 303);
 
+  // Until Stripe is configured, SOUP Scholar is paid by bank transfer against
+  // an invoice on /payments. Concierge is arranged with the SOUP team.
+  if (!process.env.STRIPE_SECRET_KEY?.trim()) {
+    if (plan === "premium") return NextResponse.redirect(`${paymentBaseUrl()}/payments#invoice`, 303);
+    return NextResponse.redirect(`${paymentBaseUrl()}/payments?error=${encodeURIComponent("Online card payment isn't available yet. Contact SOUP support to arrange SOUP Concierge by bank transfer.")}`, 303);
+  }
+
   const payment = await prisma.payment.create({ data: { profileId: profile.id, type: "PREMIUM_COUNSELING", status: "PENDING", amount: selected.priceUsd, currency: "USD", title: selected.title, description: selected.description, provider: "STRIPE", metadata: { plan } } });
   try {
     const base = paymentBaseUrl();

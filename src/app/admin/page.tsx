@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Activity, AlertTriangle, BadgeDollarSign, CheckCircle2, Clock3, FileStack, GraduationCap, LifeBuoy, MailCheck, Send, Users } from "lucide-react";
 import { Header } from "@/components/Header";
 import { requireRole } from "@/lib/auth/currentUser";
-import { APPLICATION_ROLES, CASE_ROLES, COMMERCIAL_ROLES, DOCUMENT_ROLES, STAFF_ROLES, SUPPORT_ROLES, ADMIN_ROLES } from "@/lib/auth/roles";
+import { APPLICATION_ROLES, CASE_ROLES, COMMERCIAL_ROLES, DOCUMENT_ROLES, STAFF_ROLES, SUPPORT_ROLES, ADMIN_ROLES, PAYMENT_REVIEW_ROLES } from "@/lib/auth/roles";
 import { getAdminDashboardData } from "@/lib/queries/dashboard";
 import { prisma } from "@/lib/prisma";
 import type { AppRole, Prisma, ServiceReferralType } from "@prisma/client";
@@ -53,6 +53,7 @@ export default async function AdminDashboardPage() {
     ["COUNSELOR", "ADMISSIONS", "FINANCE", "ACCOMMODATION", "ADMIN", "SUPER_ADMIN"].includes(role) && ["/admin/partners", "Partner catalog"],
     hasRole(role, ADMIN_ROLES) && ["/admin/universities", "University catalog"],
     hasRole(role, COMMERCIAL_ROLES) && ["/admin/referrals", "Partner referrals & revenue"],
+    hasRole(role, PAYMENT_REVIEW_ROLES) && ["/admin/payments", "Bank transfer payments"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/support", "Support queue"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/audit", "Audit trail"],
     hasRole(role, SUPPORT_ROLES) && ["/admin/companion", "Companion activity"],

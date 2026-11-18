@@ -1,5 +1,6 @@
 import { requireApiProfile } from "@/lib/auth/apiUser";
 import { createPairingCode } from "@/lib/companion/auth";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,8 @@ export const runtime = "nodejs";
 export async function POST() {
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
+  const gated = await paymentRequiredResponse(current.profile.id, current.user.role);
+  if (gated) return gated;
   const { code, expiresAt } = await createPairingCode(current.profile.id);
   return Response.json({ code, expiresAt });
 }

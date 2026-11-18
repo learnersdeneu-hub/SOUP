@@ -6,6 +6,7 @@ import { startPartnerReferral } from "@/lib/services/referrals";
 import { safeHttpUrl } from "@/lib/security/urls";
 import { parseJsonBody } from "@/lib/validation/http";
 import { insuranceStartRequestSchema } from "@/lib/validation/schemas";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export async function POST(request: Request) {
   const parsed = await parseJsonBody(request, insuranceStartRequestSchema);
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ url: destination, tracked: false });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });
   if (!profile) return Response.json({ url: destination, tracked: false });
+  const gated = await paymentRequiredResponse(profile.id);
+  if (gated) return gated;
 
   const studentCase = await ensureStudentCase(profile.id);
   const attribution = await resolveReferralAttribution(profile.id, body.source);

@@ -7,6 +7,7 @@ import { safeHttpUrl } from "@/lib/security/urls";
 import { parseJsonBody } from "@/lib/validation/http";
 import { partnerReferralStartSchema } from "@/lib/validation/schemas";
 import type { PartnerType, ServiceReferralType } from "@prisma/client";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 const REFERRAL_BY_PARTNER: Partial<Record<PartnerType, ServiceReferralType>> = {
   ACCOMMODATION: "ACCOMMODATION",
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ url: destination, tracked: false });
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });
   if (!profile) return Response.json({ url: destination, tracked: false });
+  const gated = await paymentRequiredResponse(profile.id);
+  if (gated) return gated;
 
   const studentCase = await ensureStudentCase(profile.id);
   const attribution = await resolveReferralAttribution(profile.id, source);

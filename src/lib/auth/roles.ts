@@ -9,3 +9,5 @@ export const SUPPORT_ROLES: AppRole[] = ["SUPPORT", "ADMIN", "SUPER_ADMIN"];
 export const COMMERCIAL_ROLES: AppRole[] = ["FINANCE", "ACCOMMODATION", "ADMIN", "SUPER_ADMIN"];
 export const ADMIN_ROLES: AppRole[] = ["ADMIN", "SUPER_ADMIN"];
 export const SUPER_ADMIN_ROLES: AppRole[] = ["SUPER_ADMIN"];
+// Who can confirm or reject manual bank-transfer payments in /admin/payments.
+export const PAYMENT_REVIEW_ROLES: AppRole[] = ["FINANCE", "ADMIN", "SUPER_ADMIN"];

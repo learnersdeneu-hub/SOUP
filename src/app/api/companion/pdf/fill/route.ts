@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { fillPdfFields, appendAttachments, type PdfAttachment } from "@/lib/companion/pdfFill";
 import { logServerError } from "@/lib/logging/safe";
+import { paymentRequiredResponse } from "@/lib/payments/access";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -24,6 +25,8 @@ function inferMime(name: string | null): string {
 export async function POST(request: Request) {
   const current = await requireApiProfile();
   if (!current.ok) return current.response;
+  const gated = await paymentRequiredResponse(current.profile.id, current.user.role);
+  if (gated) return gated;
   const { profile } = current;
 
   let form: FormData;
